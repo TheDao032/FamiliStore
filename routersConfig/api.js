@@ -2,10 +2,10 @@ const express = require('express')
 
 const API = express.Router()
 
-const actorController = require('../controllers/actors.controller')
-const customerController = require('../controllers/customers.controller')
+const accountController = require('../controllers/account.controller')
+const productController = require('../controllers/product.controller')
 
-API.use('/actors', actorController)
-API.use('/customers', customerController)
+API.use('/account', accountController)
+API.use('/product', productController)
 
 module.exports = API
