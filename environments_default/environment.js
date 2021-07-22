@@ -2,12 +2,12 @@ const env = {
 	ipServer: 'localhost',
 	portServer: 3000,
 	configDatabase: {
-		client: 'mysql2',
+		client: 'pg',
 		host: 'localhost',
-		port: 3306,
-		user: 'root',
+		port: 5432,
+		user: 'postgres',
 		password: '',
-		dbName: 'sakila',
+		dbName: 'FamilyStore_db',
 		minPool: 0,
 		maxPool: 50
 	}

@@ -6,7 +6,7 @@ const successCode = 0
 const errorCode = 1
 
 router.get('/list', async (req, res) => {
-	const result = await knex.from('customer')
+	const result = await knex.from('account')
 
 	if (result) {
 		return res.status(200).json({
@@ -23,7 +23,7 @@ router.get('/list', async (req, res) => {
 
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
-	const result = await knex.from('customer').where('customer_id', id)
+	const result = await knex.from('account').where('account_id', id)
 
 	if (result) {
 		return res.status(200).json({
@@ -32,17 +32,14 @@ router.get('/details/:id', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
-		listActors: [],
+	return res.status(500).json({ listActors: [],
 		statusCode: errorCode
 	})
 })
 
-router.post('/add', async (req, res) => {
-	const { firstName, lastName, storeId, email, addressId } = req.body
-
-	const presentDate = new Date()
-	await knex('customer').insert({store_id: storeId,first_name: firstName, last_name: lastName, address_id: addressId, email: email, create_date: presentDate}).catch((error) => {
+router.post('/add', (req, res) => {
+	const { firstName, lastName } = req.body
+	knex('account').insert({}).catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
 			statusCode: errorCode
@@ -52,12 +49,11 @@ router.post('/add', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
-
 })
 
 router.post('/delete/:id', (req, res) => {
 	const { id } = req.params
-	knex('customer').where('customer_id', id).del().catch((error) => {
+	knex('account').where('account_id', id).del().catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
 			statusCode: errorCode
@@ -68,5 +64,4 @@ router.post('/delete/:id', (req, res) => {
 		statusCode: successCode
 	})
 })
-
 module.exports = router
