@@ -14,14 +14,14 @@ const errorCode = 1
 const successCode = 0
 
 router.post('/login', (req, res) => {
-	const { username, password } = req.body
-	if (!username || !password) {
+	const { userName, passWord } = req.body
+	if (!userName || !passWord) {
 		return res.status(400).json({
 			errorMessage: 'Bad Request',
 			code: errorCode
 		})
 	}
-	authenticationService.authenticate(username, password, (err, auth = null, user = null) => {
+	authenticationService.authenticate(userName, passWord, (err, auth = null, user = null) => {
 		if (err) {
 			res.status(401).json({
 				err,
@@ -42,40 +42,42 @@ router.post('/login', (req, res) => {
 		})
 	})
 });
+
 router.post('/register', async (req, res) => {
-	const acc = req.body;
-	let date_ob = new Date();
-	if(!acc.username || !acc.password || !acc.email){
+	const { userName, passWord, email, fullName, phoneNumber, role, avatar, status } = req.body
+	let dateOb = new Date()
+	if (!userName || userName === '' || !passWord || passWord === '' || !email || email === '') {
 		return res.status(400).json({
-			errorMessage: 'register faill',
+			errorMessage: 'Bad Request',
 			code: errorCode
 		})
 	}
+
 	// check unique username and email
-	const verifying = await knex('tbl_account').where('acc_username', acc.username).orWhere('acc_email', acc.email).select('acc_id');
-	if(verifying.length != 0){
+	const verifying = await knex('tbl_account').where('acc_username', userName).orWhere('acc_email', email)
+	if (verifying.length != 0) {
 		return res.status(400).json({
-			errorMessage: 'username or email exist',
+			errorMessage: 'username or email existed',
 			code: errorCode
 		})
 	}
 
 	// send email
-	var code = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString();
-	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com');
+	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
+	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
 
-	const fullname = acc.full_name || 'quý khách';
+	const fullName = fullName || 'quý khách'
 	var mailOptions = {
 		from: '<vsthien1212@gmail.com>',
-		to: `${acc.email}`,
+		to: `${email}`,
 		subject: 'Xác nhận Email',
-		html: `<h1>Chào ${fullname} thân mến! </h1><br>
-           <h3>Bạn đã chọn ${acc.email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
-           <h3>Mã Xác minh: ${code}</h3><br>
+		html: `<h1>Chào ${fullName} thân mến! </h1><br>
+           <h3>Bạn đã chọn ${email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
+           <h3>Mã Xác minh: ${token}</h3><br>
            <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
            <h3>Trân trọng!</h3>`
 		//text: `1234sdadsa sad ${a}`
-	};
+	}
 
 	transporter.sendMail(mailOptions, async function (error, info) {
 		if (error) {
@@ -83,29 +85,30 @@ router.post('/register', async (req, res) => {
 				errorMessage: 'send email faill',
 				code: errorCode
 			})
-		} else {
-			console.log('send email thanh cong');
-			//console.log('Email sent: ' + info.response);
-		}
-	});
-	const hashPassword = bcrypt.hashSync(acc.password, 3);
-	const hashtoken = bcrypt.hashSync(code, 3);
+		} 
+		return res.status(200).json({
+			code: successCode
+		})
+	})
+	const hashPassword = bcrypt.hashSync(passWord, 3)
+	const hashToken = bcrypt.hashSync(token, 3)
 	// add account
 	const result = await knex('tbl_account').max('acc_id as maxId').first()
 	const account = {
 		acc_id: +result['maxId'] + 1,
-		acc_username: acc.username,
+		acc_username: userName,
 		acc_password: hashPassword,
-		acc_email: acc.email,
-		acc_phone_number: acc.phone_number || null,
-		acc_full_name: acc.full_name || null,
-		acc_role: acc.role || 1,
-		acc_token: hashtoken,
-		acc_avatar: acc.avatar || null,
-		acc_status: acc.status || null,
-		acc_created_date: date_ob,
+		acc_email: email,
+		acc_phone_number: phoneNumber || null,
+		acc_full_name: fullName || null,
+		acc_role: role || 1,
+		acc_token: hashToken,
+		acc_avatar: avatar || null,
+		acc_status: status || null,
+		acc_created_date: dateOb,
 		acc_updated_date: null
 	}
+
 	await knex('tbl_account').insert(account).catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
@@ -117,18 +120,19 @@ router.post('/register', async (req, res) => {
 		statusCode: successCode
 	})
 });
-router.post('/VerificationEmail', async (req, res) => {
-	const acc  = req.body;
-	let date_ob = new Date();
-	const result = await knex.from('tbl_account').where('acc_id', acc.id);
-	if(result.length == 0){
+
+router.post('/verification-email', async (req, res) => {
+	const { accId, accToken }  = req.body
+	let dateOb = new Date()
+	const result = await knex.from('tbl_account').where('acc_id', accId)
+	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exist',
 			code: errorCode
 		})
 	}
-	//!bcrypt.compareSync(acc.token, result[0]['acc_token'])
-	if(!bcrypt.compareSync(acc.token, result[0]['acc_token'])){
+
+	if (!bcrypt.compareSync(accToken, result[0]['acc_token'])) {
 		return res.status(400).json({
 			errorMessage: 'verify email faill',
 			code: errorCode
@@ -138,14 +142,15 @@ router.post('/VerificationEmail', async (req, res) => {
 	const account = {
 		acc_token: null,
 		acc_status: 0,
-		acc_updated_date: date_ob
-	};
-	await knex('tbl_account').where('acc_id', acc.id).update(account).catch((error) => {
+		acc_updated_date: dateOb
+	}
+	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
 			statusCode: errorCode
 		})
-	});
+	})
+
 	return res.status(200).json({
 		statusCode: successCode
 	})
