@@ -54,33 +54,42 @@ router.get('/details/:id', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
+	var prod = await knex('tbl_product')
+		.where('prod_name', req.body.prod_name)
+		.andWhere('prod_category_id', req.body.prod_category_id)
+	if (prod.length!=0) {
+		return res.status(400).json({
+			errorMessage: 'product record exists',
+			code: errorCode
+		})
+	}
 	const imgNextID = await knex('tbl_product_images').max('prod_img_id as MaxID').first()
 	await knex('tbl_product').insert({
 		prod_id: req.body.prod_id,
-		prod_name:req.body.prod_name,
+		prod_name: req.body.prod_name,
 		prod_category_id: req.body.prod_category_id,
-		prod_amount : req.body.prod_amount,
-		prod_price : req.body.prod_price,
+		prod_amount: req.body.prod_amount,
+		prod_price: req.body.prod_price,
 		prod_status: req.body.prod_status,
-		prod_created_date : moment().format('YYYY-MM-DD HH:mm:ss')
+		prod_created_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	})
-	.returning('*')
-	.then(async (rows) =>{
-		await knex('tbl_product_images').insert({
-			prod_img_id:imgNextID.MaxID + 1,
-			prod_img_product_id: rows[0].prod_id,
-			prod_img_data : req.body.prod_img_data,
-			prod_img_status:req.body.prod_img_status
+		.returning('*')
+		.then(async (rows) => {
+			await knex('tbl_product_images').insert({
+				prod_img_id: imgNextID.MaxID + 1,
+				prod_img_product_id: rows[0].prod_id,
+				prod_img_data: req.body.prod_img_data,
+				prod_img_status: req.body.prod_img_status
+			})
 		})
-	})
-	.catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
+		.catch((error) => {
+			return res.status(500).json({
+				errorMessage: error,
+				statusCode: errorCode
+			})
 		})
-	})
-	
-	
+
+
 
 
 	return res.status(200).json({
@@ -88,36 +97,47 @@ router.post('/add', async (req, res) => {
 	})
 
 })
-router.post('/update/:id', async (req,res) => {
-	const {id} = req.params
-	await knex('tbl_product')
-	.where('prod_id', id)
-	.update({
-		prod_name:req.body.prod_name,
-		prod_category_id: req.body.prod_category_id,
-		prod_amount : req.body.prod_amount,
-		prod_price : req.body.prod_price,
-		prod_status: req.body.prod_status,
-		prod_updated_date : moment().format('YYYY-MM-DD HH:mm:ss')
-	})
-	.then(async (rows) =>{
-		if(!rows){
-			
-			return res.status(404).json({success:false});
-		}
-		
-		await knex('tbl_product_images')
-		.where('prod_img_product_id', id)
-		.update({
-			prod_img_data : req.body.prod_img_data,
-			prod_img_status:req.body.prod_img_status
+router.post('/update/:id', async (req, res) => {
+	var prod = await knex('tbl_product')
+		.where('prod_name', req.body.prod_name)
+		.andWhere('prod_category_id', req.body.prod_category_id)
+	console.log(prod)
+	if (prod.length != 0) {
+		return res.status(400).json({
+			errorMessage: 'invalid update action',
+			code: errorCode
 		})
-		
-	})
-	.catch((err) => {
-		throw new Error(err.toString())
-		
-	})
+	}
+
+	const { id } = req.params
+	await knex('tbl_product')
+		.where('prod_id', id)
+		.update({
+			prod_name: req.body.prod_name,
+			prod_category_id: req.body.prod_category_id,
+			prod_amount: req.body.prod_amount,
+			prod_price: req.body.prod_price,
+			prod_status: req.body.prod_status,
+			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
+		})
+		.then(async (rows) => {
+			if (!rows) {
+
+				return res.status(404).json({ success: false });
+			}
+
+			await knex('tbl_product_images')
+				.where('prod_img_product_id', id)
+				.update({
+					prod_img_data: req.body.prod_img_data,
+					prod_img_status: req.body.prod_img_status
+				})
+
+		})
+		.catch((err) => {
+			throw new Error(err.toString())
+
+		})
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -137,7 +157,7 @@ router.post('/delete/:id', async (req, res) => {
 			statusCode: errorCode
 		})
 	})
-	
+
 
 
 	return res.status(200).json({

@@ -66,7 +66,7 @@ router.post('/register', async (req, res) => {
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
 
-	const fullName = fullName || 'quý khách'
+	fullName = fullName || 'quý khách'
 	var mailOptions = {
 		from: '<vsthien1212@gmail.com>',
 		to: `${email}`,
