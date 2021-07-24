@@ -63,4 +63,14 @@ router.post('/update', async (req, res) => {
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
 		.update({ cate_name: `${cateName && cateName != '' ? cateName : ''}`, cate_father: `${cateFather && cateFather != '' ? cateFather : ''}`})
+	.catch((err) => {
+		return res.status(500).json({
+			errorMessage: err,
+			code: errorCode
+		})
+	})
+	
+	return res.status(200).json({
+		code: successCode
+	})
 })
