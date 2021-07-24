@@ -54,10 +54,12 @@ router.get('/details/:id', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
+	var {prodID, prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+
 	var prod = await knex('tbl_product')
-		.where('prod_name', req.body.prod_name)
-		.andWhere('prod_category_id', req.body.prod_category_id)
-	if (prod.length!=0) {
+		.where('prod_name', prodName)
+		.andWhere('prod_category_id', prodCategoryID)
+	if (prod.length !== 0) {
 		return res.status(400).json({
 			errorMessage: 'product record exists',
 			code: errorCode
@@ -65,12 +67,12 @@ router.post('/add', async (req, res) => {
 	}
 	const imgNextID = await knex('tbl_product_images').max('prod_img_id as MaxID').first()
 	await knex('tbl_product').insert({
-		prod_id: req.body.prod_id,
-		prod_name: req.body.prod_name,
-		prod_category_id: req.body.prod_category_id,
-		prod_amount: req.body.prod_amount,
-		prod_price: req.body.prod_price,
-		prod_status: req.body.prod_status,
+		prod_id: prodID,
+		prod_name: prodName,
+		prod_category_id: prodCategoryID,
+		prod_amount: prodAmount,
+		prod_price: prodPrice,
+		prod_status: prodStatus,
 		prod_created_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	})
 		.returning('*')
@@ -78,8 +80,8 @@ router.post('/add', async (req, res) => {
 			await knex('tbl_product_images').insert({
 				prod_img_id: imgNextID.MaxID + 1,
 				prod_img_product_id: rows[0].prod_id,
-				prod_img_data: req.body.prod_img_data,
-				prod_img_status: req.body.prod_img_status
+				prod_img_data: prodImgData,
+				prod_img_status: prodImgStatus
 			})
 		})
 		.catch((error) => {
@@ -98,11 +100,13 @@ router.post('/add', async (req, res) => {
 
 })
 router.post('/update/:id', async (req, res) => {
+	var {prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+
 	var prod = await knex('tbl_product')
-		.where('prod_name', req.body.prod_name)
-		.andWhere('prod_category_id', req.body.prod_category_id)
-	console.log(prod)
-	if (prod.length != 0) {
+		.where('prod_name', prodName)
+		.andWhere('prod_category_id', prodCategoryID)
+
+	if (prod.length !== 0) {
 		return res.status(400).json({
 			errorMessage: 'invalid update action',
 			code: errorCode
@@ -113,11 +117,11 @@ router.post('/update/:id', async (req, res) => {
 	await knex('tbl_product')
 		.where('prod_id', id)
 		.update({
-			prod_name: req.body.prod_name,
-			prod_category_id: req.body.prod_category_id,
-			prod_amount: req.body.prod_amount,
-			prod_price: req.body.prod_price,
-			prod_status: req.body.prod_status,
+			prod_name: prodName,
+			prod_category_id: prodCategoryID,
+			prod_amount: prodAmount,
+			prod_price: prodPrice,
+			prod_status: prodStatus,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
 		})
 		.then(async (rows) => {
@@ -129,8 +133,8 @@ router.post('/update/:id', async (req, res) => {
 			await knex('tbl_product_images')
 				.where('prod_img_product_id', id)
 				.update({
-					prod_img_data: req.body.prod_img_data,
-					prod_img_status: req.body.prod_img_status
+					prod_img_data: prodImgData,
+					prod_img_status: prodImgStatus
 				})
 
 		})
