@@ -8,7 +8,7 @@ const authentication = require('../middlewares/authentication')
 const environment = require('../environments/environment')
 const nodemailer = require('nodemailer')
 const knex = require('../utils/dbConnection')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
 
 const errorCode = 1
 const successCode = 0
@@ -41,7 +41,7 @@ router.post('/login', (req, res) => {
 			}
 		})
 	})
-});
+})
 
 router.post('/register', async (req, res) => {
 	const { userName, passWord, email, fullName, phoneNumber, role, avatar, status } = req.body
@@ -119,7 +119,7 @@ router.post('/register', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
-});
+})
 
 router.post('/verification-email', async (req, res) => {
 	const { accId, accToken }  = req.body
@@ -154,6 +154,6 @@ router.post('/verification-email', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
-});
+})
 
 module.exports = router
