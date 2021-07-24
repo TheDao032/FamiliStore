@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 const successCode = 0
 const errorCode = 1
@@ -48,16 +49,25 @@ router.post('/add', async (req, res) => {
 		})
 	}
 
+	const verifying = await knex('tbl_account').where('acc_username', acc.username).orWhere('acc_email', acc.email).select('acc_id');
+	if(verifying.length != 0){
+		return res.status(400).json({
+			errorMessage: 'username or email exist',
+			code: errorCode
+		})
+	}
 	// add account
+	const hashPassword = bcrypt.hashSync(acc.password, 3);
 	const result = await knex('tbl_account').max('acc_id as maxId').first()
 	const account = {
 		acc_id: +result['maxId'] + 1,
 		acc_username: acc.username,
-		acc_password: acc.password,
+		acc_password: hashPassword,
 		acc_email: acc.email,
 		acc_phone_number: acc.phone_number || null,
 		acc_full_name: acc.full_name || null,
 		acc_role: acc.role || 1,
+		acc_token: null,
 		acc_avatar: acc.avatar || null,
 		acc_status: acc.status || null,
 		acc_created_date: date_ob,
@@ -92,9 +102,10 @@ router.patch('/update', async (req, res) =>{
 	}
 	const acc_id = acc.id;
 	const result = await knex('tbl_account').where('acc_id', acc_id);
+	const hashPassword = bcrypt.hashSync(acc.password, 3);
 	const account = {
 		acc_username: acc.username || result['acc_username'],
-		acc_password: acc.password || result['acc_password'],
+		acc_password: hashPassword || result['acc_password'],
 		acc_email: acc.email || result['acc_email'],
 		acc_phone_number: acc.phone_number || result['acc_phone_number'],
 		acc_full_name: acc.full_name || result['acc_full_name'],

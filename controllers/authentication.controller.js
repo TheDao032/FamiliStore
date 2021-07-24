@@ -8,6 +8,7 @@ const authentication = require('../middlewares/authentication')
 const environment = require('../environments/environment')
 const nodemailer = require('nodemailer')
 const knex = require('../utils/dbConnection')
+const bcrypt = require('bcrypt');
 
 const errorCode = 1
 const successCode = 0
@@ -87,16 +88,19 @@ router.post('/register', async (req, res) => {
 			//console.log('Email sent: ' + info.response);
 		}
 	});
+	const hashPassword = bcrypt.hashSync(acc.password, 3);
+	const hashtoken = bcrypt.hashSync(code, 3);
 	// add account
 	const result = await knex('tbl_account').max('acc_id as maxId').first()
 	const account = {
 		acc_id: +result['maxId'] + 1,
 		acc_username: acc.username,
-		acc_password: acc.password,
+		acc_password: hashPassword,
 		acc_email: acc.email,
 		acc_phone_number: acc.phone_number || null,
 		acc_full_name: acc.full_name || null,
 		acc_role: acc.role || 1,
+		acc_token: hashtoken,
 		acc_avatar: acc.avatar || null,
 		acc_status: acc.status || null,
 		acc_created_date: date_ob,
@@ -114,8 +118,34 @@ router.post('/register', async (req, res) => {
 	})
 });
 router.post('/VerificationEmail', async (req, res) => {
-	
-	
+	const acc  = req.body;
+	let date_ob = new Date();
+	const result = await knex.from('tbl_account').where('acc_id', acc.id);
+	if(result.length == 0){
+		return res.status(400).json({
+			errorMessage: 'id not exist',
+			code: errorCode
+		})
+	}
+	//!bcrypt.compareSync(acc.token, result[0]['acc_token'])
+	if(!bcrypt.compareSync(acc.token, result[0]['acc_token'])){
+		return res.status(400).json({
+			errorMessage: 'verify email faill',
+			code: errorCode
+		})
+	}
+
+	const account = {
+		acc_token: null,
+		acc_status: 0,
+		acc_updated_date: date_ob
+	};
+	await knex('tbl_account').where('acc_id', acc.id).update(account).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	});
 	return res.status(200).json({
 		statusCode: successCode
 	})
