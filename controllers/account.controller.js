@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
+const nodemailer = require('nodemailer');
 
 const successCode = 0
 const errorCode = 1
@@ -42,10 +43,12 @@ router.post('/add', async (req, res) => {
 	let date_ob = new Date();
 	if(!acc.username || !acc.password || !acc.email){
 		return res.status(400).json({
-			errorMessage: 'register faill',
+			errorMessage: 'add faill',
 			code: errorCode
 		})
 	}
+
+	// add account
 	const result = await knex('tbl_account').max('acc_id as maxId').first()
 	const account = {
 		acc_id: +result['maxId'] + 1,
@@ -74,11 +77,18 @@ router.post('/add', async (req, res) => {
 router.patch('/update', async (req, res) =>{
 	const acc = req.body;
 	let date_ob = new Date();
-	if(!acc.username || !acc.password || !acc.email){
+	if(!acc.username || !acc.password || !acc.email || !acc.id){
 		return res.status(400).json({
-			errorMessage: 'register faill',
+			errorMessage: 'update faill',
 			code: errorCode
 		});
+	}
+	const verifying = await knex('tbl_account').where('acc_username', acc.username).whereNot('acc_id', acc.id).orWhere('acc_email', acc.email).whereNot('acc_id', acc.id).select('acc_id');
+	if(verifying.length != 0){
+		return res.status(400).json({
+			errorMessage: 'username or email exist',
+			code: errorCode
+		})
 	}
 	const acc_id = acc.id;
 	const result = await knex('tbl_account').where('acc_id', acc_id);
