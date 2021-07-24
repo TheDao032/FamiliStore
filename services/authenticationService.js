@@ -1,6 +1,7 @@
 const moment = require('moment')
 const environment = require('../environments/environment')
 const knex = require('../utils/dbConnection')
+const bcrypt = require('bcrypt');
 
 const errorCode = 1
 const successCode = 0
@@ -16,10 +17,13 @@ const getRole = async (acc_id) => {
 }
 
 const authenticate = (username, password, callback) => {
-	knex('tbl_account').where({ acc_username: username, acc_password: password }).select('*')
+	knex('tbl_account').where({ acc_username: username}).select('*')
 		.then((result) => {
 			if (result.lenght === 0) {
 				throw new Error('User Not Found')
+			}
+			if(!bcrypt.compareSync(password, result[0]['acc_password'])){
+				throw new Error('User password wrong')
 			}
 
 			const { acc_id, acc_full_name } = result[0]
