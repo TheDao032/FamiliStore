@@ -52,7 +52,6 @@ router.post('/add', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
-
 })
 
 router.post('/delete/:id', (req, res) => {
