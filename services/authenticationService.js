@@ -17,12 +17,12 @@ const getRole = async (acc_id) => {
 }
 
 const authenticate = (username, password, callback) => {
-	knex('tbl_account').where({ acc_username: username}).select('*')
+	knex('tbl_account').where({ acc_username: username, acc_status: 0 }).select('*')
 		.then((result) => {
 			if (result.lenght === 0) {
 				throw new Error('User Not Found')
 			}
-			if(!bcrypt.compareSync(password, result[0]['acc_password'])){
+			if(!bcrypt.compareSync(password, result[0].acc_password)){
 				throw new Error('User password wrong')
 			}
 
@@ -31,7 +31,6 @@ const authenticate = (username, password, callback) => {
 				username,
 				acc_id,
 			}
-			console.log(auth)
 			return Promise.all([
 				auth, 
 				getRole(acc_id).then((role_id) => {
@@ -44,8 +43,6 @@ const authenticate = (username, password, callback) => {
 			])
 		})
 		.then(([auth, info]) => {
-			console.log('auth', auth)
-			console.log('info', info)
 			const user = {
 				...info
 			}
