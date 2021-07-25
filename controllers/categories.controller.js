@@ -3,6 +3,9 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 
+const errorCode = 1
+const successCode = 0
+
 router.post('/add-father', (req, res) => {
 	const { cateId, cateName } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName }).catch((error) => {
@@ -74,3 +77,5 @@ router.post('/update', async (req, res) => {
 		code: successCode
 	})
 })
+
+module.exports = router
