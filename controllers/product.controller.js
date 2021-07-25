@@ -97,7 +97,6 @@ router.post('/add', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
-
 })
 router.post('/update/:id', async (req, res) => {
 	var {prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body

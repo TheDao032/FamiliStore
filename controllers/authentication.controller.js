@@ -44,7 +44,7 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/register', async (req, res) => {
-	const { userName, passWord, email, fullName, phoneNumber, role, avatar, status } = req.body
+	const { userName, passWord, email, fullName, phoneNumber, role, avatar } = req.body
 	let dateOb = new Date()
 	if (!userName || userName === '' || !passWord || passWord === '' || !email || email === '') {
 		return res.status(400).json({
@@ -66,12 +66,16 @@ router.post('/register', async (req, res) => {
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
 
+<<<<<<< HEAD
 	fullName = fullName || 'quý khách'
+=======
+	const cusName = fullName || 'quý khách'
+>>>>>>> 6e94bb822fcc188e5e27ddcee1ac19f88e2367d1
 	var mailOptions = {
 		from: '<vsthien1212@gmail.com>',
 		to: `${email}`,
 		subject: 'Xác nhận Email',
-		html: `<h1>Chào ${fullName} thân mến! </h1><br>
+		html: `<h1>Chào ${cusName} thân mến! </h1><br>
            <h3>Bạn đã chọn ${email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
            <h3>Mã Xác minh: ${token}</h3><br>
            <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
@@ -92,19 +96,17 @@ router.post('/register', async (req, res) => {
 	})
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)
+
 	// add account
-	const result = await knex('tbl_account').max('acc_id as maxId').first()
 	const account = {
-		acc_id: +result['maxId'] + 1,
 		acc_username: userName,
 		acc_password: hashPassword,
 		acc_email: email,
 		acc_phone_number: phoneNumber || null,
 		acc_full_name: fullName || null,
-		acc_role: role || 1,
+		acc_role: role || null,
 		acc_token: hashToken,
 		acc_avatar: avatar || null,
-		acc_status: status || null,
 		acc_created_date: dateOb,
 		acc_updated_date: null
 	}
