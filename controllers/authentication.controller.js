@@ -109,7 +109,6 @@ router.post('/register', async (req, res) => {
 	}
 
 	await knex('tbl_account').insert(account).catch((error) => {
-		console.log(error)
 		return res.status(500).json({
 			errorMessage: error,
 			statusCode: errorCode
