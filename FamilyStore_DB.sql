@@ -48,7 +48,7 @@ CREATE TABLE public.tbl_account (
     acc_full_name character varying(100),
     acc_role character varying(5),
     acc_avatar text,
-    acc_status integer DEFAULT 0,
+    acc_status integer DEFAULT 2,
     acc_created_date date,
     acc_updated_date date
 );
@@ -334,8 +334,7 @@ ALTER TABLE public.tbl_ware_house OWNER TO postgres;
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_account (acc_id, acc_username, acc_password, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date) FROM stdin;
-1	test	test	test@gmail.com	\N	\N	\N	\N	0	2021-07-24	2021-07-24
+COPY public.tbl_account (acc_id, acc_username, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date) FROM stdin;
 \.
 
 
@@ -416,6 +415,7 @@ COPY public.tbl_product_images (prod_img_id, prod_img_product_id, prod_img_data,
 --
 
 COPY public.tbl_roles (rol_id, rol_name, role_status, rol_create_date, rol_update_date) FROM stdin;
+ADM	admin	0	2021-07-25	2021-07-25
 \.
 
 
@@ -431,7 +431,7 @@ COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount
 -- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_account_id_seq', 1, true);
+SELECT pg_catalog.setval('public.tbl_account_id_seq', 6, true);
 
 
 --
