@@ -44,7 +44,8 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/register', async (req, res) => {
-	const { userName, passWord, email, fullName, phoneNumber, role, avatar } = req.body
+	const { picture } = req.files
+	const { userName, passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 	if (!userName || userName === '' || !passWord || passWord === '' || !email || email === '') {
 		return res.status(400).json({
@@ -102,7 +103,7 @@ router.post('/register', async (req, res) => {
 		acc_full_name: fullName || null,
 		acc_role: role || null,
 		acc_token: hashToken,
-		acc_avatar: avatar || null,
+		acc_avatar: picture.data || null,
 		acc_created_date: dateOb,
 		acc_updated_date: null
 	}
