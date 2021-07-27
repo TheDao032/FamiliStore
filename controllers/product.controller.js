@@ -6,10 +6,14 @@ const successCode = 0
 const errorCode = 1
 
 router.get('/list', async (req, res) => {
+	const {p, catID, orderBy, limitRecs} = req.query
+	
 	var p = +req.query.p;
 	var cat = req.query.cat || "%";
 	var order = req.query.order || 'asc';
 	var limit = req.query.limit || 10;
+
+
 	var result = await knex.from('tbl_product')
 		.join('tbl_categories', 'tbl_product.prod_category_id', '=', 'tbl_categories.cate_id')
 		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
@@ -20,13 +24,13 @@ router.get('/list', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			list: result,
+			listProduct: result,
 			statusCode: successCode
 		})
 	}
 	else {
 		return res.status(500).json({
-			list: [],
+			listProduct: [],
 			statusCode: errorCode
 		})
 	}
@@ -42,19 +46,19 @@ router.get('/details/:id', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			listActors: result,
+			listProductDetail: result,
 			statusCode: successCode
 		})
 	}
 
 	return res.status(500).json({
-		listActors: [],
+		listProductDetail: [],
 		statusCode: errorCode
 	})
 })
 
 router.post('/add', async (req, res) => {
-	var {prodID, prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+	const {prodID, prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
 
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
@@ -99,7 +103,7 @@ router.post('/add', async (req, res) => {
 	})
 })
 router.post('/update/:id', async (req, res) => {
-	var {prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+	const  {prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
 
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
