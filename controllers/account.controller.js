@@ -13,13 +13,13 @@ router.get('/list', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			listActors: result,
+			listAccouts: result,
 			statusCode: successCode
 		})
 	}
 
 	return res.status(500).json({
-		listActors: [],
+		listAccounts: [],
 		statusCode: errorCode
 	})
 })
@@ -30,12 +30,13 @@ router.get('/details/:id', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			listActors: result,
+			account: result,
 			statusCode: successCode
 		})
 	}
 
-	return res.status(500).json({ listActors: [],
+	return res.status(500).json({ 
+		account: [],
 		statusCode: errorCode
 	})
 })
