@@ -15,7 +15,6 @@ router.post('/add-father', (req, res) => {
 		})
 	})
 })
-
 router.post('/add-child', (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather }).catch((error) => {
