@@ -69,12 +69,12 @@ router.post('/update', async (req, res) => {
 	.catch((err) => {
 		return res.status(500).json({
 			errorMessage: err,
-			code: errorCode
+			statusCode: errorCode
 		})
 	})
 	
 	return res.status(200).json({
-		code: successCode
+		statusCode: successCode
 	})
 })
 

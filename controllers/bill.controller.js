@@ -17,13 +17,13 @@ router.post('/list-details', (req, res) => {
 	if (result.length === 0) {
 		return res.status(404).json({
 			listBillDetail: [],
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
 	return res.status(404).json({
 		listBillDetail: result,
-		code: successCode
+		statusCode: successCode
 	})
 })
 
@@ -46,7 +46,7 @@ router.post('/add', async (req, res) => {
 	if (newBillId.length === 0) {
 		return res.status(500).json({
 			errorMessage: err,
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
@@ -56,7 +56,7 @@ router.post('/add', async (req, res) => {
 		if (prodInfo.length === 0) {
 			return res.status(404).json({
 				errorMessage: err,
-				code: errorCode
+				statusCode: errorCode
 			})
 		}
 
@@ -75,7 +75,7 @@ router.post('/add', async (req, res) => {
 			.catch((err) => {
 				return res.status(500).json({
 					errorMessage: err,
-					code: errorCode
+					statusCode: errorCode
 				})
 			})
 	})
