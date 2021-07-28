@@ -8,10 +8,10 @@ const errorCode = 1
 router.get('/list', async (req, res) => {
 	const {p, catID, orderBy, limitRecs} = req.query
 	
-	var p = +req.query.p;
-	var cat = req.query.cat || "%";
-	var order = req.query.order || 'asc';
-	var limit = req.query.limit || 10;
+	var page = (Number.isInteger(+p) && p > 0) || 0;
+	var cat = catID || "%";
+	var order = orderBy || 'asc';
+	var limit = limitRecs || 10;
 
 
 	var result = await knex.from('tbl_product')
@@ -19,7 +19,7 @@ router.get('/list', async (req, res) => {
 		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
 		.where('tbl_categories.cate_name', 'like', cat)
 		.limit(limit)
-		.offset(p * limit)
+		.offset(page * limit)
 		.orderBy('prod_name', order)
 
 	if (result) {
@@ -35,6 +35,13 @@ router.get('/list', async (req, res) => {
 		})
 	}
 
+})
+
+router.post('/testimage', async (req, res) => {
+	const {productImage} = req.files
+	for(let i = 0; i < productImage.length; i++){
+		console.log(productImage[i].data)
+	}
 })
 
 router.get('/details/:id', async (req, res) => {
@@ -142,7 +149,10 @@ router.post('/update/:id', async (req, res) => {
 
 		})
 		.catch((err) => {
-			throw new Error(err.toString())
+			return res.status(500).json({
+				errorMessage: error,
+				statusCode: errorCode
+			})
 
 		})
 
