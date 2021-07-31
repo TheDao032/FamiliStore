@@ -219,4 +219,31 @@ router.post('/forgot-password', async (req, res) => {
 	})
 })
 
+router.post('/new-password', async (req, res) => {
+	const { accId, accPassWord }  = req.body
+	let dateOb = new Date()
+	const result = await knex.from('tbl_account').where('acc_id', accId)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'id not exist',
+			code: errorCode
+		})
+	}
+	const hashPassword = bcrypt.hashSync(accPassWord, 3)
+	const account = {
+		acc_password: hashPassword,
+		acc_updated_date: dateOb
+	}
+	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	})
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
 module.exports = router
