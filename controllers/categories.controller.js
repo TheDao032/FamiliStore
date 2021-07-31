@@ -6,7 +6,7 @@ const knex = require('../utils/dbConnection')
 const errorCode = 1
 const successCode = 0
 
-router.post('/add-father', (req, res) => {
+router.post('/add-father', validation.newCategoryFather, (req, res) => {
 	const { cateId, cateName } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName }).catch((error) => {
 		return res.status(500).json({
@@ -15,7 +15,8 @@ router.post('/add-father', (req, res) => {
 		})
 	})
 })
-router.post('/add-child', (req, res) => {
+
+router.post('/add-child', validation.newCategoryChild, (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather }).catch((error) => {
 		return res.status(500).json({
@@ -42,7 +43,24 @@ router.get('/list', async (req, res) => {
 	})
 })
 
-router.get('/list-child', async (req, res) => {
+router.get('/list-father', async (req, res) => {
+	const result = await knex.from('tbl_categories')
+		.where({ cate_status: 0, cate_father: null})
+
+	if (result) {
+		return res.status(200).json({
+			listCategories: result,
+			statusCode: successCode
+		})
+	}
+
+	return res.status(500).json({
+		listCategories: [],
+		statusCode: errorCode
+	})
+})
+
+router.get('/list-child', validation.listCategoryChild, async (req, res) => {
 	const { cateFather } = req.body
 	const result = await knex.from('tbl_categories')
 		.where({ cate_father: cateFather, cate_status: 0})
@@ -60,7 +78,7 @@ router.get('/list-child', async (req, res) => {
 	})
 })
 
-router.post('/update', async (req, res) => {
+router.post('/update', validation.newCategoryChild, async (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
