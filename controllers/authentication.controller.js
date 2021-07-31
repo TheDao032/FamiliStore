@@ -44,7 +44,7 @@ router.post('/login', (req, res) => {
 })
 
 router.post('/register', async (req, res) => {
-	const { picture } = req.files
+	const { picture } = req.files | null
 	const { userName, passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 	if (!userName || userName === '' || !passWord || passWord === '' || !email || email === '') {
@@ -87,9 +87,9 @@ router.post('/register', async (req, res) => {
 				code: errorCode
 			})
 		} 
-		return res.status(200).json({
-			code: successCode
-		})
+		// return res.status(200).json({
+		// 	code: successCode
+		// })
 	})
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)
@@ -138,11 +138,21 @@ router.post('/verification-email', async (req, res) => {
 		})
 	}
 
-	const account = {
-		acc_token: null,
-		acc_status: 0,
-		acc_updated_date: dateOb
+	var account = {}
+	if(accToken.length === 5){
+		account = {
+			acc_token: null,
+			acc_status: 0,
+			acc_updated_date: dateOb
+		}
 	}
+	else{
+		account = {
+			acc_token: null,
+			acc_updated_date: dateOb
+		}
+	}
+	
 	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
@@ -152,6 +162,60 @@ router.post('/verification-email', async (req, res) => {
 
 	return res.status(200).json({
 		statusCode: successCode
+	})
+})
+
+router.post('/forgot-password', async (req, res) => {
+	const { email }  = req.body
+	let dateOb = new Date()
+	const result = await knex.from('tbl_account').where('acc_email', email)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'email not exist',
+			code: errorCode
+		})
+	}
+
+	var token = 'f' + (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
+	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
+
+	const cusName = result[0]['acc_fullName'] || 'quý khách'
+	var mailOptions = {
+		from: '<vsthien1212@gmail.com>',
+		to: `${email}`,
+		subject: 'Xác nhận Email',
+		html: `<h1>Chào ${cusName} thân mến! </h1><br>
+           <h3>Đây là mã xác nhận để Khôi phục lại mật khẩu:</h3>
+           <h3>Mã Xác minh: ${token}</h3><br>
+           <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
+           <h3>Trân trọng!</h3>`
+		//text: `1234sdadsa sad ${a}`
+	}
+
+	transporter.sendMail(mailOptions, async function (error, info) {
+		if (error) {
+			return res.status(400).json({
+				errorMessage: 'send email faill',
+				code: errorCode
+			})
+		} 
+	})
+	const hashToken = bcrypt.hashSync(token, 3)
+	
+	const account = {
+		acc_token: hashToken,
+		acc_updated_date: dateOb
+	}
+	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	})
+
+	return res.status(200).json({
+		statusCode: successCode,
+		accId: result[0]['acc_id']
 	})
 })
 
