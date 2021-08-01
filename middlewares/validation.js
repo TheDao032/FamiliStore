@@ -10,7 +10,7 @@ const newAccount = (req, res, next) => {
     		phoneNumber: { type: 'string', pattern: '' },
     		role: { type: 'string', pattern: '' }
   		},
-		required: [userName, passWord, email, role],
+		required: ["userName", "passWord", "email", "role"],
 		additionalProperties: true
 	}
 
@@ -56,39 +56,14 @@ const updateAccount = (req, res, next) => {
 	next()
 }
 
-const verifyToken = (req, res, next) => {
+const comfirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
 			accId: { type: 'string', pattern: '' },
 			accToken: { type: 'string', pattern: '', }
 		},
-		required: [accId, accToken],
-		additionalProperties: false
-	}
-
-	const ajv = new ajvLib({
-		allErrors: true
-	})
-
-	const validator = ajv.compile(shema)
-	const valid = validator(req.body)
-
-	if (!valid) {
-		return res.status(400).json(valid.errors)
-	}
-
-	next()
-}
-
-const verifyToken = (req, res, next) => {
-	const shema = {
-		type: 'object',
-		properties: {
-			accId: { type: 'string', pattern: '' },
-			accToken: { type: 'string', pattern: '', }
-		},
-		required: [accId, accToken],
+		required: ["accId", "accToken"],
 		additionalProperties: false
 	}
 
@@ -113,7 +88,7 @@ const login = (req, res, next) => {
 			userName: { type: 'string', pattern: '' },
 			passWord: { type: 'string', pattern: '', }
 		},
-		required: [userName, passWord],
+		required: ["userName", "passWord"],
 		additionalProperties: false
 	}
 
@@ -145,12 +120,12 @@ const newBill = (req, res, next) => {
 					properties: {
 						prodId: { type: 'string', pattern: '' }
 					},
-					required: [prodId],
+					required: ["prodId"],
 					additionalProperties: true
 				},
 			}
   		},
-		required: [accId, totalPrice, totalQuantity, listProductId],
+		required: ["accId", "totalPrice", "totalQuantity", "listProductId"],
 		additionalProperties: true
 	}
 
@@ -175,7 +150,7 @@ const listBillDetail = (req, res, next) => {
 			accId: { type: 'integer' },
     		billId: { type: 'string', pattern: '' }
   		},
-		required: [accId, billId],
+		required: ["accId", "billId"],
 		additionalProperties: true
 	}
 
@@ -200,7 +175,7 @@ const newCategoryFather = (req, res, next) => {
     		cateId: { type: 'string', pattern: '' },
 			cateName: { type: 'string', pattern: '' }
   		},
-		required: [cateId, cateName],
+		required: ["cateId", "cateName"],
 		additionalProperties: true
 	}
 
@@ -226,7 +201,7 @@ const newCategoryChild = (req, res, next) => {
 			cateName: { type: 'string', pattern: '' },
 			cateFather: { type: 'string', pattern: '' }
   		},
-		required: [cateId, cateName],
+		required: ["cateId", "cateName"],
 		additionalProperties: true
 	}
 
@@ -250,7 +225,7 @@ const listCategoryChild = (req, res, next) => {
   		properties: {
 			cateFather: { type: 'string', pattern: '' }
   		},
-		required: [cateFather],
+		required: ["cateFather"],
 		additionalProperties: true
 	}
 
@@ -274,7 +249,7 @@ const listDistricts = (req, res, next) => {
   		properties: {
 			cityId: { type: 'integer' }
   		},
-		required: [cityId],
+		required: ["cityId"],
 		additionalProperties: true
 	}
 
@@ -298,7 +273,7 @@ const listDeliveries = (req, res, next) => {
   		properties: {
 			accId: { type: 'integer' }
   		},
-		required: [accId],
+		required: ["accId"],
 		additionalProperties: true
 	}
 
@@ -323,7 +298,7 @@ const newCity = (req, res, next) => {
 			cityId: { type: 'string', pattern: '' },
 			cityName: { type: 'string', pattern: '' }
   		},
-		required: [cityId, cityName],
+		required: ["cityId", "cityName"],
 		additionalProperties: true
 	}
 
@@ -350,7 +325,7 @@ const newDistrict = (req, res, next) => {
 			distName: { type: 'string', pattern: '' },
 			distShipPrice: { type: 'string', pattern: '' }
   		},
-		required: [cityId, distId, distName, distShipPrice],
+		required: ["cityId", "distId", "distName", "distShipPrice"],
 		additionalProperties: true
 	}
 
@@ -377,7 +352,7 @@ const newDelivery = (req, res, next) => {
 			accId: { type: 'integer' },
 			delDetailAddress: { type: 'string', pattern: '' }
   		},
-		required: [cityId, distId, accId, delDetailAddress],
+		required: ["cityId", "distId", "accId", "delDetailAddress"],
 		additionalProperties: true
 	}
 
@@ -398,7 +373,7 @@ const newDelivery = (req, res, next) => {
 module.exports = {
 	newAccount,
 	updateAccount,
-	verifyToken,
+	comfirmToken,
 	login,
  	newBill,
 	listBillDetail,

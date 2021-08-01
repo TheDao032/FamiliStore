@@ -105,3 +105,4 @@ router.post('/add-delivery', validation.newDelivery, (req, res) => {
 	})
 })
 
+module.exports = router
