@@ -154,7 +154,7 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 	})
 })
 
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	const { email }  = req.body
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_email', email)
@@ -208,7 +208,7 @@ router.post('/forgot-password', async (req, res) => {
 	})
 })
 
-router.post('/new-password', async (req, res) => {
+router.post('/new-password',validation.newPassword, async (req, res) => {
 	const { accId, accPassWord }  = req.body
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)

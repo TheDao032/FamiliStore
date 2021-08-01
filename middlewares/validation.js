@@ -60,10 +60,58 @@ const comfirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: 'string', pattern: '' },
+			accId: { type: 'integer'},
 			accToken: { type: 'string', pattern: '', }
 		},
 		required: ["accId", "accToken"],
+		additionalProperties: false
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors)
+	}
+
+	next()
+}
+
+const forgotPassword = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+			email: { type: 'string', pattern: '' }
+		},
+		required: ["email"],
+		additionalProperties: false
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors)
+	}
+
+	next()
+}
+const newPassword = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+			accId: { type: 'integer'},
+			accPassword: { type: 'string', pattern: '' }
+		},
+		required: ["accId", "accPassword"],
 		additionalProperties: false
 	}
 
@@ -374,6 +422,8 @@ module.exports = {
 	newAccount,
 	updateAccount,
 	comfirmToken,
+	forgotPassword,
+	newPassword,
 	login,
  	newBill,
 	listBillDetail,
