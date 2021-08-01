@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
+const validation = require('../middlewares/validation')
 
 const successCode = 0
 const errorCode = 1
@@ -37,7 +38,7 @@ router.get('/details/:id', async (req, res) => {
 	})
 })
 
-router.post('/add', async (req, res) => {
+router.post('/add', validation.newWareHouse, async (req, res) => {
 	const { stoAccountId, stoProductName, stoAmount, stoCategoryId, stoOriginPrice, stoProductId, cost } = req.body
     
 	const presentDate = new Date()
@@ -63,7 +64,7 @@ router.post('/add', async (req, res) => {
 			errorMessage: error,
 			statusCode: errorCode
 		})
-	})
+	})  
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -84,7 +85,7 @@ router.post('/delete/:id', (req, res) => {
 	})
 })
 
-router.post('/update', async (req, res) => {
+router.post('/update',validation.updateWareHouse, async (req, res) => {
 	const {stoId, stoAccountId, stoProductName, stoAmount, stoCategoryId, stoOriginPrice, stoProductId, cost } = req.body
     const presentDate = new Date()
     const wareHouse = {
