@@ -65,12 +65,7 @@ router.post('/list-deliveries', validation.listDeliveries, async (req, res) => {
 router.post('/add-city', validation.newCity, (req, res) => {
 	const { cityId, cityName } = req.body
 
-	knex('tbl_cities').insert({ ci_id: cityId, ci_name: cityName }).catch((err) => {
-		return res.status(500).json({
-			errorMessage: err,
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_cities').insert({ ci_id: cityId, ci_name: cityName })
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -80,11 +75,7 @@ router.post('/add-city', validation.newCity, (req, res) => {
 router.post('/add-district', validation.newDistrict, (req, res) => {
 	const { cityId, distId, distName, distShipPrice } = req.body
 
-	knex('tbl_districts').insert({ dis_id: distId, dis_name: distName, dis_city_id: cityId, dis_ship_price: distShipPrice }).catch((err) => {
-		return res.status(500).json({
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_districts').insert({ dis_id: distId, dis_name: distName, dis_city_id: cityId, dis_ship_price: distShipPrice })
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -94,11 +85,7 @@ router.post('/add-district', validation.newDistrict, (req, res) => {
 router.post('/add-delivery', validation.newDelivery, (req, res) => {
 	const { cityId, distId, accId, delDetailAddress } = req.body
 
-	knex('tbl_delivery_address').insert({ del_id: distId, ddel_city: cityId, del_detail_address: delDetailAddress, del_user_id: accId }).catch((err) => {
-		return res.status(500).json({
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_delivery_address').insert({ del_id: distId, ddel_city: cityId, del_detail_address: delDetailAddress, del_user_id: accId })
 
 	return res.status(200).json({
 		statusCode: successCode

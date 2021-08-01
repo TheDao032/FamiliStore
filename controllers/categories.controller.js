@@ -9,22 +9,12 @@ const successCode = 0
 
 router.post('/add-father', validation.newCategoryFather, (req, res) => {
 	const { cateId, cateName } = req.body
-	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName }).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName })
 })
 
 router.post('/add-child', validation.newCategoryChild, (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
-	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather }).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather })
 })
 
 router.get('/list', async (req, res) => {
@@ -84,12 +74,6 @@ router.post('/update', validation.newCategoryChild, async (req, res) => {
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
 		.update({ cate_name: `${cateName && cateName != '' ? cateName : ''}`, cate_father: `${cateFather && cateFather != '' ? cateFather : ''}`})
-	.catch((err) => {
-		return res.status(500).json({
-			errorMessage: err,
-			statusCode: errorCode
-		})
-	})
 	
 	return res.status(200).json({
 		statusCode: successCode
