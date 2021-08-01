@@ -2,11 +2,12 @@ const express = require('express')
 
 const knex = require('../utils/dbConnection')
 const router = express.Router()
+const validation = require('../middlewares/validation')
 
 const errorCode = 1
 const successCode = 0
 
-router.post('/list-details', (req, res) => {
+router.post('/list-details', validation.listBillDetail, (req, res) => {
 	const { accId, billId } = req.body
 	
 	const result = knex('tbl_bill')

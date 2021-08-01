@@ -5,6 +5,7 @@ const router = express.Router()
 const jsonWebToken = require('jsonwebtoken')
 const authenticationService = require('../services/authenticationService')
 const authentication = require('../middlewares/authentication')
+const validation = require('../middlewares/validation')
 const environment = require('../environments/environment')
 const nodemailer = require('nodemailer')
 const knex = require('../utils/dbConnection')
@@ -13,14 +14,9 @@ const bcrypt = require('bcrypt')
 const errorCode = 1
 const successCode = 0
 
-router.post('/login', (req, res) => {
+router.post('/login', validation.login, (req, res) => {
 	const { userName, passWord } = req.body
-	if (!userName || !passWord) {
-		return res.status(400).json({
-			errorMessage: 'Bad Request',
-			code: errorCode
-		})
-	}
+
 	authenticationService.authenticate(userName, passWord, (err, auth = null, user = null) => {
 		if (err) {
 			res.status(401).json({
@@ -43,16 +39,9 @@ router.post('/login', (req, res) => {
 	})
 })
 
-router.post('/register', async (req, res) => {
-	const { picture } = req.files | null
+router.post('/register', validation.newAccount, async (req, res) => {
 	const { userName, passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
-	if (!userName || userName === '' || !passWord || passWord === '' || !email || email === '') {
-		return res.status(400).json({
-			errorMessage: 'Bad Request',
-			code: errorCode
-		})
-	}
 
 	// check unique username and email
 	const verifying = await knex('tbl_account').where('acc_username', userName).orWhere('acc_email', email)
@@ -103,7 +92,7 @@ router.post('/register', async (req, res) => {
 		acc_full_name: fullName || null,
 		acc_role: role || null,
 		acc_token: hashToken,
-		acc_avatar: picture.data || null,
+		acc_avatar: req.files ? req.files.picture.data : null,
 		acc_created_date: dateOb,
 		acc_updated_date: null
 	}
@@ -120,7 +109,7 @@ router.post('/register', async (req, res) => {
 	})
 })
 
-router.post('/verification-email', async (req, res) => {
+router.post('/verification-email', validation.comfirmToken, async (req, res) => {
 	const { accId, accToken }  = req.body
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)

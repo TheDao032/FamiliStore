@@ -39,14 +39,6 @@ router.get('/details/:id', async (req, res) => {
 
 router.post('/add', async (req, res) => {
 	const { stoAccountId, stoProductName, stoAmount, stoCategoryId, stoOriginPrice, stoProductId, cost } = req.body
-
-    // const checkStoAccountId = stoAccountId && stoAccountId !== ''
-	// const checkStoProductName = stoProductName && stoProductName !== ''
-	// const checkStoAmount = stoAmount && stoAmount !== ''
-	// const checkStoCategoryId = stoCategoryId && stoCategoryId !== ''
-	// const checkStoOriginPrice = stoOriginPrice && stoOriginPrice !== ''
-	// const checkStoProductId = stoProductId && stoProductId !== ''
-	// const checkCost = cost && cost !== ''
     
 	const presentDate = new Date()
     if(!stoAccountId || !stoCategoryId || !stoProductId){
@@ -57,12 +49,12 @@ router.post('/add', async (req, res) => {
     }
 
     const wareHouse = {
-        sto_id: 1,
         sto_account_id: stoAccountId,
         sto_product_name: stoProductName || null,
         sto_amount: stoAmount || null,
         sto_category_id: stoCategoryId,
         sto_origin_price: stoOriginPrice || null,
+        sto_created_date: presentDate,
         sto_product_id: stoProductId,
         cost: cost || null
     }
@@ -87,6 +79,32 @@ router.post('/delete/:id', (req, res) => {
 		})
 	})
 
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.post('/update', async (req, res) => {
+	const {stoId, stoAccountId, stoProductName, stoAmount, stoCategoryId, stoOriginPrice, stoProductId, cost } = req.body
+    const presentDate = new Date()
+    const wareHouse = {
+        sto_account_id: stoAccountId && stoAccountId != '' ? stoAccountId : '',
+        sto_product_name: stoProductName && stoProductName != '' ? stoProductName : '',
+        sto_amount: stoAmount && stoAmount != null ? stoAmount : null,
+        sto_category_id: stoCategoryId && stoCategoryId != '' ? stoCategoryId : '',
+        sto_origin_price: stoOriginPrice && stoOriginPrice != '' ? stoOriginPrice : '',
+        sto_update_date: presentDate,
+        sto_product_id: stoProductId,
+        cost: cost && cost != '' ? cost : ''
+    }
+    console.log(wareHouse);
+	await knex('tbl_ware_house').where('sto_id', stoId).update(wareHouse).catch((err) => {
+		return res.status(500).json({
+			errorMessage: err,
+			statusCode: errorCode
+		})
+	})
+	
 	return res.status(200).json({
 		statusCode: successCode
 	})

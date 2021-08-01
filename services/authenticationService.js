@@ -17,7 +17,8 @@ const getRole = async (acc_id) => {
 }
 
 const authenticate = (username, password, callback) => {
-	knex('tbl_account').where({ acc_username: username, acc_status: 0 }).select('*')
+	knex('tbl_account').where({ acc_username: username, acc_status: 0, acc_token: null })
+		.orWhere({ acc_username: username, acc_status: 0, acc_token: null })
 		.then((result) => {
 			if (result.lenght === 0) {
 				throw new Error('User Not Found')
