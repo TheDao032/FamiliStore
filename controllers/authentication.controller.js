@@ -36,7 +36,7 @@ router.post('/login', validation.login, (req, res) => {
 				token
 			}
 		})
-	})
+	}, req, res)
 })
 
 router.post('/register', validation.newAccount, async (req, res) => {
@@ -97,13 +97,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		acc_updated_date: null
 	}
 
-	await knex('tbl_account').insert(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
-
+	await knex('tbl_account').insert(account)
 	return res.status(200).json({
 		statusCode: successCode
 	})
@@ -132,13 +126,8 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 		acc_status: 0,
 		acc_updated_date: dateOb
 	}
-	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
 
+	await knex('tbl_account').where('acc_id', accId).update(account)
 	return res.status(200).json({
 		statusCode: successCode
 	})

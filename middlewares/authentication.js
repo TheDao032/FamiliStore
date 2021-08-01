@@ -31,22 +31,18 @@ const verifyToken = (req, res, next) => {
         if (err)
             return res.status(401).json({
                 err,
-                code: 2, //
+                statusCode: 2,
             })
         const account = decode
-        return authenticationService
-            .getRole(account.acc_id)
-            .then((role_id) => {
-                account.acc_role = role_id
-                req.account = account
+        const role_id = authenticationService.getRole(account.acc_id)
+        
+		if (role === '') {
+			return res.status(401).json({
+                statusCode: 6,
             })
-            .catch(() =>
-                res.status(401).json({
-                    err,
-                    code: 6, //
-                })
-            )
-            .then(next)
+		}
+		account.acc_role = role_id
+        req.account = account
     })
 }
 

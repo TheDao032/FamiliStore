@@ -73,12 +73,6 @@ router.post('/add', async (req, res) => {
 		}
 
 		await knex('tbl_bill_detail').insert(newBillDetail)
-			.catch((err) => {
-				return res.status(500).json({
-					errorMessage: err,
-					statusCode: errorCode
-				})
-			})
 	})
 })
 
