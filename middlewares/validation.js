@@ -22,7 +22,7 @@ const newAccount = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -50,7 +50,7 @@ const updateAccount = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -75,7 +75,7 @@ const comfirmToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -100,7 +100,7 @@ const login = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -137,7 +137,7 @@ const newBill = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -162,7 +162,7 @@ const listBillDetail = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -187,7 +187,7 @@ const newCategoryFather = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -213,7 +213,7 @@ const newCategoryChild = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -237,7 +237,7 @@ const listCategoryChild = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -261,7 +261,7 @@ const listDistricts = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -285,7 +285,7 @@ const listDeliveries = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -310,7 +310,7 @@ const newCity = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -337,7 +337,7 @@ const newDistrict = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
@@ -364,7 +364,7 @@ const newDelivery = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(valid.errors)
+		return res.status(400).json(validator.errors)
 	}
 
 	next()
