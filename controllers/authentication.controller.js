@@ -40,7 +40,6 @@ router.post('/login', validation.login, (req, res) => {
 })
 
 router.post('/register', validation.newAccount, async (req, res) => {
-	const { picture } = req.files
 	const { userName, passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 
@@ -93,7 +92,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		acc_full_name: fullName || null,
 		acc_role: role || null,
 		acc_token: hashToken,
-		acc_avatar: picture.data || null,
+		acc_avatar: req.files ? req.files.picture.data : null,
 		acc_created_date: dateOb,
 		acc_updated_date: null
 	}
@@ -110,7 +109,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	})
 })
 
-router.post('/verification-email', validation.verifyToken, async (req, res) => {
+router.post('/verification-email', validation.comfirmToken, async (req, res) => {
 	const { accId, accToken }  = req.body
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)
