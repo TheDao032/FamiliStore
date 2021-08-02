@@ -7,18 +7,6 @@ const successCode = 0
 const errorCode = 1
 
 
-router.post('/upload', function (req, res, next) {
-	const images = req.files.image
-	if (images.length == undefined) {// number of uploaded image is 1
-		commonService.ImageUploader(images)
-	}
-	else {
-		for (let i = 0; i < images.length; i++) {
-			commonService.ImageUploader(images[i]);
-		}
-	}
-
-});
 router.post('/delete', function (req, res) {
 	/*
 	cloudinary.api.delete_resources(['igfxj0bmsvscey5ps5jj', ''], function (error, result) {
@@ -83,17 +71,31 @@ router.get('/details/:id', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
 
+	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
+	const images = req.files.image
+
+	var isValidImage = commonService.validateImage(images)
+	var isValidNumberOfFile = commonService.validateNumberOfFiles(images)
+	var errorMessage = "";
+	if (!isValidImage)
+		errorMessage = errorMessage + "Invalid image!"
+	if (!isValidNumberOfFile)
+		errorMessage = errorMessage + " Invalid number of files!"
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
 		.andWhere('prod_category_id', prodCategoryID)
 	if (prod.length !== 0) {
+		errorMessage = errorMessage + " Product record exists!"
+	}
+
+	if(errorMessage !== ""){
 		return res.status(400).json({
-			errorMessage: 'product record exists',
-			code: errorCode
+			message : errorMessage,
+			statusCode : errorCode
 		})
 	}
+	
 	await knex('tbl_product').insert({
 		prod_name: prodName,
 		prod_category_id: prodCategoryID,
@@ -123,6 +125,7 @@ router.post('/add', async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
+	
 })
 router.post('/update/:id', async (req, res) => {
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
