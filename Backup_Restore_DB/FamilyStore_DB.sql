@@ -127,7 +127,7 @@ CREATE TABLE public.tbl_categories (
     cate_id character varying(5) NOT NULL,
     cate_name character varying(100),
     cate_status integer DEFAULT 0,
-    cate_father character varying(5),
+    cate_father character varying(5) DEFAULT NULL::character varying,
     cate_created_date date,
     cate_updated_date date
 );
@@ -213,7 +213,7 @@ ALTER TABLE public.tbl_delivery_address OWNER TO postgres;
 CREATE TABLE public.tbl_districts (
     dis_id character varying(5) NOT NULL,
     dis_name character varying(50),
-    dis_city_id character varying(5),
+    dis_city_id character varying(5) NOT NULL,
     dis_ship_price character varying(100),
     dis_status integer DEFAULT 0
 );
@@ -431,7 +431,7 @@ COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount
 -- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_account_id_seq', 6, true);
+SELECT pg_catalog.setval('public.tbl_account_id_seq', 1, true);
 
 
 --
