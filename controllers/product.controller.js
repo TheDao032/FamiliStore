@@ -2,12 +2,36 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const moment = require('moment');
+const commonService = require('../services/commonService')
 const successCode = 0
 const errorCode = 1
 
+
+router.post('/upload', function (req, res, next) {
+	const images = req.files.image
+	if (images.length == undefined) {// number of uploaded image is 1
+		commonService.ImageUploader(images)
+	}
+	else {
+		for (let i = 0; i < images.length; i++) {
+			commonService.ImageUploader(images[i]);
+		}
+	}
+
+});
+router.post('/delete', function (req, res) {
+	/*
+	cloudinary.api.delete_resources(['igfxj0bmsvscey5ps5jj', ''], function (error, result) {
+		console.log(result);
+	});
+	*/
+
+})
+
+
 router.get('/list', async (req, res) => {
-	const {p, catID, orderBy, limitRecs} = req.query
-	
+	const { p, catID, orderBy, limitRecs } = req.query
+
 	var page = (Number.isInteger(+p) && p > 0) || 0;
 	var cat = catID || "%";
 	var order = orderBy || 'asc';
@@ -37,12 +61,6 @@ router.get('/list', async (req, res) => {
 
 })
 
-router.post('/testimage', async (req, res) => {
-	const {productImage} = req.files
-	for(let i = 0; i < productImage.length; i++){
-		console.log(productImage[i].data)
-	}
-})
 
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
@@ -65,7 +83,7 @@ router.get('/details/:id', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-	const {prodID, prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
 
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
@@ -76,9 +94,7 @@ router.post('/add', async (req, res) => {
 			code: errorCode
 		})
 	}
-	const imgNextID = await knex('tbl_product_images').max('prod_img_id as MaxID').first()
 	await knex('tbl_product').insert({
-		prod_id: prodID,
 		prod_name: prodName,
 		prod_category_id: prodCategoryID,
 		prod_amount: prodAmount,
@@ -89,7 +105,6 @@ router.post('/add', async (req, res) => {
 		.returning('*')
 		.then(async (rows) => {
 			await knex('tbl_product_images').insert({
-				prod_img_id: imgNextID.MaxID + 1,
 				prod_img_product_id: rows[0].prod_id,
 				prod_img_data: prodImgData,
 				prod_img_status: prodImgStatus
@@ -110,7 +125,7 @@ router.post('/add', async (req, res) => {
 	})
 })
 router.post('/update/:id', async (req, res) => {
-	const  {prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus} = req.body
+	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
 
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
