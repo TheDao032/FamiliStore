@@ -1,15 +1,16 @@
 const express = require('express')
+const jsonWebToken = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const nodemailer = require('nodemailer')
 
 const router = express.Router()
+const knex = require('../utils/dbConnection')
+const environment = require('../environments/environment')
 
-const jsonWebToken = require('jsonwebtoken')
 const authenticationService = require('../services/authenticationService')
 const authentication = require('../middlewares/authentication')
 const validation = require('../middlewares/validation')
-const environment = require('../environments/environment')
-const nodemailer = require('nodemailer')
-const knex = require('../utils/dbConnection')
-const bcrypt = require('bcrypt')
+const mailService = require('../services/mailService')
 
 const errorCode = 1
 const successCode = 0
@@ -21,7 +22,7 @@ router.post('/login', validation.login, (req, res) => {
 		if (err) {
 			res.status(401).json({
 				err,
-				code: 2
+				statusCode: 2
 			})
 			return
 		}
@@ -30,7 +31,7 @@ router.post('/login', validation.login, (req, res) => {
 			algorithm: 'HS256'
 		})
 		res.status(200).json({
-			code: successCode,
+			statusCode: successCode,
 			data: {
 				user,
 				token
@@ -48,7 +49,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	if (verifying.length != 0) {
 		return res.status(400).json({
 			errorMessage: 'username or email existed',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
@@ -57,29 +58,31 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
 
 	const cusName = fullName || 'quý khách'
-	var mailOptions = {
-		from: '<vsthien1212@gmail.com>',
-		to: `${email}`,
-		subject: 'Xác nhận Email',
-		html: `<h1>Chào ${cusName} thân mến! </h1><br>
-           <h3>Bạn đã chọn ${email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
-           <h3>Mã Xác minh: ${token}</h3><br>
-           <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
-           <h3>Trân trọng!</h3>`
-		//text: `1234sdadsa sad ${a}`
-	}
+	// var mailOptions = {
+	// 	from: '<vsthien1212@gmail.com>',
+	// 	to: `${email}`,
+	// 	subject: 'Xác nhận Email',
+	// 	html: `<h1>Chào ${cusName} thân mến! </h1><br>
+    //        <h3>Bạn đã chọn ${email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
+    //        <h3>Mã Xác minh: ${token}</h3><br>
+    //        <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
+    //        <h3>Trân trọng!</h3>`
+	// 	//text: `1234sdadsa sad ${a}`
+	// }
 
-	transporter.sendMail(mailOptions, async function (error, info) {
-		if (error) {
-			return res.status(400).json({
-				errorMessage: 'send email faill',
-				code: errorCode
-			})
-		} 
-		return res.status(200).json({
-			code: successCode
-		})
-	})
+	await mailService.sendMail(email, cusName, token, req, res)
+
+	// await transporter.sendMail(mailOptions, (error, info) => {
+	// 	if (error) {
+	// 		return res.status(400).json({
+	// 			errorMessage: 'send email faill',
+	// 			statusCode: errorCode
+	// 		})
+	// 	} 
+	// 	return res.status(200).json({
+	// 		statusCode: successCode
+	// 	})
+	// })
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)
 
@@ -110,14 +113,14 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exist',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
 	if (!bcrypt.compareSync(accToken, result[0]['acc_token'])) {
 		return res.status(400).json({
 			errorMessage: 'verify email faill',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
