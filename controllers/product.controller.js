@@ -196,7 +196,7 @@ router.post('/update/:id', async (req, res) => {
 	})
 })
 router.post('/delete/:id', async (req, res) => {
-	const { id } = req.params;
+	const { id } = req.params
 	await knex('tbl_product_images').where('prod_img_product_id', id).del().catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
