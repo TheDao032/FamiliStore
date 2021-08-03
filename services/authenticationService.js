@@ -1,7 +1,7 @@
 const moment = require('moment')
 const environment = require('../environments/environment')
 const knex = require('../utils/dbConnection')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
 
 const errorCode = 1
 const successCode = 0
@@ -23,12 +23,14 @@ const authenticate = async (username, password, callback, req, res) => {
 
 	if (result.length === 0) {
 		return res.status(500).json({ 
+			errorMessage: 'User Does Not Exist!',
 			statusCode: errorCode
 		})
 	}
 
 	if(!bcrypt.compareSync(password, result[0].acc_password)){
 		return res.status(500).json({ 
+			errorMessage: 'Password Incorrect!',
 			statusCode: errorCode
 		})
 	}
@@ -38,7 +40,7 @@ const authenticate = async (username, password, callback, req, res) => {
 		username,
 		acc_id,
 	}
-	const info = Promise.all([
+	const info = await Promise.all([
 		auth, 
 		getRole(acc_id).then((role_id) => {
 			return {
