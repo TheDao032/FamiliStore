@@ -53,37 +53,12 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		})
 	}
 
-	//vosithien1212%40gmail.com:thien123456@smtp.gmail.com')
-	// send email: family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	var transporter = nodemailer.createTransport('smtps://family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 
 	const cusName = fullName || 'quý khách'
-	// var mailOptions = {
-	// 	from: '<vsthien1212@gmail.com>',
-	// 	to: `${email}`,
-	// 	subject: 'Xác nhận Email',
-	// 	html: `<h1>Chào ${cusName} thân mến! </h1><br>
-    //        <h3>Bạn đã chọn ${email} sử dung email để đăng ký tài khoản Famali Store, chào mừng bạn đến với trang thương mại điện tử của chúng tôi:</h3>
-    //        <h3>Mã Xác minh: ${token}</h3><br>
-    //        <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
-    //        <h3>Trân trọng!</h3>`
-	// 	//text: `1234sdadsa sad ${a}`
-	// }
-
+	
 	await mailService.sendMail(email, cusName, token, req, res)
 
-	// await transporter.sendMail(mailOptions, (error, info) => {
-	// 	if (error) {
-	// 		return res.status(400).json({
-	// 			errorMessage: 'send email faill',
-	// 			statusCode: errorCode
-	// 		})
-	// 	} 
-	// 	return res.status(200).json({
-	// 		statusCode: successCode
-	// 	})
-	// })
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)
 
