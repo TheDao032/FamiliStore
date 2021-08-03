@@ -165,29 +165,9 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	}
 
 	var token = 'f' + (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
 
 	const cusName = result[0]['acc_fullName'] || 'quý khách'
-	var mailOptions = {
-		from: '<vsthien1212@gmail.com>',
-		to: `${email}`,
-		subject: 'Xác nhận Email',
-		html: `<h1>Chào ${cusName} thân mến! </h1><br>
-           <h3>Đây là mã xác nhận để Khôi phục lại mật khẩu:</h3>
-           <h3>Mã Xác minh: ${token}</h3><br>
-           <h3>Lưu ý: Vui lòng không cung cấp mã này cho bất kì ai, mã xác minh chỉ được sử dụng 1 lần.</h3><br>
-           <h3>Trân trọng!</h3>`
-		//text: `1234sdadsa sad ${a}`
-	}
-
-	transporter.sendMail(mailOptions, async function (error, info) {
-		if (error) {
-			return res.status(400).json({
-				errorMessage: 'send email faill',
-				code: errorCode
-			})
-		} 
-	})
+	await mailService.sendMail(email, cusName, token, req, res)
 	const hashToken = bcrypt.hashSync(token, 3)
 	
 	const account = {

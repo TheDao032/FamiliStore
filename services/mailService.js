@@ -13,8 +13,6 @@ const sendMail = async (email, cusName, token, req, res) => {
     // create reusable transporter object using the default SMTP transport
     const fromEmail = environment.mailConfig.user
     const password = environment.mailConfig.password
-    console.log(fromEmail)
-    console.log(environment.mailConfig.password)
     // let transporter = nodemailer.createTransport({
     //     host: "smtp.ethereal.email",
     //     port: 587,
