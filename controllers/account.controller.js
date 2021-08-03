@@ -27,7 +27,7 @@ router.get('/list', async (req, res) => {
 
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
-	const result = await knex.from('tbl_account').where('account_id', id)
+	const result = await knex.from('tbl_account').where('acc_id', id)
 
 	if (result) {
 		return res.status(200).json({
@@ -80,9 +80,9 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 	})
 })
 
-router.post('/delete/:id', (req, res) => {
+router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
-	knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
+	await knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
 
 	return res.status(200).json({
 		statusCode: successCode

@@ -7,10 +7,10 @@ const validation = require('../middlewares/validation')
 const errorCode = 1
 const successCode = 0
 
-router.post('/list-details', validation.listBillDetail, (req, res) => {
+router.post('/list-details', validation.listBillDetail, async (req, res) => {
 	const { accId, billId } = req.body
 	
-	const result = knex('tbl_bill')
+	const result = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bill_id', 'bdetail_bill_id')
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
 		.where({ bill_account_id: accId, bill_id: billId, bill_status: 0 })
@@ -87,8 +87,7 @@ router.get('/:id', async (req, res) => {
 		})
 	}
 
-	console.log(result[0])
-	return res.status(404).json({
+	return res.status(200).json({
 		Bill: result[0],
 		statusCode: successCode
 	})
@@ -107,7 +106,7 @@ router.get('/history-bill/:id', async (req, res) => {
 	}
 
 	console.log(result)
-	return res.status(404).json({
+	return res.status(200).json({
 		ListBill: result,
 		statusCode: successCode
 	})
