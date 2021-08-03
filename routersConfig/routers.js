@@ -6,6 +6,6 @@ const authentication = require('../middlewares/authentication')
 const API = require('./api')
 
 router.use('/api/authentication', authenticattionController)
-router.use('/api', API)
+router.use('/api', authentication.verifyToken, API)
 
 module.exports = router

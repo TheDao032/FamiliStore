@@ -52,9 +52,10 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		})
 	}
 
-	// send email
+	//vosithien1212%40gmail.com:thien123456@smtp.gmail.com')
+	// send email: family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
+	var transporter = nodemailer.createTransport('smtps://family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 
 	const cusName = fullName || 'quý khách'
 	var mailOptions = {
