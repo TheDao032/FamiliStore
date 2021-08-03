@@ -1,5 +1,5 @@
 cloudStorage = require('../utils/cloudStorage')
-
+const knex = require('../utils/dbConnection')
 
 function imageValidator(image) {
     if (image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/jpeg") {
@@ -8,8 +8,9 @@ function imageValidator(image) {
         return false;
     }
 }
+
 module.exports = {
-    ImageUploader: function (image) {
+    ImageUploader: function (image, dependentID) {
         let streamUploader = function (image) {
             console.log(image);
             return new Promise(function (resolve, reject) {
@@ -27,13 +28,21 @@ module.exports = {
         };
 
         async function upload(image) {
+            console.log(dependentID);
+            console.log(image);
             let result = await streamUploader(image);
             console.log(result.url);
+            
+            await knex('tbl_product_images').insert({
+				prod_img_product_id: dependentID,
+				prod_img_data: result.url
+			})
+           
         }
 
         upload(image);
     },
-   
+
     validateImage: function (images) {
         var isValidImage = true
         if (images.length == undefined) {// number of uploaded image is 1
@@ -49,12 +58,16 @@ module.exports = {
         return isValidImage
     },
 
-    validateNumberOfFiles: function (files){
-        if(files.length != undefined){
-            if(files.length > 5)
+    validateNumberOfFiles: function (files) {
+        if (files.length != undefined) {
+            if (files.length > 5)
                 return false;
             return true;
         }
+        else if (typeof files == 'object') {
+            return true;
+        }
+        return false;
     }
 
 }

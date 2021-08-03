@@ -72,30 +72,45 @@ router.get('/details/:id', async (req, res) => {
 
 router.post('/add', async (req, res) => {
 
-	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
+	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus } = req.body
+	console.log(req.body);
+	var errorMessage = "";
+	//validate field
+	if (prodName == '' || prodCategoryID == '' || prodAmount == '' || prodPrice == '' || prodStatus == '') {
+		//catch error
+		errorMessage = errorMessage + ' Some fields are blank!'
+	}
+	var prod = await knex('tbl_product')
+		.where('prod_name', prodName)
+		.andWhere('prod_category_id', prodCategoryID)
+
+
+	var cat = await knex('tbl_categories')
+		.where('cate_id', prodCategoryID)
+	if (prod.length !== 0) {
+		errorMessage = errorMessage + " Product record exists!"
+	}
+	if (cat.length === 0) {
+		errorMessage = errorMessage + " Wrong category!"
+	}
+	//validate image
 	const images = req.files.image
 
 	var isValidImage = commonService.validateImage(images)
 	var isValidNumberOfFile = commonService.validateNumberOfFiles(images)
-	var errorMessage = "";
+
 	if (!isValidImage)
 		errorMessage = errorMessage + "Invalid image!"
 	if (!isValidNumberOfFile)
 		errorMessage = errorMessage + " Invalid number of files!"
-	var prod = await knex('tbl_product')
-		.where('prod_name', prodName)
-		.andWhere('prod_category_id', prodCategoryID)
-	if (prod.length !== 0) {
-		errorMessage = errorMessage + " Product record exists!"
-	}
 
-	if(errorMessage !== ""){
+	if (errorMessage !== "") {
 		return res.status(400).json({
-			message : errorMessage,
-			statusCode : errorCode
+			message: errorMessage,
+			statusCode: errorCode
 		})
 	}
-	
+
 	await knex('tbl_product').insert({
 		prod_name: prodName,
 		prod_category_id: prodCategoryID,
@@ -106,26 +121,28 @@ router.post('/add', async (req, res) => {
 	})
 		.returning('*')
 		.then(async (rows) => {
-			await knex('tbl_product_images').insert({
-				prod_img_product_id: rows[0].prod_id,
-				prod_img_data: prodImgData,
-				prod_img_status: prodImgStatus
-			})
+			
+			if (images.length == undefined) {// number of uploaded image is 1
+				await commonService.ImageUploader(images, rows[0].prod_id)
+			}
+			else {
+				for (let i = 0; i < images.length; i++) {
+					await commonService.ImageUploader(images[i], rows[0].prod_id)
+				}
+			}
 		})
-		.catch((error) => {
+		.catch((err) => {
 			return res.status(500).json({
-				errorMessage: error,
+				errorMessage: 'There is an error from database while inserting new product record!',
 				statusCode: errorCode
 			})
+
 		})
-
-
-
 
 	return res.status(200).json({
 		statusCode: successCode
 	})
-	
+
 })
 router.post('/update/:id', async (req, res) => {
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
