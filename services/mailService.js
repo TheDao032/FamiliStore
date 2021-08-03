@@ -11,18 +11,21 @@ const sendMail = async (email, cusName, token, req, res) => {
     // let testAccount = await nodemailer.createTestAccount();
 
     // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: environment.mailConfig.user, // generated ethereal user
-            pass: environment.mailConfig.password, // generated ethereal password
-        },
-    });
+    const fromEmail = environment.mailConfig.user
+    const password = environment.mailConfig.password
+    // let transporter = nodemailer.createTransport({
+    //     host: "smtp.ethereal.email",
+    //     port: 587,
+    //     secure: false, // true for 465, false for other ports
+    //     auth: {
+    //         user: environment.mailConfig.user, // generated ethereal user
+    //         pass: environment.mailConfig.password, // generated ethereal password
+    //     },
+    // });
+    var transporter = nodemailer.createTransport(`smtps://${fromEmail}:${password}@smtp.gmail.com`)
 
     var mailOptions = {
-		from: '<vsthien1212@gmail.com>',
+		from: `<${fromEmail}>`,
 		to: `${email}`,
 		subject: 'Xác nhận Email',
 		html: `<h1>Chào ${cusName} thân mến! </h1><br>

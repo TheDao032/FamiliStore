@@ -27,7 +27,7 @@ router.get('/list', async (req, res) => {
 
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
-	const result = await knex.from('tbl_account').where('account_id', id)
+	const result = await knex.from('tbl_account').where('acc_id', id)
 
 	if (result) {
 		return res.status(200).json({
@@ -80,13 +80,36 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 	})
 })
 
-router.post('/delete/:id', (req, res) => {
+router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
-	knex('tbl_account').where('account_id', id).update({ acc_status: 1 })
+	await knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
 
 	return res.status(200).json({
 		statusCode: successCode
 	})
 })
 
+// đặt tài khoản làm nhân viên, xóa vai trò nhân viên
+router.post('/update-role', validation.updateRoleAccount, async (req, res) => {
+	const { accId, accRole } = req.body
+	const resultRole = await knex.from('tbl_roles').where('rol_id', accRole)
+	const resultAcc = await knex.from('tbl_account').where('acc_id', accId)
+	if(resultRole.length === 0){
+		return res.status(400).json({
+			errorMessage: 'role not exists',
+			code: errorCode
+		})
+	}
+	if(resultAcc.length === 0){
+		return res.status(400).json({
+			errorMessage: 'account not exists',
+			code: errorCode
+		})
+	}
+	await knex('tbl_account').where('acc_id', accId).update('acc_role', accRole)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
 module.exports = router

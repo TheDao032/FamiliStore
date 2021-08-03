@@ -53,9 +53,10 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		})
 	}
 
-	// send email
+	//vosithien1212%40gmail.com:thien123456@smtp.gmail.com')
+	// send email: family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	var transporter = nodemailer.createTransport('smtps://vsthien1212%40gmail.com:thien123456@smtp.gmail.com')
+	var transporter = nodemailer.createTransport('smtps://family.store.bot%40gmail.com:Nn123456789@@@smtp.gmail.com')
 
 	const cusName = fullName || 'quý khách'
 	// var mailOptions = {
@@ -88,6 +89,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 
 	// add account
 	const account = {
+		acc_id: 2,
 		acc_username: userName,
 		acc_password: hashPassword,
 		acc_email: email,
@@ -124,9 +126,80 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 		})
 	}
 
+	var account = {}
+	if(accToken.length === 5){
+		account = {
+			acc_token: null,
+			acc_status: 0,
+			acc_updated_date: dateOb
+		}
+	}
+	else{
+		account = {
+			acc_token: null,
+			acc_updated_date: dateOb
+		}
+	}
+	
+	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	})
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
+	const { email }  = req.body
+	let dateOb = new Date()
+	const result = await knex.from('tbl_account').where('acc_email', email)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'email not exist',
+			code: errorCode
+		})
+	}
+
+	var token = 'f' + (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
+
+	const cusName = result[0]['acc_fullName'] || 'quý khách'
+	await mailService.sendMail(email, cusName, token, req, res)
+	const hashToken = bcrypt.hashSync(token, 3)
+	
 	const account = {
-		acc_token: null,
-		acc_status: 0,
+		acc_token: hashToken,
+		acc_updated_date: dateOb
+	}
+	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	})
+
+	return res.status(200).json({
+		statusCode: successCode,
+		accId: result[0]['acc_id']
+	})
+})
+
+router.post('/new-password',validation.newPassword, async (req, res) => {
+	const { accId, accPassWord }  = req.body
+	let dateOb = new Date()
+	const result = await knex.from('tbl_account').where('acc_id', accId)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'id not exist',
+			code: errorCode
+		})
+	}
+	const hashPassword = bcrypt.hashSync(accPassWord, 3)
+	const account = {
+		acc_password: hashPassword,
 		acc_updated_date: dateOb
 	}
 

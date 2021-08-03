@@ -16,6 +16,7 @@ const getRole = async (acc_id) => {
 	}
 }
 
+
 const authenticate = async (username, password, callback, req, res) => {
 	const result = await knex('tbl_account').where({ acc_username: username, acc_status: 0, acc_token: null })
 		.orWhere({ acc_email: username, acc_status: 0, acc_token: null })
@@ -26,7 +27,7 @@ const authenticate = async (username, password, callback, req, res) => {
 			statusCode: errorCode
 		})
 	}
-		
+
 	if(!bcrypt.compareSync(password, result[0].acc_password)){
 		return res.status(500).json({ 
 			errorMessage: 'Password Incorrect!',
@@ -52,6 +53,7 @@ const authenticate = async (username, password, callback, req, res) => {
 	const user = {
 		...info[1]
 	}
+	console.log(user)
 	callback(null, auth, user)
 }
 
