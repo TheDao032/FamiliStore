@@ -18,13 +18,13 @@ API.use('/category', categoriesController)
 API.use('/delivery', deliveriesController)
 
 API.use((req, res, next) => {
-	res.status(404).json({
+	return res.status(404).json({
 		errorMessage: 'API Url Not Found',
 	})
 })
 
 API.use((err, req, res, next) => {
-	res.status(500).json({
+	return res.status(500).json({
 		errorMessage: err,
 	})
 })

@@ -2,6 +2,7 @@ const express = require('express')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
+const validation = require('../middlewares/validation')
 // const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 
@@ -41,25 +42,11 @@ router.get('/details/:id', async (req, res) => {
 	})
 })
 
-router.patch('/update', async (req, res) =>{
+router.patch('/update', validation.updateAccount, async (req, res) =>{
 	const { picture } = req.files
 	const checkAvatar = picture ? true : false
 	const { accId, accUserName, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
-	const checkAccId = accId && accId !== ''
-	const checkUserName = accUserName && accUserName !== ''
-	const checkPassWord = accPassWord && accPassWord !== ''
-	const checkEmail = accEmail && accEmail !== ''
-	const checkPhoneNumber = accPhoneNumber && accPhoneNumber !== ''
-	const checkFullName = accFullName && accFullName !== ''
-	const checkRole = accRole && accRole !== ''
 	let date_ob = new Date()
-
-	if(!checkAccId || !checkUserName || !checkPassWord || !checkEmail){
-		return res.status(400).json({
-			errorMessage: 'update faill',
-			code: errorCode
-		});
-	}
 
 	const verifying = await knex('tbl_account')
 						.where('acc_username', userName)
@@ -86,29 +73,43 @@ router.patch('/update', async (req, res) =>{
 		acc_avatar: checkAvatar ? picture.data : result.acc_avatar,
 		acc_updated_date: date_ob
 	};
-	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	});
+	await knex('tbl_account').where('acc_id', accId).update(account)
+
 	return res.status(200).json({
 		statusCode: successCode
-	});
+	})
 })
 
 router.post('/delete/:id', (req, res) => {
 	const { id } = req.params
-	knex('tbl_account').where('account_id', id).update({ acc_status: 1 }).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
 
 	return res.status(200).json({
 		statusCode: successCode
 	})
 })
 
+// đặt tài khoản làm nhân viên, xóa vai trò nhân viên
+router.post('/update-role', validation.updateRoleAccount, async (req, res) => {
+	const { accId, accRole } = req.body
+	const resultRole = await knex.from('tbl_roles').where('rol_id', accRole)
+	const resultAcc = await knex.from('tbl_account').where('acc_id', accId)
+	if(resultRole.length === 0){
+		return res.status(400).json({
+			errorMessage: 'role not exists',
+			code: errorCode
+		})
+	}
+	if(resultAcc.length === 0){
+		return res.status(400).json({
+			errorMessage: 'account not exists',
+			code: errorCode
+		})
+	}
+	await knex('tbl_account').where('acc_id', accId).update('acc_role', accRole)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
 module.exports = router

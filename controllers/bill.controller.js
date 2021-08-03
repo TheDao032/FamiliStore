@@ -73,12 +73,43 @@ router.post('/add', async (req, res) => {
 		}
 
 		await knex('tbl_bill_detail').insert(newBillDetail)
-			.catch((err) => {
-				return res.status(500).json({
-					errorMessage: err,
-					statusCode: errorCode
-				})
-			})
+	})
+})
+router.get('/:id', async (req, res) => {
+	const { id } = req.params
+	
+	const result = await knex('tbl_bill').where('bill_id', id)
+
+	if (result.length === 0) {
+		return res.status(404).json({
+			Bill: [],
+			statusCode: errorCode
+		})
+	}
+
+	console.log(result[0])
+	return res.status(404).json({
+		Bill: result[0],
+		statusCode: successCode
+	})
+})
+
+router.get('/history-bill/:id', async (req, res) => {
+	const { id } = req.params
+	
+	const result = await knex('tbl_bill').where('bill_account_id', id)
+
+	if (result.length === 0) {
+		return res.status(404).json({
+			ListBill: [],
+			statusCode: errorCode
+		})
+	}
+
+	console.log(result)
+	return res.status(404).json({
+		ListBill: result,
+		statusCode: successCode
 	})
 })
 

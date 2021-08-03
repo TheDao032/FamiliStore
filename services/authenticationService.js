@@ -9,50 +9,50 @@ const successCode = 0
 const getRole = async (acc_id) => {
 	const accRole = await knex('tbl_account').where({ acc_id: acc_id }).select('acc_role')
 
-	if (accRole.lenght !== 0) {
+	if (accRole.length !== 0) {
 		return accRole[0].acc_role
 	} else {
-		throw new Error('acc_id does not exist')
+		return ''
 	}
 }
 
-const authenticate = (username, password, callback) => {
-	knex('tbl_account').where({ acc_username: username, acc_status: 0, acc_token: null })
-		.orWhere({ acc_username: username, acc_status: 0, acc_token: null })
-		.then((result) => {
-			console.log(result)
-			if (result.lenght === 0) {
-				throw new Error('User Not Found')
-			}
-			if(!bcrypt.compareSync(password, result[0].acc_password)){
-				throw new Error('User password wrong')
-			}
 
-			const { acc_id, acc_full_name } = result[0]
-			const auth = {
-				username,
-				acc_id,
+const authenticate = async (username, password, callback, req, res) => {
+	const result = await knex('tbl_account').where({ acc_username: username, acc_status: 0, acc_token: null })
+		.orWhere({ acc_email: username, acc_status: 0, acc_token: null })
+
+	if (result.length === 0) {
+		return res.status(500).json({ 
+			statusCode: errorCode
+		})
+	}
+
+	if(!bcrypt.compareSync(password, result[0].acc_password)){
+		return res.status(500).json({ 
+			statusCode: errorCode
+		})
+	}
+
+	const { acc_id, acc_full_name } = result[0]
+	const auth = {
+		username,
+		acc_id,
+	}
+	const info = Promise.all([
+		auth, 
+		getRole(acc_id).then((role_id) => {
+			return {
+				role_id,
+				acc_full_name,
+				acc_id
 			}
-			return Promise.all([
-				auth, 
-				getRole(acc_id).then((role_id) => {
-					return {
-						role_id,
-						acc_full_name,
-						acc_id
-					}
-				})
-			])
 		})
-		.then(([auth, info]) => {
-			const user = {
-				...info
-			}
-			callback(null, auth, user)
-		})
-		.catch((err) => {
-			throw new Error(err.toString())
-		})
+	])
+	const user = {
+		...info[1]
+	}
+	console.log(user)
+	callback(null, auth, user)
 }
 
 module.exports = {
