@@ -105,7 +105,6 @@ router.get('/history-bill/:id', async (req, res) => {
 		})
 	}
 
-	console.log(result)
 	return res.status(200).json({
 		ListBill: result,
 		statusCode: successCode

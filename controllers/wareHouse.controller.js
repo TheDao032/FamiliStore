@@ -98,7 +98,6 @@ router.post('/update',validation.updateWareHouse, async (req, res) => {
         sto_product_id: stoProductId,
         cost: cost && cost != '' ? cost : ''
     }
-    console.log(wareHouse);
 	await knex('tbl_ware_house').where('sto_id', stoId).update(wareHouse).catch((err) => {
 		return res.status(500).json({
 			errorMessage: err,
