@@ -2,26 +2,14 @@ const ajvLib = require('ajv')
 
 const newAccount = (req, res, next) => {
 	const shema = {
-<<<<<<< HEAD
 		type: 'object',
 		properties: {
-			userName: { type: 'string', pattern: '' },
 			passWord: { type: 'string', pattern: '' },
 			email: { type: 'string', pattern: '' },
-			phoneNumber: { type: 'string', pattern: '' },
-			role: { type: 'string', pattern: '' }
+			phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
+			role: { type: 'string', pattern: '', maxLength: 5 }
 		},
-		required: ["userName", "passWord", "email", "role"],
-=======
-  		type: 'object',
-  		properties: {
-    		passWord: { type: 'string', pattern: '' },
-    		email: { type: 'string', pattern: '' },
-    		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
-    		role: { type: 'string', pattern: '', maxLength: 5}
-  		},
 		required: ["passWord", "email"],
->>>>>>> 3b21e07a773cbda43518360abe26e9fa26a96315
 		additionalProperties: true
 	}
 
@@ -41,24 +29,13 @@ const newAccount = (req, res, next) => {
 
 const updateAccount = (req, res, next) => {
 	const shema = {
-<<<<<<< HEAD
 		type: 'object',
 		properties: {
-			userName: { type: 'string', pattern: '' },
 			passWord: { type: 'string', pattern: '' },
 			email: { type: 'string', pattern: '' },
 			phoneNumber: { type: 'string', pattern: '' },
 			role: { type: 'string', pattern: '' }
 		},
-=======
-  		type: 'object',
-  		properties: {
-    		passWord: { type: 'string', pattern: '' },
-    		email: { type: 'string', pattern: '' },
-    		phoneNumber: { type: 'string', pattern: '' },
-    		role: { type: 'string', pattern: '' }
-  		},
->>>>>>> 3b21e07a773cbda43518360abe26e9fa26a96315
 		required: [],
 		additionalProperties: true
 	}
@@ -129,14 +106,9 @@ const newPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-<<<<<<< HEAD
 			accId: { type: 'integer' },
-			accPassword: { type: 'string', pattern: '' }
-=======
-			accId: { type: 'integer'},
-			accPassword: { type: 'string', pattern: '' , minLength: 3 },
+			accPassword: { type: 'string', pattern: '', minLength: 3 },
 			TokenChangePass: { type: 'string', pattern: '' }
->>>>>>> 3b21e07a773cbda43518360abe26e9fa26a96315
 		},
 		required: ["accId", "accPassword", "TokenChangePass"],
 		additionalProperties: false
@@ -475,16 +447,16 @@ const newComment = (req, res, next) => {
 
 const newWareHouse = (req, res, next) => {
 	const shema = {
-  		type: 'object',
-  		properties: {
-			stoAccountId: { type: 'integer'},
+		type: 'object',
+		properties: {
+			stoAccountId: { type: 'integer' },
 			stoProductName: { type: 'string', pattern: '' },
-			stoAmount: { type: 'integer'},
-			stoCategoryId: { type: 'integer'},
+			stoAmount: { type: 'integer' },
+			stoCategoryId: { type: 'integer' },
 			stoOriginPrice: { type: 'string', pattern: '' },
-			stoProductId: { type: 'integer'},
+			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '' }
-  		},
+		},
 		required: ["stoAccountId", "stoCategoryId", "stoProductId"],
 		additionalProperties: true
 	}
@@ -535,21 +507,14 @@ const updateWareHouse = (req, res, next) => {
 }
 const updateRoleAccount = (req, res, next) => {
 	const shema = {
-<<<<<<< HEAD
+
 		type: 'object',
 		properties: {
 			accId: { type: 'integer' },
-			accRole: { type: 'string', pattern: '' },
+			accRole: { type: 'string', pattern: '', maxLength: 5 },
 		},
 		required: ["accId", "accRole"],
-=======
-  		type: 'object',
-  		properties: {
-			accId: { type: 'integer'},
-			accRole: { type: 'string', pattern: '' , maxLength: 5},
-  		},
-		required: ["accId","accRole"],
->>>>>>> 3b21e07a773cbda43518360abe26e9fa26a96315
+
 		additionalProperties: true
 	}
 

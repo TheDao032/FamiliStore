@@ -10,12 +10,15 @@ const env = {
 	APP_SCOPE: process.env.APP_SCOPE || '',
 	APP_REDIRECT_URI: process.env.APP_REDIRECT_URI || 'localhost:3000',
 	mailConfig: {
-		user: process.env.MAIL_USER || 'nguyenthedao69@gmail.com',
-		password: process.env.MAIL_PASSWORD || 'Thedao032'
+		user: process.env.MAIL_USER || '<>@gmail.com',
+		password: process.env.MAIL_PASSWORD || ''
 	},
 	CLOUDINARY_CLOUD_NAME:'default',
 	CLOUDINARY_API_KEY:'default',
 	CLOUDINARY_API_SECRET:'default'
+
+		
+	}
 }
 
 module.exports = env
