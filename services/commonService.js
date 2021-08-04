@@ -28,21 +28,21 @@ module.exports = {
         };
 
         async function upload(image) {
-            console.log(dependentID);
-            console.log(image);
             let result = await streamUploader(image);
             console.log(result.url);
-            
+
             await knex('tbl_product_images').insert({
-				prod_img_product_id: dependentID,
-				prod_img_data: result.url
-			})
-           
+                prod_img_product_id: dependentID,
+                prod_img_data: result.url
+            })
+
         }
 
         upload(image);
     },
-
+    deleteImage: function (image) {
+        cloudStorage.cloudinary.api.delete_resources([image, ''], function (error, result) {});
+    },
     validateImage: function (images) {
         var isValidImage = true
         if (images.length == undefined) {// number of uploaded image is 1
