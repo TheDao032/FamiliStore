@@ -84,9 +84,12 @@ router.post('/register', validation.newAccount, async (req, res) => {
 		acc_updated_date: null
 	}
 
-	await knex('tbl_account').insert(account)
+	const newAccId = await knex('tbl_account')
+	.returning('acc_id')
+	.insert(account)
 	return res.status(200).json({
-		statusCode: successCode
+		statusCode: successCode,
+		accId: newAccId
 	})
 })
 
