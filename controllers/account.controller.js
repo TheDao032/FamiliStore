@@ -45,18 +45,16 @@ router.get('/details/:id', async (req, res) => {
 router.patch('/update', validation.updateAccount, async (req, res) =>{
 	const { picture } = req.files
 	const checkAvatar = picture ? true : false
-	const { accId, accUserName, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
+	const { accId, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
 	let date_ob = new Date()
 
 	const verifying = await knex('tbl_account')
-						.where('acc_username', userName)
-						.whereNot('acc_id', accId)
-						.orWhere('acc_email', accEmail)
+						.where('acc_email', accEmail)
 						.whereNot('acc_id', accId)
 
 	if(verifying.length != 0){
 		return res.status(400).json({
-			errorMessage: 'username or email exist',
+			errorMessage: 'Email exist',
 			statusCode: errorCode
 		})
 	}
@@ -64,7 +62,6 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 	const result = await knex('tbl_account').where('acc_id', accId);
 	const hashPassword = bcrypt.hashSync(accPassWord, 3);
 	const account = {
-		acc_username: checkUserName ? accUserName : result.acc_username,
 		acc_password: checkPassWord ? hashPassword : result.acc_password,
 		acc_email: checkEmail ? accEmail : result.acc_email,
 		acc_phone_number: checkPhoneNumber ? accPhoneNumber : result.acc_phone_number,

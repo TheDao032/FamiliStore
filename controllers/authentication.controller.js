@@ -41,14 +41,14 @@ router.post('/login', validation.login, (req, res) => {
 })
 
 router.post('/register', validation.newAccount, async (req, res) => {
-	const { userName, passWord, email, fullName, phoneNumber, role } = req.body
+	const {passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 
-	// check unique username and email
-	const verifying = await knex('tbl_account').where('acc_username', userName ? userName : '-999999').orWhere('acc_email', email)
+	// check unique email
+	const verifying = await knex('tbl_account').where('acc_email', email)
 	if (verifying.length != 0) {
 		return res.status(400).json({
-			errorMessage: 'username or email existed',
+			errorMessage: 'Email existed',
 			statusCode: errorCode
 		})
 	}
@@ -73,7 +73,6 @@ router.post('/register', validation.newAccount, async (req, res) => {
 
 	// add account
 	const account = {
-		acc_username: userName || null,
 		acc_password: hashPassword,
 		acc_email: email,
 		acc_phone_number: phoneNumber || null,

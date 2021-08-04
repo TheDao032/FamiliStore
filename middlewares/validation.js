@@ -4,7 +4,6 @@ const newAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			userName: { type: 'string', pattern: ''},
     		passWord: { type: 'string', pattern: '' },
     		email: { type: 'string', pattern: '' },
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
@@ -32,7 +31,6 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			userName: { type: 'string', pattern: '' },
     		passWord: { type: 'string', pattern: '' },
     		email: { type: 'string', pattern: '' },
     		phoneNumber: { type: 'string', pattern: '' },

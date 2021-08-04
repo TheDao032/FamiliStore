@@ -18,8 +18,7 @@ const getRole = async (acc_id) => {
 
 
 const authenticate = async (username, password, callback, req, res) => {
-	const result = await knex('tbl_account').where({ acc_username: username, acc_status: 0, acc_token: null })
-		.orWhere({ acc_email: username, acc_status: 0, acc_token: null })
+	const result = await knex('tbl_account').where({ acc_email: username, acc_status: 0, acc_token: null })
 
 	if (result.length === 0) {
 		return res.status(500).json({ 
