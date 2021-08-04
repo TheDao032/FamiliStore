@@ -27,22 +27,24 @@ const verifyToken = (req, res, next) => {
         })
 
     const token = req.headers.authorization
-    return jsonWebToken.verify(token, environment.secret, (err, decode) => {
+    return jsonWebToken.verify(token, environment.secret, async (err, decode) => {
         if (err)
             return res.status(401).json({
                 err,
                 statusCode: 2,
             })
         const account = decode
-        const role_id = authenticationService.getRole(account.acc_id)
+        const role_id = await authenticationService.getRole(account.acc_id)
         
-		if (role === '') {
+		if (role_id === '') {
 			return res.status(401).json({
                 statusCode: 6,
             })
 		}
 		account.acc_role = role_id
         req.account = account
+
+		next()
     })
 }
 

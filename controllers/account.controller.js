@@ -80,7 +80,6 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
 	const result = await knex('tbl_account').del().where('acc_id', id)
-	console.log(result)
 	if(result == 0 ){
 		return res.status(400).json({
 			errorMessage: 'id not exists',

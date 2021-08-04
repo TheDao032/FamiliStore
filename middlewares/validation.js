@@ -132,10 +132,10 @@ const login = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			userName: { type: 'string', pattern: '' },
+			email: { type: 'string', pattern: '' },
 			passWord: { type: 'string', pattern: '', }
 		},
-		required: ["userName", "passWord"],
+		required: ["email", "passWord"],
 		additionalProperties: false
 	}
 

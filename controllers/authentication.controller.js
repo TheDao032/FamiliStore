@@ -16,9 +16,9 @@ const errorCode = 1
 const successCode = 0
 
 router.post('/login', validation.login, (req, res) => {
-	const { userName, passWord } = req.body
+	const { email, passWord } = req.body
 
-	authenticationService.authenticate(userName, passWord, (err, auth = null, user = null) => {
+	authenticationService.authenticate(email, passWord, (err, auth = null, user = null) => {
 		if (err) {
 			res.status(401).json({
 				err,

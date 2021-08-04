@@ -17,8 +17,8 @@ const getRole = async (acc_id) => {
 }
 
 
-const authenticate = async (username, password, callback, req, res) => {
-	const result = await knex('tbl_account').where({ acc_email: username, acc_status: 0, acc_token: null })
+const authenticate = async (email, password, callback, req, res) => {
+	const result = await knex('tbl_account').where({ acc_email: email, acc_status: 0, acc_token: null })
 
 	if (result.length === 0) {
 		return res.status(500).json({ 
@@ -36,7 +36,7 @@ const authenticate = async (username, password, callback, req, res) => {
 
 	const { acc_id, acc_full_name } = result[0]
 	const auth = {
-		username,
+		email,
 		acc_id,
 	}
 	const info = await Promise.all([
@@ -52,7 +52,6 @@ const authenticate = async (username, password, callback, req, res) => {
 	const user = {
 		...info[1]
 	}
-	console.log(user)
 	callback(null, auth, user)
 }
 

@@ -40,7 +40,6 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.tbl_account (
     acc_id integer DEFAULT nextval('public.tbl_account_id_seq'::regclass) NOT NULL,
-    acc_username character varying(100),
     acc_password character varying(100),
     acc_token character varying(100),
     acc_email character varying(100),
@@ -170,7 +169,10 @@ CREATE TABLE public.tbl_comment (
     cmt_content text,
     cmt_product_id integer NOT NULL,
     cmt_vote integer,
-    cmt_status integer DEFAULT 0
+    cmt_status integer DEFAULT 0,
+    cmt_acc_id integer NOT NULL,
+    cmt_create_date date,
+    cmt_update_date date
 );
 
 
@@ -334,7 +336,9 @@ ALTER TABLE public.tbl_ware_house OWNER TO postgres;
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_account (acc_id, acc_username, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date) FROM stdin;
+COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date) FROM stdin;
+2	$2b$04$uYqOlg492ozZ1ynGHaB6zO/FfwwWxqRlLSGsSAIEbslc7XcTmXkIG	$2b$04$PSt7bj6jgXNF.JoA75nFc.L66oVr8TR/0UbwrANStyKlCVvA6kEPC	yiyiboj421@flipssl.com	\N	\N	ADM	\N	2	2021-08-03	\N
+11	$2b$04$ggEUCP14qxjVIO/S4TlQ8OGzlOnyR.XkGis3EcpXUwqKF6.Xb7nui	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-04	2021-08-04
 \.
 
 
@@ -374,7 +378,7 @@ COPY public.tbl_cities (ci_id, ci_name) FROM stdin;
 -- Data for Name: tbl_comment; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_comment (cmt_id, cmt_content, cmt_product_id, cmt_vote, cmt_status) FROM stdin;
+COPY public.tbl_comment (cmt_id, cmt_content, cmt_product_id, cmt_vote, cmt_status, cmt_acc_id, cmt_create_date, cmt_update_date) FROM stdin;
 \.
 
 
@@ -431,7 +435,7 @@ COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount
 -- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_account_id_seq', 1, true);
+SELECT pg_catalog.setval('public.tbl_account_id_seq', 11, true);
 
 
 --
@@ -601,6 +605,14 @@ ALTER TABLE ONLY public.tbl_bill_detail
 
 ALTER TABLE ONLY public.tbl_bill_detail
     ADD CONSTRAINT tbl_bill_detal_bill_id_fkey FOREIGN KEY (bdetail_bill_id) REFERENCES public.tbl_bill(bill_id);
+
+
+--
+-- Name: tbl_comment tbl_cmt_acc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tbl_comment
+    ADD CONSTRAINT tbl_cmt_acc_id_fkey FOREIGN KEY (cmt_acc_id) REFERENCES public.tbl_account(acc_id) NOT VALID;
 
 
 --
