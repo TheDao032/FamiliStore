@@ -483,7 +483,7 @@ const updateRoleAccount = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer'},
-			accRole: { type: 'string', pattern: '' },
+			accRole: { type: 'string', pattern: '' , maxLength: 5},
   		},
 		required: ["accId","accRole"],
 		additionalProperties: true

@@ -57,7 +57,7 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 	if(verifying.length != 0){
 		return res.status(400).json({
 			errorMessage: 'username or email exist',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
@@ -82,7 +82,14 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 
 router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
-	await knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
+	const result = await knex('tbl_account').del().where('acc_id', id)
+	console.log(result)
+	if(result == 0 ){
+		return res.status(400).json({
+			errorMessage: 'id not exists',
+			statusCode: errorCode
+		})
+	}
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -97,13 +104,13 @@ router.post('/update-role', validation.updateRoleAccount, async (req, res) => {
 	if(resultRole.length === 0){
 		return res.status(400).json({
 			errorMessage: 'role not exists',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	if(resultAcc.length === 0){
 		return res.status(400).json({
 			errorMessage: 'account not exists',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	await knex('tbl_account').where('acc_id', accId).update('acc_role', accRole)

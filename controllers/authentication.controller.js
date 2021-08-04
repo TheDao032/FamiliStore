@@ -166,7 +166,7 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'email not exist',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
@@ -200,13 +200,13 @@ router.post('/new-password',validation.newPassword, async (req, res) => {
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exists',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	if(!bcrypt.compareSync(result[0]['acc_token'], TokenChangePass)){
 		return res.status(400).json({
 			errorMessage: 'token chage password wrong',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	const hashPassWord = bcrypt.hashSync(accPassword, 3)
