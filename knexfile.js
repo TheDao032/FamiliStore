@@ -1,7 +1,7 @@
 module.exports = {
   development: {
       client: 'pg',
-      connection: 'postgres://postgres:2705@localhost:5432/FamilyStore_db',
+      connection: 'postgres://postgres:123456@localhost:5433/FamilyStore2_db',
       // migrations: {
       //     directory: __dirname + '/db/migrations',
       //   },

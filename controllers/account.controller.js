@@ -45,26 +45,23 @@ router.get('/details/:id', async (req, res) => {
 router.patch('/update', validation.updateAccount, async (req, res) =>{
 	const { picture } = req.files
 	const checkAvatar = picture ? true : false
-	const { accId, accUserName, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
+	const { accId, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
 	let date_ob = new Date()
 
 	const verifying = await knex('tbl_account')
-						.where('acc_username', userName)
-						.whereNot('acc_id', accId)
-						.orWhere('acc_email', accEmail)
+						.where('acc_email', accEmail)
 						.whereNot('acc_id', accId)
 
 	if(verifying.length != 0){
 		return res.status(400).json({
-			errorMessage: 'username or email exist',
-			code: errorCode
+			errorMessage: 'Email exist',
+			statusCode: errorCode
 		})
 	}
 
 	const result = await knex('tbl_account').where('acc_id', accId);
 	const hashPassword = bcrypt.hashSync(accPassWord, 3);
 	const account = {
-		acc_username: checkUserName ? accUserName : result.acc_username,
 		acc_password: checkPassWord ? hashPassword : result.acc_password,
 		acc_email: checkEmail ? accEmail : result.acc_email,
 		acc_phone_number: checkPhoneNumber ? accPhoneNumber : result.acc_phone_number,
@@ -82,7 +79,14 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 
 router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
-	await knex('tbl_account').where('acc_id', id).update({ acc_status: 1 })
+	const result = await knex('tbl_account').del().where('acc_id', id)
+	console.log(result)
+	if(result == 0 ){
+		return res.status(400).json({
+			errorMessage: 'id not exists',
+			statusCode: errorCode
+		})
+	}
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -97,13 +101,13 @@ router.post('/update-role', validation.updateRoleAccount, async (req, res) => {
 	if(resultRole.length === 0){
 		return res.status(400).json({
 			errorMessage: 'role not exists',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	if(resultAcc.length === 0){
 		return res.status(400).json({
 			errorMessage: 'account not exists',
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 	await knex('tbl_account').where('acc_id', accId).update('acc_role', accRole)
