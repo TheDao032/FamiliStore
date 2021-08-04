@@ -1,7 +1,9 @@
+const environment = require('./environments/environment')
+
 module.exports = {
   development: {
       client: 'pg',
-      connection: 'postgres://postgres:2705@localhost:5432/FamilyStore_db',
+      connection: environment.configDatabase.connectionString,
       // migrations: {
       //     directory: __dirname + '/db/migrations',
       //   },
