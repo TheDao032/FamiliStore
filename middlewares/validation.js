@@ -4,13 +4,13 @@ const newAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			userName: { type: 'string', pattern: '' },
+			userName: { type: 'string', pattern: ''},
     		passWord: { type: 'string', pattern: '' },
     		email: { type: 'string', pattern: '' },
-    		phoneNumber: { type: 'string', pattern: '' },
-    		role: { type: 'string', pattern: '' }
+    		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
+    		role: { type: 'string', pattern: '', maxLength: 5}
   		},
-		required: ["userName", "passWord", "email", "role"],
+		required: ["passWord", "email"],
 		additionalProperties: true
 	}
 
@@ -109,9 +109,10 @@ const newPassword = (req, res, next) => {
 		type: 'object',
 		properties: {
 			accId: { type: 'integer'},
-			accPassword: { type: 'string', pattern: '' }
+			accPassword: { type: 'string', pattern: '' , minLength: 3 },
+			TokenChangePass: { type: 'string', pattern: '' }
 		},
-		required: ["accId", "accPassword"],
+		required: ["accId", "accPassword", "TokenChangePass"],
 		additionalProperties: false
 	}
 

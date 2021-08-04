@@ -36,7 +36,7 @@ const verifyToken = (req, res, next) => {
         const account = decode
         const role_id = authenticationService.getRole(account.acc_id)
         
-		if (role === '') {
+		if (role_id === '') {
 			return res.status(401).json({
                 statusCode: 6,
             })

@@ -45,12 +45,21 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	let dateOb = new Date()
 
 	// check unique username and email
-	const verifying = await knex('tbl_account').where('acc_username', userName).orWhere('acc_email', email)
+	const verifying = await knex('tbl_account').where('acc_username', userName ? userName : '-999999').orWhere('acc_email', email)
 	if (verifying.length != 0) {
 		return res.status(400).json({
 			errorMessage: 'username or email existed',
 			statusCode: errorCode
 		})
+	}
+	if(role){
+		const rowRole = await knex('tbl_roles').where('rol_id', role)
+		if(rowRole.length === 0){
+			return res.status(400).json({
+				errorMessage: 'role not existed',
+				statusCode: errorCode
+			})
+		}
 	}
 
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
@@ -64,13 +73,12 @@ router.post('/register', validation.newAccount, async (req, res) => {
 
 	// add account
 	const account = {
-		acc_id: 2,
-		acc_username: userName,
+		acc_username: userName || null,
 		acc_password: hashPassword,
 		acc_email: email,
 		acc_phone_number: phoneNumber || null,
 		acc_full_name: fullName || null,
-		acc_role: role || null,
+		acc_role: role || 'USER',
 		acc_token: hashToken,
 		acc_avatar: req.files ? req.files.picture.data : null,
 		acc_created_date: dateOb,
@@ -90,6 +98,12 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exist',
+			statusCode: errorCode
+		})
+	}
+	if(result[0].acc_token === null){
+		return res.status(400).json({
+			errorMessage: 'user does not have a verification code',
 			statusCode: errorCode
 		})
 	}
@@ -122,10 +136,27 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 			statusCode: errorCode
 		})
 	})
-
+	if(accToken.length === 5){
+		return res.status(200).json({
+		statusCode: successCode
+		})
+	}
+	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
+	const hashToken = bcrypt.hashSync(token, 3)
+	const updateAccount = {
+		acc_token: token
+	}
+	await knex('tbl_account').where('acc_id', accId).update(updateAccount).catch((error) => {
+		return res.status(500).json({
+			errorMessage: error,
+			statusCode: errorCode
+		})
+	})
 	return res.status(200).json({
+		tokenChangePass: hashToken,
 		statusCode: successCode
 	})
+	
 })
 
 router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
@@ -163,18 +194,25 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 })
 
 router.post('/new-password',validation.newPassword, async (req, res) => {
-	const { accId, accPassWord }  = req.body
+	const { accId, accPassword, TokenChangePass }  = req.body
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)
 	if (result.length === 0) {
 		return res.status(400).json({
-			errorMessage: 'id not exist',
+			errorMessage: 'id not exists',
 			code: errorCode
 		})
 	}
-	const hashPassword = bcrypt.hashSync(accPassWord, 3)
+	if(!bcrypt.compareSync(result[0]['acc_token'], TokenChangePass)){
+		return res.status(400).json({
+			errorMessage: 'token chage password wrong',
+			code: errorCode
+		})
+	}
+	const hashPassWord = bcrypt.hashSync(accPassword, 3)
 	const account = {
-		acc_password: hashPassword,
+		acc_password: hashPassWord,
+		acc_token: null,
 		acc_updated_date: dateOb
 	}
 
