@@ -85,8 +85,10 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	}
 
 	await knex('tbl_account').insert(account)
+	const acc_id = await knex('tbl_account').where('acc_email', email).select('acc_id')
 	return res.status(200).json({
-		statusCode: successCode
+		statusCode: successCode,
+		accId: acc_id[0].acc_id
 	})
 })
 
@@ -124,7 +126,7 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 	}
 	else{
 		account = {
-			acc_token: null,
+			acc_tokenForgot: null,
 			acc_updated_date: dateOb
 		}
 	}
@@ -137,20 +139,24 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 	})
 	if(accToken.length === 5){
 		return res.status(200).json({
-		statusCode: successCode
+			statusCode: successCode
 		})
 	}
+
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 	const hashToken = bcrypt.hashSync(token, 3)
 	const updateAccount = {
 		acc_token: token
 	}
+
 	await knex('tbl_account').where('acc_id', accId).update(updateAccount).catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
 			statusCode: errorCode
 		})
 	})
+
+	
 	return res.status(200).json({
 		tokenChangePass: hashToken,
 		statusCode: successCode
