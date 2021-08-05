@@ -3,7 +3,6 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const validation = require('../middlewares/validation')
-// const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 
 const successCode = 0

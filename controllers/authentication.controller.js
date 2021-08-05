@@ -87,9 +87,10 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	const newAccId = await knex('tbl_account')
 	.returning('acc_id')
 	.insert(account)
+
 	return res.status(200).json({
 		statusCode: successCode,
-		accId: newAccId
+		accId: newAccId[0]
 	})
 })
 
@@ -180,7 +181,8 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	
 	const account = {
 		acc_token: hashToken,
-		acc_updated_date: dateOb
+		acc_updated_date: dateOb,
+		acc_status: 2,
 	}
 	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account).catch((error) => {
 		return res.status(500).json({
