@@ -8,7 +8,7 @@ const errorCode = 1
 
 
 
-router.get('/list-best-sale-per-week', async (req, res) => {
+router.get('/list-best-sale', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
@@ -36,33 +36,7 @@ router.get('/list-best-sale-per-week', async (req, res) => {
 
 })
 
-router.get('/list-best-sale-per-month', async (req, res) => {
-	const { catID } = req.params
 
-	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
-		return res.status(400).json({
-			message: "Category is not valid"
-		})
-	}
-
-
-	var result = await knex.from('tbl_product')
-		.where('prod_category_id', catID)
-	if (result) {
-		return res.status(200).json({
-			listProduct: result,
-			statusCode: successCode
-		})
-	}
-	else {
-		return res.status(500).json({
-			listProduct: [],
-			statusCode: errorCode
-		})
-	}
-
-})
 
 router.get('/list-best-price', async (req, res) => {
 	const { catID } = req.params
@@ -92,37 +66,37 @@ router.get('/list-best-price', async (req, res) => {
 
 })
 
+
+router.get('/list-suggestion', async (req, res) => {
+	const { catID } = req.params
+
+	var cat = await knex('tbl_categories').where('cate_id', catID)
+	if (cat.length == 0) {
+		return res.status(400).json({
+			message: "Category is not valid"
+		})
+	}
+
+
+	var result = await knex.from('tbl_product')
+		.where('prod_category_id', catID)
+	if (result) {
+		return res.status(200).json({
+			listProduct: result,
+			statusCode: successCode
+		})
+	}
+	else {
+		return res.status(500).json({
+			listProduct: [],
+			statusCode: errorCode
+		})
+	}
+
+})
+
 router.get('/list-by-cat/:catID', async (req, res) => {
 	const { catID } = req.params
-	console.log(catID)
-	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
-		return res.status(400).json({
-			message: "Category is not valid"
-		})
-	}
-
-
-	var result = await knex.from('tbl_product')
-		.where('prod_category_id', catID)
-	if (result) {
-		return res.status(200).json({
-			listProduct: result,
-			statusCode: successCode
-		})
-	}
-	else {
-		return res.status(500).json({
-			listProduct: [],
-			statusCode: errorCode
-		})
-	}
-
-})
-
-
-router.get('/list-suggest', async (req, res) => {
-	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
 	if (cat.length == 0) {
@@ -148,9 +122,65 @@ router.get('/list-suggest', async (req, res) => {
 	}
 
 })
+
+
 
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
+
+	var prod = await knex('tbl_product')
+		.where('prod_id', id)
+
+	if (prod.length === 0) {
+		var errorMessage = " Product record doesn't exist!"
+
+		return res.status(400).json({
+			message: errorMessage,
+			statusCode: 1
+		})
+	}
+
+	var prodObject = {}
+	const prodResult = await knex.from('tbl_product')
+		.where('prod_id', id)
+		.returning('*')
+		.then(async (rows) => {
+			prodObject = rows[0];
+			var imageResult = await knex.from('tbl_product_images')
+				.where('prod_img_product_id', prodObject.prod_id);
+			prodObject['prod_img'] = imageResult.map(attr => attr.prod_img_data);
+			console.log(prodObject)
+		})
+	if (prodObject) {
+		return res.status(200).json({
+			//listProductDetail: result,
+			statusCode: successCode
+		})
+	}
+
+	return res.status(500).json({
+		listProductDetail: [],
+		statusCode: errorCode
+	})
+})
+
+router.get('/get', async (req, res) => {
+	const { id } = req.params
+
+	var prod = await knex('tbl_product')
+		.where('prod_name', prodName)
+		.andWhere('prod_category_id', id)
+
+	if (prod.length !== 0) {
+		errorMessage = errorMessage + " Product record exists!"
+		return res.status(400).json({
+			message: errorMessage,
+			statusCode: errorCode
+		})
+
+	}
+
+
 	const result = await knex.from('tbl_product')
 		.join('tbl_categories', 'tbl_product.prod_category_id', '=', 'tbl_categories.cate_id')
 		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
@@ -172,10 +202,12 @@ router.get('/details/:id', async (req, res) => {
 router.post('/add', async (req, res) => {
 
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus } = req.body
-	console.log(req.body);
+	var images = req.files //need to get image from input type file, name is 'image'
+
 	var errorMessage = "";
+
 	//validate field
-	if (prodName == '' || prodCategoryID == '' || prodAmount == '' || prodPrice == '' || prodStatus == '') {
+	if (prodName == '' || prodCategoryID == '' || prodAmount == '' || prodPrice == '') {
 		//catch error
 		errorMessage = errorMessage + ' Some fields are blank!'
 	}
@@ -193,30 +225,36 @@ router.post('/add', async (req, res) => {
 	if (cat.length === 0) {
 		errorMessage = errorMessage + " Wrong category!"
 	}
+
 	//validate image
-	const images = req.files.image
+	if (images == null) {
+		errorMessage = errorMessage + ' Product needs to contain image!'
+	}
+	else {
+		var images = images.image
 
-	var isValidImage = commonService.validateImage(images)
-	var isValidNumberOfFile = commonService.validateNumberOfFiles(images)
+		var isValidImage = commonService.validateImage(images)
 
-	if (!isValidImage)
-		errorMessage = errorMessage + "Invalid image!"
-	if (!isValidNumberOfFile)
-		errorMessage = errorMessage + " Invalid number of files!"
+		var isValidNumberOfFile = commonService.validateNumberOfFiles(images)
 
+		if (!isValidImage)
+			errorMessage = errorMessage + "Invalid image!"
+		if (!isValidNumberOfFile)
+			errorMessage = errorMessage + " Invalid number of files!"
+	}
+	console.log(errorMessage)
 	if (errorMessage !== "") {
 		return res.status(400).json({
 			message: errorMessage,
 			statusCode: errorCode
 		})
 	}
-
 	await knex('tbl_product').insert({
 		prod_name: prodName,
 		prod_category_id: prodCategoryID,
 		prod_amount: prodAmount,
 		prod_price: prodPrice,
-		prod_status: prodStatus,
+		prod_status: 1,
 		prod_created_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	})
 		.returning('*')
@@ -299,17 +337,17 @@ router.post('/delete/:id', async (req, res) => {
 	const { id } = req.params
 	var prod = await knex('tbl_product')
 		.where('prod_id', id)
-		
+
 	if (prod.length === 0) {
 		var errorMessage = " Product record doesn't exist!"
 
 		return res.status(400).json({
-			message:errorMessage,
+			message: errorMessage,
 			statusCode: 1
 		})
 	}
 
-	
+
 	//delete image of product
 	await knex('tbl_product_images').where('prod_img_product_id', id).del()
 		.returning('*')
@@ -322,9 +360,9 @@ router.post('/delete/:id', async (req, res) => {
 			}
 
 		})
-	
+
 	//delete product
-	
+
 	await knex('tbl_product').where('prod_id', id).del().catch((error) => {
 		return res.status(500).json({
 			errorMessage: error,
@@ -332,7 +370,7 @@ router.post('/delete/:id', async (req, res) => {
 		})
 	})
 
-	
+
 	return res.status(200).json({
 		statusCode: successCode
 	})

@@ -12,7 +12,6 @@ function imageValidator(image) {
 module.exports = {
     ImageUploader: function (image, dependentID) {
         let streamUploader = function (image) {
-            console.log(image);
             return new Promise(function (resolve, reject) {
                 let stream = cloudStorage.cloudinary.uploader.upload_stream(
                     function (error, result) {
