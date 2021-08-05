@@ -94,16 +94,19 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	})
 })
 
-router.post('/verification-email', validation.comfirmToken, async (req, res) => {
+router.post('/verification-email', validation.confirmToken, async (req, res) => {
 	const { accId, accToken }  = req.body
+
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)
+
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exist',
 			statusCode: errorCode
 		})
 	}
+
 	if(result[0].acc_token === null){
 		return res.status(400).json({
 			errorMessage: 'user does not have a verification code',
@@ -113,7 +116,7 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 
 	if (!bcrypt.compareSync(accToken, result[0]['acc_token'])) {
 		return res.status(400).json({
-			errorMessage: 'verify email faill',
+			errorMessage: 'verify email fail',
 			statusCode: errorCode
 		})
 	}
@@ -124,28 +127,27 @@ router.post('/verification-email', validation.comfirmToken, async (req, res) => 
 		acc_updated_date: dateOb
 	}
 	
-	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	await knex('tbl_account').where('acc_id', accId).update(account)
+
 	return res.status(200).json({
 		statusCode: successCode
 	})
 	
 })
 
-router.post('/verification-forgot', validation.comfirmToken, async (req, res) => {
+router.post('/verification-forgot', validation.confirmToken, async (req, res) => {
 	const { accId, accToken }  = req.body
+
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)
+
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exist',
 			statusCode: errorCode
 		})
 	}
+
 	if(result[0].acc_token_forgot === null){
 		return res.status(400).json({
 			errorMessage: 'user does not have a verification code',
@@ -165,12 +167,7 @@ router.post('/verification-forgot', validation.comfirmToken, async (req, res) =>
 		acc_updated_date: dateOb
 	}
 	
-	await knex('tbl_account').where('acc_id', accId).update(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	await knex('tbl_account').where('acc_id', accId).update(account)
 
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 	const hashToken = bcrypt.hashSync(token, 3)
@@ -178,12 +175,7 @@ router.post('/verification-forgot', validation.comfirmToken, async (req, res) =>
 		acc_token_forgot: token
 	}
 
-	await knex('tbl_account').where('acc_id', accId).update(updateAccount).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	await knex('tbl_account').where('acc_id', accId).update(updateAccount)
 
 	return res.status(200).json({
 		tokenChangePass: hashToken,
@@ -193,8 +185,10 @@ router.post('/verification-forgot', validation.comfirmToken, async (req, res) =>
 
 router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	const { email }  = req.body
+
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_email', email)
+
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'email not exist',
@@ -212,12 +206,7 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 		acc_token_forgot: hashToken,
 		acc_updated_date: dateOb
 	}
-	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account)
 
 	return res.status(200).json({
 		statusCode: successCode,
@@ -226,21 +215,25 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 })
 
 router.post('/new-password',validation.newPassword, async (req, res) => {
-	const { accId, accPassword, TokenChangePass }  = req.body
+	const { accId, accPassword, tokenChangePass }  = req.body
+
 	let dateOb = new Date()
 	const result = await knex.from('tbl_account').where('acc_id', accId)
+
 	if (result.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'id not exists',
 			statusCode: errorCode
 		})
 	}
-	if(!bcrypt.compareSync(result[0]['acc_token_forgot'], TokenChangePass)){
+
+	if(!bcrypt.compareSync(result[0]['acc_token_forgot'], tokenChangePass)){
 		return res.status(400).json({
 			errorMessage: 'token chage password wrong',
 			statusCode: errorCode
 		})
 	}
+
 	const hashPassWord = bcrypt.hashSync(accPassword, 3)
 	const account = {
 		acc_password: hashPassWord,
@@ -249,6 +242,7 @@ router.post('/new-password',validation.newPassword, async (req, res) => {
 	}
 
 	await knex('tbl_account').where('acc_id', accId).update(account)
+	
 	return res.status(200).json({
 		statusCode: successCode
 	})

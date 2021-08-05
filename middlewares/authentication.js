@@ -23,7 +23,7 @@ const verifyToken = (req, res, next) => {
     if (!req.headers || !req.headers.authorization)
         return res.status(401).json({
             err: 'Unauthorized User!',
-            code: 3, //
+            statusCode: 3, //
         })
 
     const token = req.headers.authorization
@@ -78,7 +78,7 @@ function saveValuesToCookie(token, res) {
 async function getTokenFromCode(auth_code, res) {
 	const client = new AuthorizationCode(config);
 	const result = await client.getToken({
-		code: auth_code,
+		statusCode: auth_code,
 		redirect_uri: environment.APP_REDIRECT_URI,
 		scope: environment.APP_SCOPE
 	})
