@@ -75,7 +75,7 @@ router.post('/add', async (req, res) => {
 		await knex('tbl_bill_detail').insert(newBillDetail)
 	})
 })
-router.get('/:id', async (req, res) => {
+router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 	
 	const result = await knex('tbl_bill').where('bill_id', id)

@@ -423,7 +423,7 @@ const newWareHouse = (req, res, next) => {
 			stoAccountId: { type: 'integer'},
 			stoProductName: { type: 'string', pattern: '' },
 			stoAmount: { type: 'integer'},
-			stoCategoryId: { type: 'integer'},
+			stoCategoryId: { type: 'string', pattern: ''},
 			stoOriginPrice: { type: 'string', pattern: '' },
 			stoProductId: { type: 'integer'},
 			cost: { type: 'string', pattern: '' }
@@ -431,7 +431,6 @@ const newWareHouse = (req, res, next) => {
 		required: ["stoAccountId", "stoCategoryId", "stoProductId"],
 		additionalProperties: true
 	}
-
 	const ajv = new ajvLib({
 		allErrors: true
 	})
@@ -453,8 +452,8 @@ const updateWareHouse = (req, res, next) => {
 			stoId: { type: 'integer'},
 			stoAccountId: { type: 'integer'},
 			stoProductName: { type: 'string', pattern: '' },
-			stoAmount: { type: 'integer'},
-			stoCategoryId: { type: 'integer'},
+			stoAmount: { type: 'integer',},
+			stoCategoryId: { type: 'string', pattern: '' },
 			stoOriginPrice: { type: 'string', pattern: '' },
 			stoProductId: { type: 'integer'},
 			cost: { type: 'string', pattern: '' }
