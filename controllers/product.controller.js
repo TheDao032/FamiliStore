@@ -6,6 +6,40 @@ const commonService = require('../services/commonService')
 const successCode = 0
 const errorCode = 1
 
+router.get('/list', async (req, res) => {
+	const { id } = req.params
+
+	var prod = await knex('tbl_product')
+		.where('prod_name', prodName)
+		.andWhere('prod_category_id', id)
+
+	if (prod.length !== 0) {
+		errorMessage = errorMessage + " Product record exists!"
+		return res.status(400).json({
+			message: errorMessage,
+			statusCode: errorCode
+		})
+
+	}
+
+
+	const result = await knex.from('tbl_product')
+		.join('tbl_categories', 'tbl_product.prod_category_id', '=', 'tbl_categories.cate_id')
+		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
+		.where('prod_id', id)
+
+	if (result) {
+		return res.status(200).json({
+			listProductDetail: result,
+			statusCode: successCode
+		})
+	}
+
+	return res.status(500).json({
+		listProductDetail: [],
+		statusCode: errorCode
+	})
+})
 
 
 router.get('/list-best-sale', async (req, res) => {
@@ -164,40 +198,6 @@ router.get('/details/:id', async (req, res) => {
 	})
 })
 
-router.get('/get', async (req, res) => {
-	const { id } = req.params
-
-	var prod = await knex('tbl_product')
-		.where('prod_name', prodName)
-		.andWhere('prod_category_id', id)
-
-	if (prod.length !== 0) {
-		errorMessage = errorMessage + " Product record exists!"
-		return res.status(400).json({
-			message: errorMessage,
-			statusCode: errorCode
-		})
-
-	}
-
-
-	const result = await knex.from('tbl_product')
-		.join('tbl_categories', 'tbl_product.prod_category_id', '=', 'tbl_categories.cate_id')
-		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
-		.where('prod_id', id)
-
-	if (result) {
-		return res.status(200).json({
-			listProductDetail: result,
-			statusCode: successCode
-		})
-	}
-
-	return res.status(500).json({
-		listProductDetail: [],
-		statusCode: errorCode
-	})
-})
 
 router.post('/add', async (req, res) => {
 
@@ -227,28 +227,21 @@ router.post('/add', async (req, res) => {
 	}
 
 	//validate image
-	if (images == null) {
-		errorMessage = errorMessage + ' Product needs to contain image!'
+	var errorFromValidateImage = commonService.validateValidImage(images)
+
+	if (errorFromValidateImage !== '') {
+		errorMessage = errorMessage + errorFromValidateImage
 	}
-	else {
-		var images = images.image
 
-		var isValidImage = commonService.validateImage(images)
-
-		var isValidNumberOfFile = commonService.validateNumberOfFiles(images)
-
-		if (!isValidImage)
-			errorMessage = errorMessage + "Invalid image!"
-		if (!isValidNumberOfFile)
-			errorMessage = errorMessage + " Invalid number of files!"
-	}
-	console.log(errorMessage)
 	if (errorMessage !== "") {
 		return res.status(400).json({
 			message: errorMessage,
 			statusCode: errorCode
 		})
 	}
+
+	images = commonService.getImage(images)
+
 	await knex('tbl_product').insert({
 		prod_name: prodName,
 		prod_category_id: prodCategoryID,
@@ -261,11 +254,11 @@ router.post('/add', async (req, res) => {
 		.then(async (rows) => {
 
 			if (images.length == undefined) {// number of uploaded image is 1
-				await commonService.ImageUploader(images, rows[0].prod_id)
+				await commonService.ImageUploader(images, rows[0].prod_id, 'insert')
 			}
 			else {
 				for (let i = 0; i < images.length; i++) {
-					await commonService.ImageUploader(images[i], rows[0].prod_id)
+					await commonService.ImageUploader(images[i], rows[0].prod_id, 'insert')
 				}
 			}
 		})
@@ -295,12 +288,13 @@ router.post('/update/:id', async (req, res) => {
 		.where('cate_id', prodCategoryID)
 
 	if (cat.length === 0) {
-		errorMessage =  " Category doesn't exists!"
+		errorMessage = " Category doesn't exists!"
 	}
 
 	if (prod.length !== 0) {
 		errorMessage = errorMessage + " Product record with the same name exists!"
 	}
+
 	if (errorMessage !== '') {
 		return res.status(400).json({
 			message: errorMessage,
@@ -312,9 +306,9 @@ router.post('/update/:id', async (req, res) => {
 		.where('prod_id', id)
 		.update({
 			prod_name: typeof prodName !== 'undefined' ? prodName : prod.prod_name,
-			prod_category_id:typeof  prodCategoryID !== 'undefined' ? prodCategoryID : prod.prod_category_id,
-			prod_amount: typeof  prodAmount !== 'undefined' ? prodAmount : prod.prod_amount,
-			prod_price: typeof  prodPrice !== 'undefined' ? prodPrice : prod.prod_price,
+			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : prod.prod_category_id,
+			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : prod.prod_amount,
+			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : prod.prod_price,
 			prod_status: 1,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
 		})
@@ -334,32 +328,66 @@ router.post('/update/:id', async (req, res) => {
 router.post('/update-image/:id', async (req, res) => {
 	const { id } = req.params // product id
 
+	const { imageName } = req.body //string of old images name
+
+	var images = req.files //get file from req.files.image
+
+	var imagesNameArray = imageName.split(",")
+
+	var errorMessage = ''
+
 	var result = await knex.from('tbl_product')
 		.where('prod_id', id)
+
 	if (result.length === 0) {
+		errorMessage = errorMessage + " Product record doesn't exist!"
+	}
+
+	//validate image
+	var errorFromValidateImage = commonService.validateValidImage(images)
+
+	if (errorFromValidateImage !== '') {
+		errorMessage = errorMessage + errorFromValidateImage
+	}
+	//validate old image & new image length
+	var newImageLength = commonService.getImageLength(images.image)
+	var oldimageLength = imagesNameArray.length
+
+	if (newImageLength !== oldimageLength) {
+		errorMessage = errorMessage + " Old image links and new uploaded image doesn't have the consistency about length!"
+	}
+
+	if (errorMessage !== '') {
 		return res.status(400).json({
-			errorMessage: "Product record doesn't exists!",
+			message: errorMessage,
 			code: errorCode
 		})
 	}
 
-	await knex('tbl_product')
-		.where('prod_id', id)
-		.update({
-			prod_name: prodName,
-			prod_category_id: prodCategoryID,
-			prod_amount: prodAmount,
-			prod_price: prodPrice,
-			prod_status: prodStatus,
-			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
-		})
-		.catch((err) => {
-			return res.status(500).json({
-				errorMessage: error,
-				statusCode: errorCode
-			})
+	images = commonService.getImage(images)
 
-		})
+	//uploadd image
+
+	if (images.length == undefined) {// number of uploaded image is 1
+		//upload new image
+		await commonService.ImageUploader(images, id, 'update', imagesNameArray[0])
+		//delete old image
+	}
+	else {
+		for (let i = 0; i < newImageLength; i++) {
+			//upload new image and delete old image on cloud
+			let promiseToUploadImage = new Promise(async function (resolve){
+				await commonService.ImageUploader(images[i], id, 'update', imagesNameArray[i])
+				resolve();
+			})
+			promiseToUploadImage.then(function(){
+				commonService.deleteImage(imagesNameArray[i])
+			})
+			
+		}
+	}
+
+
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -386,10 +414,7 @@ router.post('/delete/:id', async (req, res) => {
 		.returning('*')
 		.then((deleted) => {
 			for (let i = 0; i < deleted.length; i++) {
-				var link = deleted[i].prod_img_data.split('/')
-				link = link[link.length - 1].split(".")
-				link = link[0]
-				commonService.deleteImage(link);
+				commonService.deleteImage(deleted[i].prod_img_data);
 			}
 
 		})
