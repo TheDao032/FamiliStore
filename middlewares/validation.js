@@ -31,7 +31,6 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		passWord: { type: 'string', pattern: '' },
     		email: { type: 'string', pattern: '' },
     		phoneNumber: { type: 'string', pattern: '' },
     		role: { type: 'string', pattern: '' }
@@ -54,7 +53,7 @@ const updateAccount = (req, res, next) => {
 	next()
 }
 
-const comfirmToken = (req, res, next) => {
+const confirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
@@ -108,9 +107,9 @@ const newPassword = (req, res, next) => {
 		properties: {
 			accId: { type: 'integer'},
 			accPassword: { type: 'string', pattern: '' , minLength: 3 },
-			TokenChangePass: { type: 'string', pattern: '' }
+			tokenChangePass: { type: 'string', pattern: '' }
 		},
-		required: ["accId", "accPassword", "TokenChangePass"],
+		required: ["accId", "accPassword", "tokenChangePass"],
 		additionalProperties: false
 	}
 
@@ -499,10 +498,37 @@ const updateRoleAccount = (req, res, next) => {
 
 	next()
 }
+
+const updateAccountPassword = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+		  accId: { type: 'integer'},
+		  accPassword: { type: 'string', pattern: ''},
+		  accConfirmPassword: { type: 'string', pattern: ''},
+		},
+	  	required: ["accId","accPassword", "accConfirmPassword"],
+	  	additionalProperties: true
+  	}
+
+  	const ajv = new ajvLib({
+	  	allErrors: true
+  	})
+
+  	const validator = ajv.compile(shema)
+  	const valid = validator(req.body)
+
+  	if (!valid) {
+	  	return res.status(400).json(validator.errors)
+  	}
+
+ 	next()
+}
+
 module.exports = {
 	newAccount,
 	updateAccount,
-	comfirmToken,
+	confirmToken,
 	forgotPassword,
 	newPassword,
 	login,
@@ -518,5 +544,6 @@ module.exports = {
 	newDelivery,
 	newWareHouse,
 	updateWareHouse,
-	updateRoleAccount
+	updateRoleAccount,
+	updateAccountPassword
 }

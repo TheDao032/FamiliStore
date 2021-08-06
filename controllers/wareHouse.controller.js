@@ -61,12 +61,7 @@ router.post('/add', validation.newWareHouse, async (req, res) => {
         sto_product_id: stoProductId,
         cost: cost || null
     }
-	await knex('tbl_ware_house').insert(wareHouse).catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})  
+	await knex('tbl_ware_house').insert(wareHouse)
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -75,12 +70,9 @@ router.post('/add', validation.newWareHouse, async (req, res) => {
 
 router.post('/delete/:id', async (req, res) => {
 	const { id } = req.params
-	const result = await knex('tbl_ware_house').where('sto_id', id).del().catch((error) => {
-		return res.status(500).json({
-			errorMessage: error,
-			statusCode: errorCode
-		})
-	})
+
+	const result = await knex('tbl_ware_house').where('sto_id', id).update({ sto_status: 1 })
+
 	if(result === 0){
 		return res.status(400).json({
 			errorMessage: 'id not exists',
@@ -101,18 +93,20 @@ router.post('/update',validation.updateWareHouse, async (req, res) => {
 	const product = await knex.from('tbl_product').where('prod_id', stoProductId)
 	const cwareHouse = await knex.from('tbl_ware_house').where('sto_id', stoId)
 	
-	if(account.length === 0 || cate.length === 0 || product.length === 0){
+	if (account.length === 0 || cate.length === 0 || product.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'account or product or category id not exists',
 			statusCode: errorCode
 		})
 	}
-	if(cwareHouse.length ===0 ){
+
+	if (cwareHouse.length ===0) {
 		return res.status(400).json({
 			errorMessage: 'id ware house not exists',
 			statusCode: errorCode
 		})
 	}
+	
     const wareHouse = {
         sto_account_id: stoAccountId && stoAccountId != '' ? stoAccountId : null,
         sto_product_name: stoProductName && stoProductName != '' ? stoProductName : null,
@@ -125,12 +119,6 @@ router.post('/update',validation.updateWareHouse, async (req, res) => {
     }
 	await knex('tbl_ware_house').where('sto_id', stoId)
 		.update(wareHouse)
-		.catch((err) => {
-		return res.status(500).json({
-			errorMessage: err,
-			statusCode: errorCode
-		})
-	})
 	
 	return res.status(200).json({
 		statusCode: successCode
