@@ -3,7 +3,6 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const validation = require('../middlewares/validation')
-// const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 
 const successCode = 0
@@ -42,17 +41,18 @@ router.get('/details/:id', async (req, res) => {
 	})
 })
 
-router.patch('/update', validation.updateAccount, async (req, res) =>{
+router.patch('/update', validation.updateAccount, async (req, res) => {
 	const { picture } = req.files
 	const checkAvatar = picture ? true : false
-	const { accId, accPassWord, accEmail, accPhoneNumber, accFullName, accRole } = req.body
+	const { accId, accEmail, accPhoneNumber, accFullName, accRole } = req.body
+	
 	let date_ob = new Date()
 
 	const verifying = await knex('tbl_account')
 						.where('acc_email', accEmail)
 						.whereNot('acc_id', accId)
 
-	if(verifying.length != 0){
+	if (verifying.length != 0) {
 		return res.status(400).json({
 			errorMessage: 'Email exist',
 			statusCode: errorCode
@@ -60,14 +60,47 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 	}
 
 	const result = await knex('tbl_account').where('acc_id', accId);
+
+	const account = {
+		acc_email:  accEmail ? accEmail : result.acc_email,
+		acc_phone_number: accPhoneNumber ? accPhoneNumber : result.acc_phone_number,
+		acc_full_name: accFullName ? accFullName : result.acc_full_name,
+		acc_role: accRole ? accRole : result.acc_role,
+		acc_avatar: checkAvatar ? picture.data : result.acc_avatar,
+		acc_updated_date: date_ob
+	};
+	await knex('tbl_account').where('acc_id', accId).update(account)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.patch('/update-password', validation.updateAccountPassword, async (req, res) => {
+	const { accId, accPassWord, accConfirmPassword } = req.body
+
+	if (accPassWord !== accConfirmPassword) {
+		return res.status(400).json({
+			errorMessage: 'password is different from confirm password',
+			statusCode: errorCode
+		})
+	}
+
+	let date_ob = new Date()
+
+	const result = await knex('tbl_account')
+						.where('acc_id', accId)
+
+	if(result.length != 0){
+		return res.status(400).json({
+			errorMessage: 'account not exist',
+			statusCode: errorCode
+		})
+	}
+
 	const hashPassword = bcrypt.hashSync(accPassWord, 3);
 	const account = {
-		acc_password: checkPassWord ? hashPassword : result.acc_password,
-		acc_email: checkEmail ? accEmail : result.acc_email,
-		acc_phone_number: checkPhoneNumber ? accPhoneNumber : result.acc_phone_number,
-		acc_full_name: checkFullName ? accFullName : result.acc_full_name,
-		acc_role: checkRole ? accRole : result.acc_role,
-		acc_avatar: checkAvatar ? picture.data : result.acc_avatar,
+		acc_password: hashPassword,
 		acc_updated_date: date_ob
 	};
 	await knex('tbl_account').where('acc_id', accId).update(account)
@@ -79,13 +112,10 @@ router.patch('/update', validation.updateAccount, async (req, res) =>{
 
 router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
-	const result = await knex('tbl_account').del().where('acc_id', id)
-	if(result == 0 ){
-		return res.status(400).json({
-			errorMessage: 'id not exists',
-			statusCode: errorCode
-		})
-	}
+
+	await knex('tbl_account')
+		.update({ acc_status: 1 })
+		.where('acc_id', id)
 
 	return res.status(200).json({
 		statusCode: successCode

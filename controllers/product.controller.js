@@ -283,43 +283,40 @@ router.post('/add', async (req, res) => {
 
 })
 router.post('/update/:id', async (req, res) => {
-	const { prodName, prodCategoryID, prodAmount, prodPrice, prodStatus, prodImgData, prodImgStatus } = req.body
+	const { prodName, prodCategoryID, prodAmount, prodPrice } = req.body
+	const { id } = req.params
 
+	var errorMessage = ''
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
 		.andWhere('prod_category_id', prodCategoryID)
 
+	var cat = await knex('tbl_categories')
+		.where('cate_id', prodCategoryID)
+
+	if (cat.length === 0) {
+		errorMessage =  " Category doesn't exists!"
+	}
+
 	if (prod.length !== 0) {
+		errorMessage = errorMessage + " Product record with the same name exists!"
+	}
+	if (errorMessage !== '') {
 		return res.status(400).json({
-			errorMessage: 'invalid update action',
+			message: errorMessage,
 			code: errorCode
 		})
 	}
 
-	const { id } = req.params
 	await knex('tbl_product')
 		.where('prod_id', id)
 		.update({
-			prod_name: prodName,
-			prod_category_id: prodCategoryID,
-			prod_amount: prodAmount,
-			prod_price: prodPrice,
-			prod_status: prodStatus,
+			prod_name: typeof prodName !== 'undefined' ? prodName : prod.prod_name,
+			prod_category_id:typeof  prodCategoryID !== 'undefined' ? prodCategoryID : prod.prod_category_id,
+			prod_amount: typeof  prodAmount !== 'undefined' ? prodAmount : prod.prod_amount,
+			prod_price: typeof  prodPrice !== 'undefined' ? prodPrice : prod.prod_price,
+			prod_status: 1,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
-		})
-		.then(async (rows) => {
-			if (!rows) {
-
-				return res.status(404).json({ success: false });
-			}
-
-			await knex('tbl_product_images')
-				.where('prod_img_product_id', id)
-				.update({
-					prod_img_data: prodImgData,
-					prod_img_status: prodImgStatus
-				})
-
 		})
 		.catch((err) => {
 			return res.status(500).json({
@@ -333,6 +330,42 @@ router.post('/update/:id', async (req, res) => {
 		statusCode: successCode
 	})
 })
+
+router.post('/update-image/:id', async (req, res) => {
+	const { id } = req.params // product id
+
+	var result = await knex.from('tbl_product')
+		.where('prod_id', id)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: "Product record doesn't exists!",
+			code: errorCode
+		})
+	}
+
+	await knex('tbl_product')
+		.where('prod_id', id)
+		.update({
+			prod_name: prodName,
+			prod_category_id: prodCategoryID,
+			prod_amount: prodAmount,
+			prod_price: prodPrice,
+			prod_status: prodStatus,
+			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
+		})
+		.catch((err) => {
+			return res.status(500).json({
+				errorMessage: error,
+				statusCode: errorCode
+			})
+
+		})
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
 router.post('/delete/:id', async (req, res) => {
 	const { id } = req.params
 	var prod = await knex('tbl_product')

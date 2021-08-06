@@ -29,13 +29,13 @@ const newAccount = (req, res, next) => {
 
 const updateAccount = (req, res, next) => {
 	const shema = {
-		type: 'object',
-		properties: {
-			passWord: { type: 'string', pattern: '' },
-			email: { type: 'string', pattern: '' },
-			phoneNumber: { type: 'string', pattern: '' },
-			role: { type: 'string', pattern: '' }
-		},
+  		type: 'object',
+  		properties: {
+    		email: { type: 'string', pattern: '' },
+    		phoneNumber: { type: 'string', pattern: '' },
+    		role: { type: 'string', pattern: '' }
+  		},
+
 		required: [],
 		additionalProperties: true
 	}
@@ -54,7 +54,7 @@ const updateAccount = (req, res, next) => {
 	next()
 }
 
-const comfirmToken = (req, res, next) => {
+const confirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
@@ -106,11 +106,11 @@ const newPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: 'integer' },
-			accPassword: { type: 'string', pattern: '', minLength: 3 },
-			TokenChangePass: { type: 'string', pattern: '' }
+			accId: { type: 'integer'},
+			accPassword: { type: 'string', pattern: '' , minLength: 3 },
+			tokenChangePass: { type: 'string', pattern: '' }	
 		},
-		required: ["accId", "accPassword", "TokenChangePass"],
+		required: ["accId", "accPassword", "tokenChangePass"],
 		additionalProperties: false
 	}
 
@@ -451,8 +451,8 @@ const newWareHouse = (req, res, next) => {
 		properties: {
 			stoAccountId: { type: 'integer' },
 			stoProductName: { type: 'string', pattern: '' },
-			stoAmount: { type: 'integer' },
-			stoCategoryId: { type: 'integer' },
+			stoAmount: { type: 'integer'},
+			stoCategoryId: { type: 'string', pattern: ''},
 			stoOriginPrice: { type: 'string', pattern: '' },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '' }
@@ -460,7 +460,6 @@ const newWareHouse = (req, res, next) => {
 		required: ["stoAccountId", "stoCategoryId", "stoProductId"],
 		additionalProperties: true
 	}
-
 	const ajv = new ajvLib({
 		allErrors: true
 	})
@@ -482,8 +481,8 @@ const updateWareHouse = (req, res, next) => {
 			stoId: { type: 'integer' },
 			stoAccountId: { type: 'integer' },
 			stoProductName: { type: 'string', pattern: '' },
-			stoAmount: { type: 'integer' },
-			stoCategoryId: { type: 'integer' },
+			stoAmount: { type: 'integer',},
+			stoCategoryId: { type: 'string', pattern: '' },
 			stoOriginPrice: { type: 'string', pattern: '' },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '' }
@@ -531,10 +530,37 @@ const updateRoleAccount = (req, res, next) => {
 
 	next()
 }
+
+const updateAccountPassword = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+		  accId: { type: 'integer'},
+		  accPassword: { type: 'string', pattern: ''},
+		  accConfirmPassword: { type: 'string', pattern: ''},
+		},
+	  	required: ["accId","accPassword", "accConfirmPassword"],
+	  	additionalProperties: true
+  	}
+
+  	const ajv = new ajvLib({
+	  	allErrors: true
+  	})
+
+  	const validator = ajv.compile(shema)
+  	const valid = validator(req.body)
+
+  	if (!valid) {
+	  	return res.status(400).json(validator.errors)
+  	}
+
+ 	next()
+}
+
 module.exports = {
 	newAccount,
 	updateAccount,
-	comfirmToken,
+	confirmToken,
 	forgotPassword,
 	newPassword,
 	login,
@@ -551,5 +577,6 @@ module.exports = {
 	newComment,
 	newWareHouse,
 	updateWareHouse,
-	updateRoleAccount
+	updateRoleAccount,
+	updateAccountPassword
 }
