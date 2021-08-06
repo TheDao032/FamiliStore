@@ -139,12 +139,40 @@ router.get('/list-by-cat/:catID', async (req, res) => {
 		})
 	}
 
-
 	var result = await knex.from('tbl_product')
+		.join('tbl_product_images', 'tbl_product.prod_id', '=', 'tbl_product_images.prod_img_product_id')
 		.where('prod_category_id', catID)
+
+	//process return list
+	var prodList = []
+
+	var index = 0
+	while (index < result.length) {
+		let prodObj = {
+			prod_id: result[index].prod_id,
+			prod_name: result[index].prod_name,
+			prod_category_id: result[index].prod_category_id,
+			prod_amount: result[index].prod_amount,
+			prod_created_date: result[index].prod_created_date,
+			prod_updated_date: result[index].prod_updated_date,
+			prod_price: result[index].prod_price
+		}
+		let imageLink = []
+		for (let i = index; i < result.length; i++) {
+			index = i + 1
+			imageLink.push(result[i].prod_img_data)
+			
+			if ((i >= result.length - 1) || ( i != 0 && result[index].prod_id != result[index - 1].prod_id )) {
+				break;
+			}
+		}
+		prodObj['images'] = imageLink
+		prodList.push(prodObj)
+	}
+
 	if (result) {
 		return res.status(200).json({
-			listProduct: result,
+			listProduct: prodList,
 			statusCode: successCode
 		})
 	}
@@ -376,18 +404,16 @@ router.post('/update-image/:id', async (req, res) => {
 	else {
 		for (let i = 0; i < newImageLength; i++) {
 			//upload new image and delete old image on cloud
-			let promiseToUploadImage = new Promise(async function (resolve){
+			let promiseToUploadImage = new Promise(async function (resolve) {
 				await commonService.ImageUploader(images[i], id, 'update', imagesNameArray[i])
 				resolve();
 			})
-			promiseToUploadImage.then(function(){
+			promiseToUploadImage.then(function () {
 				commonService.deleteImage(imagesNameArray[i])
 			})
-			
+
 		}
 	}
-
-
 
 	return res.status(200).json({
 		statusCode: successCode
