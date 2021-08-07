@@ -8,7 +8,7 @@ const successCode = 0
 
 const sendMail = async (email, cusName, token, req, res) => {
 
-    // let testAccount = await nodemailer.createTestAccount();
+    // let testAccount = await nodemailer.createTestAccount()
 
     // create reusable transporter object using the default SMTP transport
     const fromEmail = environment.mailConfig.user
@@ -21,7 +21,7 @@ const sendMail = async (email, cusName, token, req, res) => {
     //         user: environment.mailConfig.user, // generated ethereal user
     //         pass: environment.mailConfig.password, // generated ethereal password
     //     },
-    // });
+    // })
     var transporter = nodemailer.createTransport(`smtps://${fromEmail}:${password}@smtp.gmail.com`)
 
     var mailOptions = {

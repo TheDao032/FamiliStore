@@ -3,6 +3,6 @@ exports.seed = function(knex, Promise) {
     return knex('').del()
       .then(function () {
         // Inserts seed entries
-        return knex('').insert([]);
-      });
-  };
+        return knex('').insert([])
+      })
+  }
