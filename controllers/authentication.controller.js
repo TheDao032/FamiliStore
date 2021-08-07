@@ -262,7 +262,7 @@ router.post('/new-password', authenticationValidate.newPassword, async (req, res
 router.post('/refresh-token', authenticationValidate.refreshToken, async (req, res) => {
 	const { accessToken, refreshToken } = req.body
 
-	await jsonWebToken.verify(accessToken, environment.secret, { ignoreExpiration: true }, async (err, decode) => {
+	jsonWebToken.verify(accessToken, environment.secret, { ignoreExpiration: true }, async (err, decode) => {
         if (err) {
 			return res.status(401).json({
                 err,
