@@ -2,12 +2,12 @@ const express = require('express')
 
 const knex = require('../utils/dbConnection')
 const router = express.Router()
-const validation = require('../middlewares/validation')
+const billValidation = require('../middlewares/validation/bill.validate')
 
 const errorCode = 1
 const successCode = 0
 
-router.post('/list-details', validation.listBillDetail, async (req, res) => {
+router.post('/list-details', billValidation.listBillDetail, async (req, res) => {
 	const { accId, billId } = req.body
 	
 	const result = await knex('tbl_bill')
@@ -28,7 +28,7 @@ router.post('/list-details', validation.listBillDetail, async (req, res) => {
 	})
 })
 
-router.post('/add', async (req, res) => {
+router.post('/add', billValidation.newBill, async (req, res) => {
 	const { accId, totalPrice, totalQuantity, listProductId } = req.body
 
 	let present = new Date()
