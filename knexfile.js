@@ -3,7 +3,9 @@ const environment = require('./environments/environment')
 module.exports = {
   development: {
       client: 'pg',
+
       connection: environment.configDatabase.connectionString,
+
       // migrations: {
       //     directory: __dirname + '/db/migrations',
       //   },

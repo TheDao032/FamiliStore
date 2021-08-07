@@ -12,6 +12,12 @@ const env = {
 	mailConfig: {
 		user: process.env.MAIL_USER || '<>@gmail.com',
 		password: process.env.MAIL_PASSWORD || ''
+	},
+	CLOUDINARY_CLOUD_NAME:'default',
+	CLOUDINARY_API_KEY:'default',
+	CLOUDINARY_API_SECRET:'default'
+
+		
 	}
 }
 
