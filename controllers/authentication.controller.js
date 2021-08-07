@@ -1,6 +1,7 @@
 const express = require('express')
 const jsonWebToken = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const randomstring = require('randomstring')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
@@ -32,7 +33,7 @@ router.post('/login', authenticationValidate.login, (req, res) => {
 			algorithm: 'HS256'
 		})
 
-		var refreshToken = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
+		var refreshToken = randomstring.generate(100)
 
 		await accountModel.updateRefreshToken(user.accId, refreshToken)
 

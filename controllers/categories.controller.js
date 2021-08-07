@@ -12,7 +12,7 @@ router.post('/add-father', categoriesValidation.newCategoryFather, (req, res) =>
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName })
 })
 
-router.post('/add-child', validation.newCategoryChild, (req, res) => {
+router.post('/add-child', categoriesValidation.newCategoryChild, (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather })
 })
