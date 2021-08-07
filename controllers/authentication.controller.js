@@ -1,24 +1,26 @@
 const express = require('express')
 const jsonWebToken = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const nodemailer = require('nodemailer')
+const randomstring = require('randomstring')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const environment = require('../environments/environment')
 
 const authenticationService = require('../services/authenticationService')
-const authentication = require('../middlewares/authentication')
-const validation = require('../middlewares/validation')
+const authenticationValidate = require('../middlewares/validation/authentication.validate')
 const mailService = require('../services/mailService')
+const mailOptions = require('../template/mailOptions')
+
+const accountModel = require('../models/account.model')
 
 const errorCode = 1
 const successCode = 0
 
-router.post('/login', validation.login, (req, res) => {
+router.post('/login', authenticationValidate.login, (req, res) => {
 	const { email, passWord } = req.body
 
-	authenticationService.authenticate(email, passWord, (err, auth = null, user = null) => {
+	authenticationService.authenticate(email, passWord, async (err, auth = null, user = null) => {
 		if (err) {
 			res.status(401).json({
 				err,
@@ -26,33 +28,42 @@ router.post('/login', validation.login, (req, res) => {
 			})
 			return
 		}
-		const token = jsonWebToken.sign(auth, environment.secret, {
+
+		const accessToken = jsonWebToken.sign(auth, environment.secret, {
 			expiresIn: '1h',
 			algorithm: 'HS256'
 		})
+
+		var refreshToken = randomstring.generate(100)
+
+		await accountModel.updateRefreshToken(user.accId, refreshToken)
+
 		res.status(200).json({
 			statusCode: successCode,
 			data: {
 				user,
-				token
+				accessToken,
+				refreshToken
 			}
 		})
 	}, req, res)
 })
 
-router.post('/register', validation.newAccount, async (req, res) => {
+router.post('/register', authenticationValidate.register, async (req, res) => {
 	const {passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 
 	// check unique email
-	const verifying = await knex('tbl_account').where('acc_email', email)
+	const verifying = await accountModel.findByEmail(email)
+
 	if (verifying.length != 0) {
 		return res.status(400).json({
 			errorMessage: 'Email existed',
 			statusCode: errorCode
 		})
 	}
-	if(role){
+
+	if (role) {
 		const rowRole = await knex('tbl_roles').where('rol_id', role)
 		if(rowRole.length === 0){
 			return res.status(400).json({
@@ -66,6 +77,7 @@ router.post('/register', validation.newAccount, async (req, res) => {
 
 
 	const cusName = fullName || 'quý khách'
+<<<<<<< HEAD
 
 
 	var mailOptions = {
@@ -82,6 +94,10 @@ router.post('/register', validation.newAccount, async (req, res) => {
 
 	
 	await mailService.sendMail(email, cusName, token, req, res)
+=======
+	tokenChangePass
+	await mailService.sendMail(mailOptions.registerOptions(email, cusName, token), req, res)
+>>>>>>> 3b74d109accd4cf2a85d53c4bf803c96f5f9a1c9
 
 
 	const hashPassword = bcrypt.hashSync(passWord, 3)
@@ -110,11 +126,11 @@ router.post('/register', validation.newAccount, async (req, res) => {
 	})
 })
 
-router.post('/verification-email', validation.confirmToken, async (req, res) => {
+router.post('/verification-email', authenticationValidate.confirmToken, async (req, res) => {
 	const { accId, accToken }  = req.body
 
 	let dateOb = new Date()
-	const result = await knex.from('tbl_account').where('acc_id', accId)
+	const result = await accountModel.findById(accId)
 
 	if (result.length === 0) {
 		return res.status(400).json({
@@ -125,7 +141,7 @@ router.post('/verification-email', validation.confirmToken, async (req, res) => 
 
 	if(result[0].acc_token === null){
 		return res.status(400).json({
-			errorMessage: 'user does not have a verification code',
+			errorMessage: 'user has already vefified',
 			statusCode: errorCode
 		})
 	}
@@ -151,59 +167,11 @@ router.post('/verification-email', validation.confirmToken, async (req, res) => 
 	
 })
 
-router.post('/verification-forgot', validation.confirmToken, async (req, res) => {
-	const { accId, accToken }  = req.body
-
-	let dateOb = new Date()
-	const result = await knex.from('tbl_account').where('acc_id', accId)
-
-	if (result.length === 0) {
-		return res.status(400).json({
-			errorMessage: 'id not exist',
-			statusCode: errorCode
-		})
-	}
-
-	if(result[0].acc_token_forgot === null){
-		return res.status(400).json({
-			errorMessage: 'user does not have a verification code',
-			statusCode: errorCode
-		})
-	}
-
-	if (!bcrypt.compareSync(accToken, result[0]['acc_token_forgot'])) {
-		return res.status(400).json({
-			errorMessage: 'verify forgot faill',
-			statusCode: errorCode
-		})
-	}
-
-	var account = {
-		acc_token_forgot: null,
-		acc_updated_date: dateOb
-	}
-	
-	await knex('tbl_account').where('acc_id', accId).update(account)
-
-	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	const hashToken = bcrypt.hashSync(token, 3)
-	const updateAccount = {
-		acc_token_forgot: token
-	}
-
-	await knex('tbl_account').where('acc_id', accId).update(updateAccount)
-
-	return res.status(200).json({
-		tokenChangePass: hashToken,
-		statusCode: successCode
-	})
-})
-
-router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
+router.post('/forgot-password', authenticationValidate.forgotPassword, async (req, res) => {
 	const { email }  = req.body
 
 	let dateOb = new Date()
-	const result = await knex.from('tbl_account').where('acc_email', email)
+	const result = await accountModel.findByEmail(email)
 
 	if (result.length === 0) {
 		return res.status(400).json({
@@ -215,13 +183,14 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	var token = 'f' + (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 
 	const cusName = result[0]['acc_fullName'] || 'quý khách'
-	await mailService.sendMail(email, cusName, token, req, res)
+	await mailService.sendMail(mailOptions.forgotPasswordOptions(email, cusName, token), req, res)
 	const hashToken = bcrypt.hashSync(token, 3)
 	
 	const account = {
 		acc_token_forgot: hashToken,
 		acc_updated_date: dateOb
 	}
+
 	await knex('tbl_account').where('acc_id', result[0]['acc_id']).update(account)
 
 	return res.status(200).json({
@@ -230,11 +199,11 @@ router.post('/forgot-password', validation.forgotPassword, async (req, res) => {
 	})
 })
 
-router.post('/new-password',validation.newPassword, async (req, res) => {
+router.post('/new-password', authenticationValidate.newPassword, async (req, res) => {
 	const { accId, accPassword, tokenChangePass }  = req.body
 
 	let dateOb = new Date()
-	const result = await knex.from('tbl_account').where('acc_id', accId)
+	const result = await accountModel.findById(accId)
 
 	if (result.length === 0) {
 		return res.status(400).json({
@@ -243,9 +212,9 @@ router.post('/new-password',validation.newPassword, async (req, res) => {
 		})
 	}
 
-	if(!bcrypt.compareSync(result[0]['acc_token_forgot'], tokenChangePass)){
+	if (!bcrypt.compareSync(tokenChangePass, result[0]['acc_token_forgot'])) {
 		return res.status(400).json({
-			errorMessage: 'token chage password wrong',
+			errorMessage: 'token change password wrong',
 			statusCode: errorCode
 		})
 	}
@@ -262,6 +231,38 @@ router.post('/new-password',validation.newPassword, async (req, res) => {
 	return res.status(200).json({
 		statusCode: successCode
 	})
+})
+
+router.post('/refresh-token', authenticationValidate.refreshToken, async (req, res) => {
+	const { accessToken, refreshToken } = req.body
+
+	jsonWebToken.verify(accessToken, environment.secret, { ignoreExpiration: true }, async (err, decode) => {
+        if (err) {
+			return res.status(401).json({
+                err,
+                statusCode: 3,
+            })
+		}
+
+		const { accId } = decode
+
+		if (accountModel.isValidRefreshToken(accId, refreshToken)) {
+			const newAccessToken = jsonWebToken.sign(auth, environment.secret, {
+				expiresIn: '1h',
+				algorithm: 'HS256'
+			})
+			
+			res.status(200).json({
+				statusCode: successCode,
+				accessToken: newAccessToken
+			})
+		}
+
+		return res.status(401).json({
+			errorMessage: 'InValid Refresh Token',
+			statusCode: 2,
+		})
+    })
 })
 
 module.exports = router

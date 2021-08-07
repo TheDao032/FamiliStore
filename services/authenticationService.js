@@ -2,6 +2,7 @@ const moment = require('moment')
 const environment = require('../environments/environment')
 const knex = require('../utils/dbConnection')
 const bcrypt = require('bcrypt')
+const accountModel = require('../models/account.model')
 
 const errorCode = 1
 const successCode = 0
@@ -18,9 +19,7 @@ const getRole = async (acc_id) => {
 
 
 const authenticate = async (email, password, callback, req, res) => {
-	const result = await knex('tbl_account')
-	.where({ acc_email: email, acc_status: 2 })
-	.orWhere({ acc_email: email, acc_status: 0 })
+	const result = await accountModel.findActiveUser(email)
 
 	if (result.length === 0) {
 		return res.status(500).json({ 
@@ -38,16 +37,16 @@ const authenticate = async (email, password, callback, req, res) => {
 
 	const { acc_id, acc_status } = result[0]
 	const auth = {
-		acc_status,
-		acc_id,
+		accStaus: acc_status,
+		accId: acc_id,
 	}
 	const info = await Promise.all([
 		auth, 
-		getRole(acc_id).then((role_id) => {
+		getRole(acc_id).then((role) => {
 			return {
-				role_id,
-				acc_status,
-				acc_id
+				role,
+				accStatus: acc_status,
+				accId: acc_id
 			}
 		})
 	])

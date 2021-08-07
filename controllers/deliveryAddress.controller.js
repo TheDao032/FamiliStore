@@ -2,7 +2,7 @@ const express = require('express')
 
 const knex = require('../utils/dbConnection')
 const router = express.Router()
-const validation = require('../middlewares/validation')
+const deliveryValidation = require('../middlewares/validation/delivery.model')
 
 const errorCode = 1
 const successCode = 0
@@ -23,7 +23,7 @@ router.get('/list-cities', async (req, res) => {
 	})
 })
 
-router.post('/list-districts', validation.listDistricts, async (req, res) => {
+router.post('/list-districts', deliveryValidation.listDistricts, async (req, res) => {
 	const { cityId } = req.body
 	const result = await knex.from('tbl_districts')
 						.where({ dis_city_id: cityId ? cityId : ''})
@@ -41,7 +41,7 @@ router.post('/list-districts', validation.listDistricts, async (req, res) => {
 	})
 })
 
-router.post('/list-deliveries', validation.listDeliveries, async (req, res) => {
+router.post('/list-deliveries', deliveryValidation.listDeliveries, async (req, res) => {
 	const { accId } = req.body
 	const result = await knex.from('tbl_delivery_address')
 						.join('tbl_districts', 'dis_id', 'del_district')
@@ -62,7 +62,7 @@ router.post('/list-deliveries', validation.listDeliveries, async (req, res) => {
 })
 
 
-router.post('/add-city', validation.newCity, (req, res) => {
+router.post('/add-city', deliveryValidation.newCity, (req, res) => {
 	const { cityId, cityName } = req.body
 
 	knex('tbl_cities').insert({ ci_id: cityId, ci_name: cityName })
@@ -72,7 +72,7 @@ router.post('/add-city', validation.newCity, (req, res) => {
 	})
 })
 
-router.post('/add-district', validation.newDistrict, (req, res) => {
+router.post('/add-district', deliveryValidation.newDistrict, (req, res) => {
 	const { cityId, distId, distName, distShipPrice } = req.body
 
 	knex('tbl_districts').insert({ dis_id: distId, dis_name: distName, dis_city_id: cityId, dis_ship_price: distShipPrice })
@@ -82,7 +82,7 @@ router.post('/add-district', validation.newDistrict, (req, res) => {
 	})
 })
 
-router.post('/add-delivery', validation.newDelivery, (req, res) => {
+router.post('/add-delivery', deliveryValidation.newDelivery, (req, res) => {
 	const { cityId, distId, accId, delDetailAddress } = req.body
 
 	knex('tbl_delivery_address').insert({ del_id: distId, ddel_city: cityId, del_detail_address: delDetailAddress, del_user_id: accId })

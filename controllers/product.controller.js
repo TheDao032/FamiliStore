@@ -50,17 +50,6 @@ router.get('/list', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	if (result) {
-		return res.status(200).json({
-			listProductDetail: result,
-			statusCode: successCode
-		})
-	}
-
-	return res.status(500).json({
-		listProductDetail: [],
-		statusCode: errorCode
-	})
 })
 
 
