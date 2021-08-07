@@ -380,9 +380,14 @@ router.post('/update-image/:id', async (req, res) => {
 	//uploadd image
 
 	if (images.length == undefined) {// number of uploaded image is 1
-		//upload new image
-		await commonService.ImageUploader(images, id, 'update', imagesNameArray[0])
-		//delete old image
+		let promiseToUploadImage = new Promise(async function (resolve) {
+			await commonService.ImageUploader(images, id, 'update', imagesNameArray[0])
+			resolve();
+		})
+		promiseToUploadImage.then(function () {
+			commonService.deleteImage(imagesNameArray[0])
+		})
+
 	}
 	else {
 		for (let i = 0; i < newImageLength; i++) {

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const moment = require('moment');
-const validator = require('../middlewares/validation')
+const validator = require('../middlewares/validation/comment.validate')
 const successCode = 0
 const errorCode = 1
 
