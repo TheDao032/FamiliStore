@@ -194,7 +194,6 @@ router.get('/details/:id', async (req, res) => {
 			var imageResult = await knex.from('tbl_product_images')
 				.where('prod_img_product_id', prodObject.prod_id);
 			prodObject['prod_img'] = imageResult.map(attr => attr.prod_img_data);
-			console.log(prodObject)
 		})
 	if (prodObject) {
 		return res.status(200).json({

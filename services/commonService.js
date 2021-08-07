@@ -55,7 +55,6 @@ module.exports = {
 
         async function upload(image) {
             let result = await streamUploader(image);
-            console.log(result.url);
             if (type === 'insert') {
                 await knex('tbl_product_images').insert({
                     prod_img_product_id: dependentID,
@@ -78,7 +77,6 @@ module.exports = {
         image = image.split('/')
         image = image[image.length - 1].split(".")
         image = image[0]
-        console.log(image)
         //delete image on cloud
         cloudStorage.cloudinary.api.delete_resources([image, ''], function (error, result) { });
     },
