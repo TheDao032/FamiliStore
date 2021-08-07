@@ -1,4 +1,4 @@
-const { ClientCredentials, ResourceOwnerPassword, AuthorizationCode } = require('simple-oauth2');
+const { ClientCredentials, ResourceOwnerPassword, AuthorizationCode } = require('simple-oauth2')
 const jsonWebToken = require('jsonwebtoken')
 const environment = require('../environments/environment')
 
@@ -22,15 +22,15 @@ const verifyToken = (req, res, next) => {
     req.account = undefined
     if (!req.headers || !req.headers.authorization)
         return res.status(401).json({
-            err: 'Unauthorized User!',
-            code: 3, //
+            errorMessage: 'Unauthorized User!',
+            statusCode: 3, //
         })
 
     const token = req.headers.authorization
     return jsonWebToken.verify(token, environment.secret, async (err, decode) => {
         if (err)
             return res.status(401).json({
-                err,
+                errorMessage: err,
                 statusCode: 2,
             })
         const account = decode
@@ -76,9 +76,9 @@ function saveValuesToCookie(token, res) {
 }
 
 async function getTokenFromCode(auth_code, res) {
-	const client = new AuthorizationCode(config);
+	const client = new AuthorizationCode(config)
 	const result = await client.getToken({
-		code: auth_code,
+		statusCode: auth_code,
 		redirect_uri: environment.APP_REDIRECT_URI,
 		scope: environment.APP_SCOPE
 	})
@@ -104,7 +104,7 @@ function clearCookies(res) {
 }
 
 async function getAccessToken(data, res) {
-	const client = new AuthorizationCode(config);
+	const client = new AuthorizationCode(config)
 	const accessToken = data.access_token
 	if (accessToken) {
 		const newDate = new Date(data.expires_at).getTime()

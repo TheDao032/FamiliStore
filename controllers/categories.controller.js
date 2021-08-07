@@ -2,17 +2,17 @@ const express = require('express')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
-const validation = require('../middlewares/validation')
+const categoriesValidation = require('../middlewares/validation/categories.validate')
 
 const errorCode = 1
 const successCode = 0
 
-router.post('/add-father', validation.newCategoryFather, (req, res) => {
+router.post('/add-father', categoriesValidation.newCategoryFather, (req, res) => {
 	const { cateId, cateName } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName })
 })
 
-router.post('/add-child', validation.newCategoryChild, (req, res) => {
+router.post('/add-child', categoriesValidation.newCategoryChild, (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	knex('tbl_categories').insert({ cate_id: cateId, cate_name: cateName, cate_father: cateFather })
 })
@@ -51,7 +51,7 @@ router.get('/list-father', async (req, res) => {
 	})
 })
 
-router.get('/list-child', validation.listCategoryChild, async (req, res) => {
+router.get('/list-child', categoriesValidation.listCategoryChild, async (req, res) => {
 	const { cateFather } = req.body
 	const result = await knex.from('tbl_categories')
 		.where({ cate_father: cateFather, cate_status: 0})
@@ -69,7 +69,7 @@ router.get('/list-child', validation.listCategoryChild, async (req, res) => {
 	})
 })
 
-router.post('/update', validation.newCategoryChild, async (req, res) => {
+router.post('/update', categoriesValidation.newCategoryChild, async (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })

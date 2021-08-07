@@ -49,7 +49,8 @@ CREATE TABLE public.tbl_account (
     acc_avatar text,
     acc_status integer DEFAULT 2,
     acc_created_date date,
-    acc_updated_date date
+    acc_updated_date date,
+    acc_token_forgot character varying(100)
 );
 
 
@@ -326,7 +327,8 @@ CREATE TABLE public.tbl_ware_house (
     sto_created_date date,
     sto_updated_date date,
     sto_product_id integer,
-    cost character varying(100)
+    cost character varying(100),
+    sto_status integer DEFAULT 0
 );
 
 
@@ -336,9 +338,9 @@ ALTER TABLE public.tbl_ware_house OWNER TO postgres;
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date) FROM stdin;
-2	$2b$04$uYqOlg492ozZ1ynGHaB6zO/FfwwWxqRlLSGsSAIEbslc7XcTmXkIG	$2b$04$PSt7bj6jgXNF.JoA75nFc.L66oVr8TR/0UbwrANStyKlCVvA6kEPC	yiyiboj421@flipssl.com	\N	\N	ADM	\N	2	2021-08-03	\N
-11	$2b$04$ggEUCP14qxjVIO/S4TlQ8OGzlOnyR.XkGis3EcpXUwqKF6.Xb7nui	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-04	2021-08-04
+COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date, acc_token_forgot) FROM stdin;
+2	$2b$04$uYqOlg492ozZ1ynGHaB6zO/FfwwWxqRlLSGsSAIEbslc7XcTmXkIG	$2b$04$PSt7bj6jgXNF.JoA75nFc.L66oVr8TR/0UbwrANStyKlCVvA6kEPC	yiyiboj421@flipssl.com	\N	\N	ADM	\N	2	2021-08-03	\N	\N
+11	$2b$04$ggEUCP14qxjVIO/S4TlQ8OGzlOnyR.XkGis3EcpXUwqKF6.Xb7nui	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-04	2021-08-04	\N
 \.
 
 
@@ -427,7 +429,7 @@ ADM	admin	0	2021-07-25	2021-07-25
 -- Data for Name: tbl_ware_house; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount, sto_category_id, sto_origin_price, sto_created_date, sto_updated_date, sto_product_id, cost) FROM stdin;
+COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount, sto_category_id, sto_origin_price, sto_created_date, sto_updated_date, sto_product_id, cost, sto_status) FROM stdin;
 \.
 
 
