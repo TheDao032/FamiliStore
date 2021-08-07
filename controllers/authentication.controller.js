@@ -10,6 +10,7 @@ const environment = require('../environments/environment')
 const authenticationService = require('../services/authenticationService')
 const authenticationValidate = require('../middlewares/validation/authentication.validate')
 const mailService = require('../services/mailService')
+const mailOptions = require('../template/mailOptions')
 
 const accountModel = require('../models/account.model')
 
@@ -75,8 +76,8 @@ router.post('/register', authenticationValidate.register, async (req, res) => {
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 
 	const cusName = fullName || 'quý khách'
-	
-	await mailService.sendMail(email, cusName, token, req, res)
+	tokenChangePass
+	await mailService.sendMail(mailOptions.registerOptions(email, cusName, token), req, res)
 
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)
@@ -145,54 +146,6 @@ router.post('/verification-email', authenticationValidate.confirmToken, async (r
 	
 })
 
-router.post('/verification-forgot', authenticationValidate.confirmToken, async (req, res) => {
-	const { accId, accToken }  = req.body
-
-	let dateOb = new Date()
-	const result = await accountModel.findById(accId)
-
-	if (result.length === 0) {
-		return res.status(400).json({
-			errorMessage: 'id not exist',
-			statusCode: errorCode
-		})
-	}
-
-	if (result[0].acc_token_forgot === null) {
-		return res.status(400).json({
-			errorMessage: 'user has already vefified',
-			statusCode: errorCode
-		})
-	}
-
-	if (!bcrypt.compareSync(accToken, result[0]['acc_token_forgot'])) {
-		return res.status(400).json({
-			errorMessage: 'verify forgot faill',
-			statusCode: errorCode
-		})
-	}
-
-	var account = {
-		acc_token_forgot: null,
-		acc_updated_date: dateOb
-	}
-	
-	await knex('tbl_account').where('acc_id', accId).update(account)
-
-	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
-	const hashToken = bcrypt.hashSync(token, 3)
-	const updateAccount = {
-		acc_token_forgot: token
-	}
-
-	await knex('tbl_account').where('acc_id', accId).update(updateAccount)
-
-	return res.status(200).json({
-		tokenChangePass: hashToken,
-		statusCode: successCode
-	})
-})
-
 router.post('/forgot-password', authenticationValidate.forgotPassword, async (req, res) => {
 	const { email }  = req.body
 
@@ -209,7 +162,7 @@ router.post('/forgot-password', authenticationValidate.forgotPassword, async (re
 	var token = 'f' + (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 
 	const cusName = result[0]['acc_fullName'] || 'quý khách'
-	await mailService.sendMail(email, cusName, token, req, res)
+	await mailService.sendMail(mailOptions.forgotPasswordOptions(email, cusName, token), req, res)
 	const hashToken = bcrypt.hashSync(token, 3)
 	
 	const account = {
@@ -238,9 +191,9 @@ router.post('/new-password', authenticationValidate.newPassword, async (req, res
 		})
 	}
 
-	if (!bcrypt.compareSync(result[0]['acc_token_forgot'], tokenChangePass)) {
+	if (!bcrypt.compareSync(tokenChangePass, result[0]['acc_token_forgot'])) {
 		return res.status(400).json({
-			errorMessage: 'token chage password wrong',
+			errorMessage: 'token change password wrong',
 			statusCode: errorCode
 		})
 	}
