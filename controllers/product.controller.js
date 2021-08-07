@@ -197,7 +197,7 @@ router.get('/details/:id', async (req, res) => {
 		})
 	if (prodObject) {
 		return res.status(200).json({
-			//listProductDetail: result,
+			listProductDetail: prodObject,
 			statusCode: successCode
 		})
 	}
