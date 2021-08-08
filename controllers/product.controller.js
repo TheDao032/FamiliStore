@@ -57,7 +57,7 @@ router.get('/list-best-sale', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -88,7 +88,7 @@ router.get('/list-suggestion', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -116,7 +116,7 @@ router.get('/list-by-cat/:catID', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -217,7 +217,7 @@ router.post('/add', async (req, res) => {
 	var errorMessage = "";
 
 	//validate field
-	if (prodName == '' || prodCategoryID == '' || prodAmount == '' || prodPrice == '') {
+	if (prodName === '' || prodCategoryID === '' || prodAmount === '' || prodPrice === '') {
 		//catch error
 		errorMessage = errorMessage + ' Some fields are blank!'
 	}
@@ -263,7 +263,7 @@ router.post('/add', async (req, res) => {
 		.returning('*')
 		.then(async (rows) => {
 
-			if (images.length == undefined) {// number of uploaded image is 1
+			if (images.length === undefined) {// number of uploaded image is 1
 				await commonService.ImageUploader(images, rows[0].prod_id, 'insert')
 			}
 			else {
@@ -378,7 +378,7 @@ router.post('/update-image/:id', async (req, res) => {
 
 	//uploadd image
 
-	if (images.length == undefined) {// number of uploaded image is 1
+	if (images.length === undefined) {// number of uploaded image is 1
 		let promiseToUploadImage = new Promise(async function (resolve) {
 			await commonService.ImageUploader(images, id, 'update', imagesNameArray[0])
 			resolve();

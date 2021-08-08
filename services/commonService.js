@@ -2,7 +2,7 @@ cloudStorage = require('../utils/cloudStorage')
 const knex = require('../utils/dbConnection')
 
 function imageValidator(image) {
-    if (image.mimetype == "image/png" || image.mimetype == "image/jpg" || image.mimetype == "image/jpeg") {
+    if (image.mimetype === "image/png" || image.mimetype === "image/jpg" || image.mimetype === "image/jpeg") {
         return true;
     } else {
         return false;
@@ -11,7 +11,7 @@ function imageValidator(image) {
 
 function validateImage(images) {
     var isValidImage = true
-    if (images.length == undefined) {// number of uploaded image is 1
+    if (images.length === undefined) {// number of uploaded image is 1
         isValidImage = imageValidator(images)
     }
     else {
@@ -25,12 +25,12 @@ function validateImage(images) {
 }
 
 function validateNumberOfFiles(files) {
-    if (files.length != undefined) {
+    if (files.length !== undefined) {
         if (files.length > 5)
             return false;
         return true;
     }
-    else if (typeof files == 'object') {
+    else if (typeof files === 'object') {
         return true;
     }
     return false;
@@ -82,10 +82,10 @@ module.exports = {
     },
     validateValidImage: function (images) {
         var errorMessage = ''
-        if (images == null) {
+
+        if (images === null) {
             errorMessage = errorMessage + ' Product needs to contain image!'
-        }
-        else {
+        } else {
             var images = images.image
 
             var isValidImage = validateImage(images)
@@ -105,7 +105,7 @@ module.exports = {
     },
 
     getImageLength: function (images) {
-        if (images.length == undefined) {// number of uploaded image is 1
+        if (images.length === undefined) {// number of uploaded image is 1
             return 1;
         }
         else {
