@@ -1,7 +1,43 @@
 cloudStorage = require('../utils/cloudStorage')
 const knex = require('../utils/dbConnection')
 
-const avatarUploader = async (image, accId, type, oldImageLink, callback) => {
+const productUploader = function (image, dependentID, type, oldImageLink) {
+    let streamUploader = function (image) {
+        return new Promise(function (resolve, reject) {
+            let stream = cloudStorage.cloudinary.uploader.upload_stream(
+                function (error, result) {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(error);
+                    }
+                }
+            );
+            cloudStorage.streamifier.createReadStream(image.data).pipe(stream);
+        });
+    };
+
+    async function upload(image) {
+        let result = await streamUploader(image);
+        if (type === 'insert') {
+            await knex('tbl_product_images').insert({
+                prod_img_product_id: dependentID,
+                prod_img_data: result.url
+            })
+        }
+        else if (type === 'update') {
+            await knex('tbl_product_images')
+                .where('prod_img_data', oldImageLink)
+                .update({
+                    prod_img_data: result.url
+                })
+        }
+    }
+
+    upload(image);
+}
+
+const avatarUploader = async (image, accId, type, oldImageLink) => {
     let result = await new Promise((resolve, reject) => {
         let stream = cloudStorage.cloudinary.uploader.upload_stream(
             function (error, result) {
@@ -60,5 +96,6 @@ module.exports = {
     avatarUploader,
     deleteImage,
     getImage,
-    getImageLength
+    getImageLength,
+    productUploader
 }
