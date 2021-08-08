@@ -78,7 +78,6 @@ router.post('/register', authenticationValidate.register, async (req, res) => {
 
 	const cusName = fullName || 'quý khách'
 
-	tokenChangePass
 	await mailService.sendMail(mailOptions.registerOptions(email, cusName, token), req, res)
 
 
