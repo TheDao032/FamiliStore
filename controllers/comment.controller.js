@@ -8,7 +8,6 @@ const errorCode = 1
 
 router.get('/list', async (req, res) => {
     const {productID} = req.query; 
-    console.log(req.params);
 
 	const result = await knex.select('cmt_id', 'cmt_content', 'cmt_product_id', 'cmt_vote', 'acc_id', 'acc_username', 'cmt_created_date').from('tbl_comment')
     .join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
