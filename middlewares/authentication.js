@@ -34,14 +34,14 @@ const verifyToken = (req, res, next) => {
                 statusCode: 2,
             })
         const account = decode
-        const role_id = await authenticationService.getRole(account.acc_id)
+        const roleId = await authenticationService.getRole(account.accId)
         
-		if (role_id === '') {
+		if (roleId === '') {
 			return res.status(401).json({
                 statusCode: 6,
             })
 		}
-		account.acc_role = role_id
+		account.accRole = roleId
         req.account = account
 
 		next()

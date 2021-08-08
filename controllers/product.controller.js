@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const knex = require('../utils/dbConnection')
 const moment = require('moment');
-const commonService = require('../services/commonService')
+const imageService = require('../services/imageService')
+const imageValidator = require('../middlewares/validation/image.validate')
+const validator = require('../middlewares/validation/product.validate')
 const successCode = 0
 const errorCode = 1
 
@@ -29,8 +31,8 @@ router.get('/list', async (req, res) => {
 		for (let i = index; i < result.length; i++) {
 			index = i + 1
 			imageLink.push(result[i].prod_img_data)
-			
-			if ((i >= result.length - 1) || ( i != 0 && result[index].prod_id != result[index - 1].prod_id )) {
+
+			if ((i >= result.length - 1) || (i != 0 && result[index].prod_id != result[index - 1].prod_id)) {
 				break;
 			}
 		}
@@ -57,7 +59,7 @@ router.get('/list-best-sale', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -88,7 +90,7 @@ router.get('/list-suggestion', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -116,7 +118,7 @@ router.get('/list-by-cat/:catID', async (req, res) => {
 	const { catID } = req.params
 
 	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length == 0) {
+	if (cat.length === 0) {
 		return res.status(400).json({
 			message: "Category is not valid"
 		})
@@ -144,8 +146,8 @@ router.get('/list-by-cat/:catID', async (req, res) => {
 		for (let i = index; i < result.length; i++) {
 			index = i + 1
 			imageLink.push(result[i].prod_img_data)
-			
-			if ((i >= result.length - 1) || ( i != 0 && result[index].prod_id != result[index - 1].prod_id )) {
+
+			if ((i >= result.length - 1) || (i != 0 && result[index].prod_id != result[index - 1].prod_id)) {
 				break;
 			}
 		}
@@ -215,12 +217,21 @@ router.post('/add', async (req, res) => {
 	var images = req.files //need to get image from input type file, name is 'image'
 
 	var errorMessage = "";
-
 	//validate field
-	if (prodName == '' || prodCategoryID == '' || prodAmount == '' || prodPrice == '') {
-		//catch error
-		errorMessage = errorMessage + ' Some fields are blank!'
+	if (prodName === undefined || prodCategoryID === undefined || prodAmount === undefined || prodPrice === undefined || req.files.image === undefined) {
+		return res.status(400).json({
+			message: 'Some required fields are undefined ',
+			statusCode: errorCode
+		})
 	}
+
+	if (prodName === '' || prodCategoryID === '' || prodAmount === '' || prodPrice === '') {
+		return res.status(400).json({
+			message: 'Some required fields are blank ',
+			statusCode: errorCode
+		})
+	}
+
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
 		.andWhere('prod_category_id', prodCategoryID)
@@ -237,12 +248,12 @@ router.post('/add', async (req, res) => {
 	}
 
 	//validate image
-	var errorFromValidateImage = commonService.validateValidImage(images)
+	var errorFromValidateImage = imageValidator.validateValidImage(images)
 
 	if (errorFromValidateImage !== '') {
 		errorMessage = errorMessage + errorFromValidateImage
 	}
-
+	console.log(errorMessage)
 	if (errorMessage !== "") {
 		return res.status(400).json({
 			message: errorMessage,
@@ -250,7 +261,7 @@ router.post('/add', async (req, res) => {
 		})
 	}
 
-	images = commonService.getImage(images)
+	images = imageService.getImage(images)
 
 	await knex('tbl_product').insert({
 		prod_name: prodName,
@@ -263,12 +274,12 @@ router.post('/add', async (req, res) => {
 		.returning('*')
 		.then(async (rows) => {
 
-			if (images.length == undefined) {// number of uploaded image is 1
-				await commonService.ImageUploader(images, rows[0].prod_id, 'insert')
+			if (images.length === undefined) {// number of uploaded image is 1
+				await imageService.productUploader(images, rows[0].prod_id, 'insert')
 			}
 			else {
 				for (let i = 0; i < images.length; i++) {
-					await commonService.ImageUploader(images[i], rows[0].prod_id, 'insert')
+					await imageService.productUploader(images[i], rows[0].prod_id, 'insert')
 				}
 			}
 		})
@@ -285,11 +296,12 @@ router.post('/add', async (req, res) => {
 	})
 
 })
-router.post('/update/:id', async (req, res) => {
+router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	const { prodName, prodCategoryID, prodAmount, prodPrice } = req.body
 	const { id } = req.params
 
 	var errorMessage = ''
+
 	var prod = await knex('tbl_product')
 		.where('prod_name', prodName)
 		.andWhere('prod_category_id', prodCategoryID)
@@ -354,13 +366,13 @@ router.post('/update-image/:id', async (req, res) => {
 	}
 
 	//validate image
-	var errorFromValidateImage = commonService.validateValidImage(images)
+	var errorFromValidateImage = imageValidator.validateValidImage(images)
 
 	if (errorFromValidateImage !== '') {
 		errorMessage = errorMessage + errorFromValidateImage
 	}
 	//validate old image & new image length
-	var newImageLength = commonService.getImageLength(images.image)
+	var newImageLength = imageService.getImageLength(images.image)
 	var oldimageLength = imagesNameArray.length
 
 	if (newImageLength !== oldimageLength) {
@@ -374,17 +386,17 @@ router.post('/update-image/:id', async (req, res) => {
 		})
 	}
 
-	images = commonService.getImage(images)
+	images = imageService.getImage(images)
 
 	//uploadd image
 
-	if (images.length == undefined) {// number of uploaded image is 1
+	if (images.length === undefined) {// number of uploaded image is 1
 		let promiseToUploadImage = new Promise(async function (resolve) {
-			await commonService.ImageUploader(images, id, 'update', imagesNameArray[0])
+			await imageService.productUploader(images, id, 'update', imagesNameArray[0])
 			resolve();
 		})
 		promiseToUploadImage.then(function () {
-			commonService.deleteImage(imagesNameArray[0])
+			imageService.deleteImage(imagesNameArray[0])
 		})
 
 	}
@@ -392,11 +404,11 @@ router.post('/update-image/:id', async (req, res) => {
 		for (let i = 0; i < newImageLength; i++) {
 			//upload new image and delete old image on cloud
 			let promiseToUploadImage = new Promise(async function (resolve) {
-				await commonService.ImageUploader(images[i], id, 'update', imagesNameArray[i])
+				await imageService.productUploader(images[i], id, 'update', imagesNameArray[i])
 				resolve();
 			})
 			promiseToUploadImage.then(function () {
-				commonService.deleteImage(imagesNameArray[i])
+				imageService.deleteImage(imagesNameArray[i])
 			})
 
 		}
@@ -427,7 +439,7 @@ router.post('/delete/:id', async (req, res) => {
 		.returning('*')
 		.then((deleted) => {
 			for (let i = 0; i < deleted.length; i++) {
-				commonService.deleteImage(deleted[i].prod_img_data);
+				imageService.deleteImage(deleted[i].prod_img_data);
 			}
 
 		})
