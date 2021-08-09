@@ -2,7 +2,10 @@ const environment = require('../environments/environment')
 
 const registerOptions = (to, cusName, token) => {
     return {
-        from: `<${environment.mailConfig.user}>`,
+        from: {
+            name: 'FamilyStore',
+            email: `${environment.mailConfig.user}`
+        },
         to: `${to}`,
         subject: 'Xác nhận Email',
         html: ` <h1>Chào ${cusName} thân mến! </h1><br>
@@ -16,7 +19,10 @@ const registerOptions = (to, cusName, token) => {
   
 const forgotPasswordOptions = (to, cusName, token) => {
     return {
-        from: `<${environment.mailConfig.user}>`,
+        from: {
+            name: 'FamilyStore',
+            email: `${environment.mailConfig.user}`
+        },
         to: `${to}`,
         subject: 'Quên mật khẩu',
         html: ` <h1>Chào ${cusName} thân mến! </h1><br>
