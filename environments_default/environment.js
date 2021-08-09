@@ -11,14 +11,12 @@ const env = {
 	APP_REDIRECT_URI: process.env.APP_REDIRECT_URI || 'localhost:3000',
 	mailConfig: {
 		user: process.env.MAIL_USER || '<>@gmail.com',
-		password: process.env.MAIL_PASSWORD || ''
 	},
-	CLOUDINARY_CLOUD_NAME:'default',
-	CLOUDINARY_API_KEY:'default',
-	CLOUDINARY_API_SECRET:'default'
+	CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'default',
+	CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || 'default',
+	CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || 'default',
+	SENDGRID_API_KEY: process.env.SENDGRID_API_KEY || 'default'
 
-		
-	}
 }
 
 module.exports = env
