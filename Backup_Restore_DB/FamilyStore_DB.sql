@@ -50,7 +50,8 @@ CREATE TABLE public.tbl_account (
     acc_status integer DEFAULT 2,
     acc_created_date date,
     acc_updated_date date,
-    acc_token_forgot character varying(100)
+    acc_token_forgot character varying(100),
+    acc_refresh_token character varying(100)
 );
 
 
@@ -338,9 +339,10 @@ ALTER TABLE public.tbl_ware_house OWNER TO postgres;
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date, acc_token_forgot) FROM stdin;
-2	$2b$04$uYqOlg492ozZ1ynGHaB6zO/FfwwWxqRlLSGsSAIEbslc7XcTmXkIG	$2b$04$PSt7bj6jgXNF.JoA75nFc.L66oVr8TR/0UbwrANStyKlCVvA6kEPC	yiyiboj421@flipssl.com	\N	\N	ADM	\N	2	2021-08-03	\N	\N
-11	$2b$04$ggEUCP14qxjVIO/S4TlQ8OGzlOnyR.XkGis3EcpXUwqKF6.Xb7nui	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-04	2021-08-04	\N
+COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date, acc_token_forgot, acc_refresh_token) FROM stdin;
+2	$2b$04$uYqOlg492ozZ1ynGHaB6zO/FfwwWxqRlLSGsSAIEbslc7XcTmXkIG	\N	yiyiboj421@flipssl.com	\N	\N	ADM	http://res.cloudinary.com/nthedao/image/upload/v1628388990/vqvqdli2jgee6ogxujyo.png	0	2021-08-03	2021-08-08	\N	zZILgOYolMRtOIuficmsNmuV1q3yYdBZYS5RcFFetI7udRnYVfvZ1Zz0HiytW1Zf1C7nUyLdGQiATT3EHpu2BAabf3HptJb4ne81
+11	$2b$04$5zfPVCS.Sn2UCptukjFGFOEIE0jl1nuIxafbOh4N5qeav7kNV9CzK	\N	nthedao@gmail.com	\N	\N	ADM	\N	0	2021-08-04	2021-08-07	\N	rguXyQXoMkdW1CcZFEdNI48Ehq5tmhQbl36VnlcZTbcCZNZYocsBm3rD4d2dDn8fx2LWh8neBHYtiViL2ICbsBPvO5jC0R4UYGWi
+13	$2b$04$LVr/HMiP84jiTje5qlP6eOCzztowSzroU2PDAi9xMcZIBf0m7w.bC	$2b$04$MgQi5sAOfhVfb4IZkzRF7.GokBUcqUxDYzQ296gmTBmHt0AcD4wgS	nthedao2705@gmail.com	\N	\N	USER	\N	2	2021-08-08	\N	\N	\N
 \.
 
 
@@ -422,6 +424,7 @@ COPY public.tbl_product_images (prod_img_id, prod_img_product_id, prod_img_data,
 
 COPY public.tbl_roles (rol_id, rol_name, role_status, rol_create_date, rol_update_date) FROM stdin;
 ADM	admin	0	2021-07-25	2021-07-25
+USER	user	0	2021-08-08	2021-08-08
 \.
 
 
@@ -437,7 +440,7 @@ COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount
 -- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_account_id_seq', 11, true);
+SELECT pg_catalog.setval('public.tbl_account_id_seq', 13, true);
 
 
 --
