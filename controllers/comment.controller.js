@@ -8,11 +8,15 @@ const errorCode = 1
 
 router.get('/list', async (req, res) => {
     const {productID} = req.query; 
-
-	const result = await knex.select('cmt_id', 'cmt_content', 'cmt_product_id', 'cmt_vote', 'acc_id', 'acc_username', 'cmt_created_date').from('tbl_comment')
+	//write ajv, write validate product ID
+	/*
+	const result = await knex.select('tbl_comment.cmt_id', 'tbl_comment.cmt_content', 'tbl_comment.cmt_product_id', 'tbl_comment.cmt_vote', 'tbl_comment.cmt_acc_id', 'tbl_account.acc_username', 'tbl_comment.cmt_create_date', 'tbl_comment.tbl_update_date').from('tbl_comment')
     .join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
-    .where('cmt_product_id', productID);
-
+    .where('tbl_comment.cmt_product_id', productID);
+*/
+	result = await knex.select('tbl_comment.cmt_id', 'tbl_comment.cmt_content', 'tbl_comment.cmt_product_id', 'tbl_comment.cmt_vote', 'tbl_comment.cmt_acc_id', 'tbl_account.acc_email', 'tbl_comment.cmt_create_date', 'tbl_comment.cmt_update_date').from('tbl_comment')
+	.join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
+	.where('tbl_comment.cmt_product_id', productID)
 	if (result) {
 		return res.status(200).json({
 			listComment: result,
@@ -29,6 +33,7 @@ router.get('/list', async (req, res) => {
 
 router.post('/add', validator.newComment,async (req, res) => {
 	const { productID, accountID, content, vote } = req.body
+	console.log(req.body)
     var regex = new RegExp('[0-5]')
     var isValid = regex.test(vote)
     if(!isValid){
@@ -43,7 +48,7 @@ router.post('/add', validator.newComment,async (req, res) => {
         cmt_acc_id: accountID,
         cmt_content: content,
         cmt_vote: vote,
-        cmt_created_date:moment().format('YYYY-MM-DD HH:mm:ss')
+        cmt_create_date:moment().format('YYYY-MM-DD HH:mm:ss')
     })
  
 	return res.status(200).json({

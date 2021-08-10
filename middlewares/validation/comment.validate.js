@@ -5,10 +5,10 @@ const newComment = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			productID: { type: 'integer', pattern: '' },
-			accountID: { type: 'integer', pattern: '' },
+			productID: { type: 'integer' },
+			accountID: { type: 'integer' },
 			content: { type: 'string', pattern: '' },
-			vote: { type: 'integer', pattern: '' }
+			vote: { type: 'integer' }
 		},
 		required: ["productID", "accountID", "content", "vote"],
 		additionalProperties: true
