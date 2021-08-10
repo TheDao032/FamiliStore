@@ -12,14 +12,15 @@ const newBill = (req, res, next) => {
 				items: {
 					type: 'object',
 					properties: {
-						prodId: { type: 'string', pattern: '' }
+						prodId: { type: 'string', pattern: '' },
+						prodQuantity:{type:'integer'}
 					},
-					required: ["prodId"],
+					required: ["prodId", "prodQuantity"],
 					additionalProperties: true
 				},
 			}
   		},
-		required: ["accId", "totalPrice", "totalQuantity", "listProductId"],
+		required: ["accId", "totalPrice", "totalQuantity"],
 		additionalProperties: true
 	}
 
@@ -61,9 +62,12 @@ const listBillDetail = (req, res, next) => {
 
 	next()
 }
+const validateNumberOfProduct =  function (productList){
 
+}
 
 module.exports = {
     newBill,
-    listBillDetail
+    listBillDetail,
+	validateNumberOfProduct
 }
