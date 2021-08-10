@@ -4,7 +4,7 @@ const listDistricts = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'integer' }
+			cityId: { type: 'string', maxLength: 5 }
   		},
 		required: ["cityId"],
 		additionalProperties: true

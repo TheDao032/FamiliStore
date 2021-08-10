@@ -26,7 +26,7 @@ router.get('/list-cities', async (req, res) => {
 router.post('/list-districts', deliveryValidation.listDistricts, async (req, res) => {
 	const { cityId } = req.body
 	const result = await knex.from('tbl_districts')
-						.where({ dis_city_id: cityId ? cityId : ''})
+						.where({ dis_city_id: cityId })
 
 	if (result) {
 		return res.status(200).json({
@@ -46,7 +46,7 @@ router.post('/list-deliveries', deliveryValidation.listDeliveries, async (req, r
 	const result = await knex.from('tbl_delivery_address')
 						.join('tbl_districts', 'dis_id', 'del_district')
 						.join('tbl_cities', 'ci_id', 'del_city')
-						.where({ del_user_id: accId ? accId : ''})
+						.where({ del_user_id: accId })
 
 	if (result) {
 		return res.status(200).json({
