@@ -8,7 +8,7 @@ const updateAccountPassword = (req, res, next) => {
 		  accPassword: { type: 'string', pattern: ''},
 		  accConfirmPassword: { type: 'string', pattern: ''},
 		},
-	  	required: ['accId','accPassword', 'accConfirmPassword'],
+	  	required: ['accId', 'accPassword', 'accConfirmPassword'],
 	  	additionalProperties: true
   	}
 
@@ -30,8 +30,8 @@ const updateRoleAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: ['integer', 'string']},
-			accRole: { type: 'string', pattern: '' , maxLength: 5},
+			accId: { type: ['integer', 'string'] },
+			accRole: { type: 'string', pattern: '' , maxLength: 5 },
   		},
 		required: ["accId","accRole"],
 		additionalProperties: true

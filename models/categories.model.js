@@ -7,6 +7,22 @@ const findById = async (cateId) => {
     return info
 }
 
+const findFather = async () => {
+    const info = await knex('tbl_categories')
+                    .where({ cate_father: null })
+
+    return info
+}
+
+const findChild = async (cateFather) => {
+    const info = await knex('tbl_categories')
+                    .where({ cate_father: cateFather })
+
+    return info
+}
+
 module.exports = {
-    findById
+    findById,
+    findFather,
+    findChild
 }
