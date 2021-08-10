@@ -29,6 +29,15 @@ router.post('/add-father', categoriesValidation.newCategoryFather, async (req, r
 router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 
+	const categoriyFatherInfo = categoriesModel.findById(cateFather)
+
+	if (categoriyFatherInfo.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'category Is Not Existed',
+			statusCode: errorCode
+		})
+	}
+
 	const presentDate = new Date()
 	const newFatherCate = {
 		cate_id: cateId, 
@@ -46,39 +55,32 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 })
 
 router.get('/list', async (req, res) => {
-	const result = await knex.from('tbl_categories')
-		.where({ cate_status: 0})
 
 	let fullCategories = []
 
+	const listCategories = await categoriesModel.findAll()
+
 	const listCategoriesFather = await categoriesModel.findFather()
+	
+	const result = await Promise.all([
+		listCategoriesFather.map((item) => {
+		const listChild = listCategories.filter((info) => info.cate_father === item.cate_id)
 
-	listCategoriesFather.forEach(async (element) => {
-		const listCategoriesChild = await categoriesModel.findChild(element.cate_id)
-
-		let listChild = []
-
-		listCategoriesChild.forEach((element) => {
-			let childInfo = {
-				cateId: element.cate_id,
-				cateName: element.cate_name
-			}
-
-			listChild.push(childInfo)
-		});
-
-		let fatherInfo = {
-			cateId: element.cate_id,
-			cateName: element.cate_name,
-			subCategories: listChild,
+		return {
+			cateId: item.cate_id,
+			cateName: item.cate_name,
+			subCategories: listChild.map((itemChild) => {
+				return {
+					cateId: itemChild.cate_id,
+					CateName: itemChild.cate_name
+				}
+			})
 		}
-
-		fullCategories.push(fatherInfo)
-	})
-
-	if (fullCategories.length !== 0) {
+	})])
+	
+	if (result) {
 		return res.status(200).json({
-			listCategories: fullCategories,
+			listCategories: result[0],
 			statusCode: successCode
 		})
 	}
@@ -94,8 +96,17 @@ router.get('/list-father', async (req, res) => {
 		.where({ cate_father: null})
 
 	if (result) {
+		let listCategoriesFather = []
+		result.forEach((element) => {
+			const categoriesInfo = {
+				cateId: element.cate_id,
+				cateName: element.cate_name
+			}
+			listCategoriesFather.push(categoriesInfo)
+		});
+
 		return res.status(200).json({
-			listCategories: result,
+			listCategories: listCategoriesFather,
 			statusCode: successCode
 		})
 	}
@@ -106,14 +117,32 @@ router.get('/list-father', async (req, res) => {
 	})
 })
 
-router.get('/list-child', categoriesValidation.listCategoryChild, async (req, res) => {
+router.post('/list-child', categoriesValidation.listCategoryChild, async (req, res) => {
 	const { cateFather } = req.body
 	const result = await knex.from('tbl_categories')
 		.where({ cate_father: cateFather })
 
+	const fatherInfo = await categoriesModel.findById(cateFather)
+
 	if (result) {
+
+		let listCategoriesChild = []
+		result.forEach((element) => {
+			const categoriesInfo = {
+				cateId: element.cate_id,
+				cateName: element.cate_name
+			}
+			listCategoriesChild.push(categoriesInfo)
+		});
+
+		const listCategoriesFather = {
+			cateId: fatherInfo[0].cate_id,
+			cateName: fatherInfo[0].cate_name, 
+			subCategories: listCategoriesChild
+		}
+
 		return res.status(200).json({
-			listCategories: result,
+			listCategories: listCategoriesFather,
 			statusCode: successCode
 		})
 	}
