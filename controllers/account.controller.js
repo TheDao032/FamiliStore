@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt')
 
 const accountModel = require('../models/account.model')
 const roleModel = require('../models/role.model')
+const imageService = require('../services/imageService')
 
 const successCode = 0
 const errorCode = 1
@@ -44,15 +45,15 @@ router.get('/details/:id', async (req, res) => {
 	})
 })
 
-router.patch('/update', accountValidation.updateAccount, async (req, res) => {
-	const { picture } = req.files
-	const checkAvatar = picture ? true : false
-	const { accId, accEmail, accPhoneNumber, accFullName, accRole } = req.body
+router.post('/update', accountValidation.updateAccount, async (req, res) => {
+	const avatar = req.files
+	const checkAvatar = avatar.image ? true : false
+	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
 	
 	let date_ob = new Date()
 
 	const verifying = await knex('tbl_account')
-						.where('acc_email', accEmail)
+						.where('acc_email', accEmail ? accEmail : '')
 						.whereNot('acc_id', accId)
 
 	if (verifying.length != 0) {
@@ -64,12 +65,24 @@ router.patch('/update', accountValidation.updateAccount, async (req, res) => {
 
 	const result = await accountModel.findById(accId)
 
+	if (checkAvatar) {
+		if (result[0].acc_avatar === null) {
+			await imageService.avatarUploader(avatar.image, accId, 'insert')
+		} else {
+			let promiseToUploadImage = new Promise(async function (resolve) {
+				await imageService.avatarUploader(avatar.image, accId, 'update', result[0].acc_avatar)
+				resolve();
+			})
+			promiseToUploadImage.then(function () {
+				imageService.deleteImage(result[0].acc_avatar)
+			})
+		}
+	}
+
 	const account = {
-		acc_email:  accEmail ? accEmail : result.acc_email,
-		acc_phone_number: accPhoneNumber ? accPhoneNumber : result.acc_phone_number,
-		acc_full_name: accFullName ? accFullName : result.acc_full_name,
-		acc_role: accRole ? accRole : result.acc_role,
-		acc_avatar: checkAvatar ? picture.data : result.acc_avatar,
+		acc_email:  accEmail ? accEmail : result[0].acc_email,
+		acc_phone_number: accPhoneNumber ? accPhoneNumber : result[0].acc_phone_number,
+		acc_full_name: accFullName ? accFullName : result[0].acc_full_name,
 		acc_updated_date: date_ob
 	}
 
@@ -80,7 +93,7 @@ router.patch('/update', accountValidation.updateAccount, async (req, res) => {
 	})
 })
 
-router.patch('/update-password', accountValidation.updateAccountPassword, async (req, res) => {
+router.post('/update-password', accountValidation.updateAccountPassword, async (req, res) => {
 	const { accId, accPassWord, accConfirmPassword } = req.body
 
 	if (accPassWord !== accConfirmPassword) {

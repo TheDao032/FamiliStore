@@ -75,9 +75,12 @@ router.post('/register', authenticationValidate.register, async (req, res) => {
 
 	var token = (Math.floor(Math.random() * (99999 - 10000)) + 10000).toString()
 
+
 	const cusName = fullName || 'quý khách'
-	tokenChangePass
+
 	await mailService.sendMail(mailOptions.registerOptions(email, cusName, token), req, res)
+
+
 
 	const hashPassword = bcrypt.hashSync(passWord, 3)
 	const hashToken = bcrypt.hashSync(token, 3)

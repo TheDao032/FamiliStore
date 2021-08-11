@@ -56,7 +56,7 @@ const confirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: 'integer'},
+			accId: { type: ['integer', 'string']},
 			accToken: { type: 'string', pattern: '', }
 		},
 		required: ["accId", "accToken"],
@@ -107,7 +107,7 @@ const newPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: 'integer'},
+			accId: { type: ['integer', 'string']},
 			accPassword: { type: 'string', pattern: '' , minLength: 3 },
 			tokenChangePass: { type: 'string', pattern: '' }
 		},

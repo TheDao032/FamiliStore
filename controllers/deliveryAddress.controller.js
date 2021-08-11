@@ -2,7 +2,7 @@ const express = require('express')
 
 const knex = require('../utils/dbConnection')
 const router = express.Router()
-const deliveryValidation = require('../middlewares/validation/delivery.model')
+const deliveryValidation = require('../middlewares/validation/delivery.validate')
 
 const errorCode = 1
 const successCode = 0
