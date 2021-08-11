@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt')
 
 const accountModel = require('../models/account.model')
 const roleModel = require('../models/role.model')
+const deliveryModel = require('../models/delivery.model')
 const imageService = require('../services/imageService')
 
 const successCode = 0
@@ -32,9 +33,19 @@ router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 	const result = await accountModel.findById(id)
 
-	if (result) {
+	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
+
+	const responseResult = {
+		email: result[0].acc_email,
+		fullName: result[0].acc_full_name,
+		phoneNumber: result[0].acc_phone_number,
+		avatar: result[0].acc_avatar,
+		deliveryAddress,
+	}
+
+	if (responseResult) {
 		return res.status(200).json({
-			account: result,
+			account: responseResult,
 			statusCode: successCode
 		})
 	}
