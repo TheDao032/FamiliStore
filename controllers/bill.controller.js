@@ -33,7 +33,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	console.log(req.body.listProductId)
 	//validate bill detail, if not valid, prevent to add bill
 	var productList = await knex('tbl_product')
-	console.log(productList)
+	
 
 	let present = new Date()
 	const newBill = {

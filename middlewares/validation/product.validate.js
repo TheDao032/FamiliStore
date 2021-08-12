@@ -28,7 +28,9 @@ const updateProduct = (req, res, next) => {
 	next()
 }
 
-
+const validateProductNumber = function(){
+	
+}
 module.exports = {
     updateProduct
 }
