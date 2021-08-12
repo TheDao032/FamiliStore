@@ -113,7 +113,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 })
 
 router.post('/update-password', accountValidation.updateAccountPassword, async (req, res) => {
-	const { accId, accOldPassWord, accNewPassWord, accConfirmPassword } = req.body
+	const { accId, accOldPassword, accNewPassword, accConfirmPassword } = req.body
 
 	const accInfo = await accountModel.findById(accId)
 
@@ -124,14 +124,14 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 		})
 	}
 
-	if (!bcrypt.compareSync(accOldPassWord, accInfo[0].acc_password)) {
+	if (!bcrypt.compareSync(accOldPassword, accInfo[0].acc_password)) {
 		return res.status(500).json({ 
 			errorMessage: 'Password Incorrect!',
 			statusCode: errorCode
 		})
 	}
 
-	if (accNewPassWord !== accConfirmPassword) {
+	if (accNewPassword !== accConfirmPassword) {
 		return res.status(400).json({
 			errorMessage: 'password is different from confirm password',
 			statusCode: errorCode

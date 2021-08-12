@@ -32,7 +32,7 @@ const newBill = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -57,7 +57,7 @@ const listBillDetail = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
