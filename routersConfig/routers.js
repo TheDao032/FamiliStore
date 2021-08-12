@@ -7,7 +7,7 @@ const API = require('./api')
 
 
 router.use('/api/authentication', authenticattionController)
-//router.use('/api', authentication.verifyToken, API)
-router.use('/api', API)
+router.use('/api', authentication.verifyToken, API)
+//router.use('/api', API)
 
 module.exports = router

@@ -77,7 +77,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 	
-	let present = new Date()
+	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 	var listObjectToJson = JSON.stringify(listProduct)
 
 	//const dd = '[{"prodId": 1, "prod": "a"}, {"prodId": 2, "prod": "b"}]'
@@ -177,11 +177,11 @@ router.get('/history-bill/:id', async (req, res) => {
 		})
 	}
 
-	var expectedDate = new Date(bill[0].bill_created_date);
-    expectedDate.setDate(expectedDate.getDate() + 2);
+	var expectedDate = new Date(bill[0].bill_created_date)
+    expectedDate.setDate(expectedDate.getDate() + 2)
 
-	createdDate = moment(bill[0].bill_created_date).format('DD/MM/YYYY');
-	expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY');
+	createdDate = moment(bill[0].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
+	expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
 	
 	var listItem = []
 	var index = 0
