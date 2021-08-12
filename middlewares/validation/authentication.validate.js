@@ -19,7 +19,7 @@ const login = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -29,7 +29,7 @@ const register = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		passWord: { type: 'string', pattern: '' },
+    		passWord: { type: 'string', pattern: '', minLength: 1 },
     		email: { type: 'string', pattern: '' },
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
     		role: { type: 'string', pattern: '', maxLength: 5}
@@ -46,7 +46,7 @@ const register = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -71,7 +71,7 @@ const confirmToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -97,7 +97,7 @@ const forgotPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -108,7 +108,7 @@ const newPassword = (req, res, next) => {
 		type: 'object',
 		properties: {
 			accId: { type: ['integer', 'string']},
-			accPassword: { type: 'string', pattern: '' , minLength: 3 },
+			accPassword: { type: 'string', pattern: '' , minLength: 1 },
 			tokenChangePass: { type: 'string', pattern: '' }
 		},
 		required: ["accId", "accPassword", "tokenChangePass"],
@@ -123,7 +123,7 @@ const newPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()
@@ -148,7 +148,7 @@ const refreshToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors)
+		return res.status(400).json(validator.errors[0])
 	}
 
 	next()

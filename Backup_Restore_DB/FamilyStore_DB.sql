@@ -721,19 +721,11 @@ ALTER TABLE ONLY public.tbl_delivery_address
 
 
 --
--- Name: tbl_delivery_address tbl_del_city_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.tbl_delivery_address
-    ADD CONSTRAINT tbl_del_city_id_fkey FOREIGN KEY (del_city_id) REFERENCES public.tbl_cities(ci_id) NOT VALID;
-
-
---
 -- Name: tbl_delivery_address tbl_del_district_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tbl_delivery_address
-    ADD CONSTRAINT tbl_del_district_id_fkey FOREIGN KEY (del_district_id) REFERENCES public.tbl_districts(dis_id) NOT VALID;
+    ADD CONSTRAINT tbl_del_district_id_fkey FOREIGN KEY (del_district_id, del_city_id) REFERENCES public.tbl_districts(dis_id, dis_city_id) NOT VALID;
 
 
 --
@@ -761,19 +753,11 @@ ALTER TABLE ONLY public.tbl_product
 
 
 --
--- Name: tbl_wards tbl_ward_city_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.tbl_wards
-    ADD CONSTRAINT tbl_ward_city_id_fkey FOREIGN KEY (ward_city_id) REFERENCES public.tbl_cities(ci_id);
-
-
---
 -- Name: tbl_wards tbl_ward_dis_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tbl_wards
-    ADD CONSTRAINT tbl_ward_dis_id_fkey FOREIGN KEY (ward_dis_id) REFERENCES public.tbl_districts(dis_id);
+    ADD CONSTRAINT tbl_ward_dis_id_fkey FOREIGN KEY (ward_dis_id, ward_city_id) REFERENCES public.tbl_districts(dis_id, dis_city_id);
 
 
 --
