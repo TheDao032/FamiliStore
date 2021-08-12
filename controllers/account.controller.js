@@ -32,6 +32,13 @@ router.get('/list', async (req, res) => {
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 	
+	if(isNaN(Number(id))){
+		return res.status(404).json({
+			message: 'id must be of integer type',
+			statusCode: errorCode
+		})
+	}
+
 	const result = await accountModel.findById(id)
 
 	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
@@ -149,6 +156,13 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
 
+	if(isNaN(Number(id))){
+		return res.status(404).json({
+			message: 'id must be of integer type',
+			statusCode: errorCode
+		})
+	}
+	
 	await knex('tbl_account')
 		.update({ acc_status: 1 })
 		.where('acc_id', id)

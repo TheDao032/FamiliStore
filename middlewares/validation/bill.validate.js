@@ -6,20 +6,21 @@ const newBill = (req, res, next) => {
   		properties: {
 			accId: { type: 'string', pattern: '' },
     		totalPrice: { type: 'string', pattern: '' },
-    		totalQuantity: { type: 'string', pattern: '' },
-    		listProductId: { 
+    		totalQuantity: { type: 'integer'},
+    		listProduct: { 
 				type: 'array', 
 				items: {
 					type: 'object',
 					properties: {
-						prodId: { type: 'string', pattern: '' }
+						prodId: { type: 'integer'},
+						prodQuantity: {type:'integer'}
 					},
-					required: ["prodId"],
+					required: ["prodId", "prodQuantity"],
 					additionalProperties: true
 				},
 			}
   		},
-		required: ["accId", "totalPrice", "totalQuantity", "listProductId"],
+		required: ["accId", "totalPrice", "totalQuantity", "listProduct"],
 		additionalProperties: true
 	}
 
