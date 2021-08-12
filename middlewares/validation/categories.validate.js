@@ -4,7 +4,7 @@ const newCategoryFather = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		cateId: { type: 'string', pattern: '' },
+    		cateId: { type: 'string', pattern: '', maxLength: 5 },
 			cateName: { type: 'string', pattern: '' }
   		},
 		required: ["cateId", "cateName"],
@@ -29,11 +29,37 @@ const newCategoryChild = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		cateId: { type: 'string', pattern: '' },
+    		cateId: { type: 'string', pattern: '', maxLength: 5 },
 			cateName: { type: 'string', pattern: '' },
-			cateFather: { type: 'string', pattern: '' }
+			cateFather: { type: 'string', pattern: '', maxLength: 5 }
   		},
 		required: ["cateId", "cateName"],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors)
+	}
+
+	next()
+}
+
+const updateCategory = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+    		cateId: { type: 'string', pattern: '', maxLength: 5 },
+			cateName: { type: 'string', pattern: '' },
+			cateFather: { type: 'string', pattern: '', maxLength: 5 }
+  		},
+		required: ["cateId"],
 		additionalProperties: true
 	}
 
@@ -75,8 +101,34 @@ const listCategoryChild = (req, res, next) => {
 	next()
 }
 
+const deleteCategory = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+			cateId: { type: 'string', pattern: '', maxLength: 5 }
+  		},
+		required: ["cateId"],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors)
+	}
+
+	next()
+}
+
 module.exports = {
     newCategoryFather,
     newCategoryChild,
-    listCategoryChild
+    listCategoryChild,
+	deleteCategory,
+	updateCategory
 }
