@@ -327,10 +327,10 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	await knex('tbl_product')
 		.where('prod_id', id)
 		.update({
-			prod_name: typeof prodName !== 'undefined' ? prodName : prod.prod_name,
-			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : prod.prod_category_id,
-			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : prod.prod_amount,
-			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : prod.prod_price,
+			prod_name: typeof prodName !== 'undefined' ? prodName : prod[0].prod_name,
+			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : prod[0].prod_category_id,
+			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : prod[0].prod_amount,
+			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : prod[0].prod_price,
 			prod_status: 1,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
 		})
