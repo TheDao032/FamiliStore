@@ -121,11 +121,25 @@ CREATE SEQUENCE public.tbl_bill_detail_id_seq
 ALTER TABLE public.tbl_bill_detail_id_seq OWNER TO postgres;
 
 --
+-- Name: tbl_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tbl_categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_categories_id_seq OWNER TO postgres;
+
+--
 -- Name: tbl_categories; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tbl_categories (
-    cate_id character varying(5) NOT NULL,
+    cate_id integer DEFAULT nextval('public.tbl_categories_id_seq'::regclass) NOT NULL,
     cate_name character varying(100),
     cate_status integer DEFAULT 0,
     cate_father character varying(5) DEFAULT NULL::character varying,
@@ -137,11 +151,25 @@ CREATE TABLE public.tbl_categories (
 ALTER TABLE public.tbl_categories OWNER TO postgres;
 
 --
+-- Name: tbl_cities_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tbl_cities_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_cities_id_seq OWNER TO postgres;
+
+--
 -- Name: tbl_cities; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tbl_cities (
-    ci_id character varying(5) NOT NULL,
+    ci_id integer DEFAULT nextval('public.tbl_cities_id_seq'::regclass) NOT NULL,
     ci_name character varying(50),
     ci_created_date date,
     ci_updated_date date
@@ -203,24 +231,38 @@ ALTER TABLE public.tbl_delivery_address_id_seq OWNER TO postgres;
 CREATE TABLE public.tbl_delivery_address (
     del_id integer DEFAULT nextval('public.tbl_delivery_address_id_seq'::regclass) NOT NULL,
     del_detail_address character varying(150),
-    del_district_id character varying(5),
-    del_city_id character varying(5),
+    del_district_id integer,
+    del_city_id integer,
     del_user_id integer,
     del_status integer DEFAULT 0,
-    del_ward character varying(5)
+    del_ward_id integer
 );
 
 
 ALTER TABLE public.tbl_delivery_address OWNER TO postgres;
 
 --
+-- Name: tbl_districts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tbl_districts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_districts_id_seq OWNER TO postgres;
+
+--
 -- Name: tbl_districts; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tbl_districts (
-    dis_id character varying(5) NOT NULL,
+    dis_id integer DEFAULT nextval('public.tbl_districts_id_seq'::regclass) NOT NULL,
     dis_name character varying(50),
-    dis_city_id character varying(5) NOT NULL,
+    dis_city_id integer,
     dis_created_date date,
     dis_updated_date date
 );
@@ -249,7 +291,7 @@ ALTER TABLE public.tbl_product_id_seq OWNER TO postgres;
 CREATE TABLE public.tbl_product (
     prod_id integer DEFAULT nextval('public.tbl_product_id_seq'::regclass) NOT NULL,
     prod_name character varying(60),
-    prod_category_id character varying(5),
+    prod_category_id integer,
     prod_amount integer,
     prod_created_date date,
     prod_updated_date date,
@@ -304,14 +346,28 @@ CREATE TABLE public.tbl_roles (
 ALTER TABLE public.tbl_roles OWNER TO postgres;
 
 --
+-- Name: tbl_wards_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tbl_wards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_wards_id_seq OWNER TO postgres;
+
+--
 -- Name: tbl_wards; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tbl_wards (
-    ward_id character varying(5) NOT NULL,
+    ward_id integer DEFAULT nextval('public.tbl_wards_id_seq'::regclass) NOT NULL,
     ward_name character varying(100),
-    ward_city_id character varying(5),
-    ward_dis_id character varying(5),
+    ward_city_id integer,
+    ward_dis_id integer,
     ward_created_date date,
     ward_updated_date date,
     ward_ship_price character varying(100)
@@ -343,7 +399,7 @@ CREATE TABLE public.tbl_ware_house (
     sto_account_id integer,
     sto_product_name character varying(100),
     sto_amount integer,
-    sto_category_id character varying(5),
+    sto_category_id integer,
     sto_origin_price character varying(100),
     sto_created_date date,
     sto_updated_date date,
@@ -420,26 +476,6 @@ COPY public.tbl_bill_detail (bdetail_id, bdetail_bill_id, bdetail_product_id, bd
 
 
 --
--- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.tbl_categories (cate_id, cate_name, cate_status, cate_father, cate_created_date, cate_updated_date) FROM stdin;
-CAT1	Category 1	0	\N	2001-01-01	2001-01-01
-CAT2	Category 2	0	\N	2001-01-01	2001-01-01
-CAT3	Category 33	0		2001-01-01	2001-01-01
-\.
-
-
---
--- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
-1	Hồ Chí Minh	\N	\N
-\.
-
-
---
 -- Data for Name: tbl_comment; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -456,6 +492,15 @@ COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, d
 
 
 --
+-- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
+1	Hồ Chí Minh	\N	\N
+\.
+
+
+--
 -- Data for Name: tbl_districts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -465,11 +510,22 @@ COPY public.tbl_districts (dis_id, dis_name, dis_city_id, dis_created_date, dis_
 
 
 --
+-- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tbl_categories (cate_id, cate_name, cate_status, cate_father, cate_created_date, cate_updated_date) FROM stdin;
+1	Category 1	0	\N	2001-01-01	2001-01-01
+2	Category 2	0	\N	2001-01-01	2001-01-01
+3	Category 33	0		2001-01-01	2001-01-01
+\.
+
+
+--
 -- Data for Name: tbl_product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod_created_date, prod_updated_date, prod_price, prod_status) FROM stdin;
-3	Product2	CAT1	20	2021-08-09	\N	30000	1
+3	Product2	1	20	2021-08-09	\N	30000	1
 \.
 
 
@@ -566,6 +622,32 @@ SELECT pg_catalog.setval('public.tbl_product_image_id_seq', 10, true);
 --
 
 SELECT pg_catalog.setval('public.tbl_ware_house_id_seq', 1, false);
+
+--
+-- Name: tbl_wards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_wards_id_seq', 1, false);
+
+
+--
+-- Name: tbl_districts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_districts_id_seq', 1, false);
+
+
+--
+-- Name: tbl_cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_cities_id_seq', 1, false);
+
+--
+-- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_categories_id_seq', 1, false);
 
 
 --
@@ -725,7 +807,7 @@ ALTER TABLE ONLY public.tbl_delivery_address
 --
 
 ALTER TABLE ONLY public.tbl_delivery_address
-    ADD CONSTRAINT tbl_del_district_id_fkey FOREIGN KEY (del_district_id, del_city_id) REFERENCES public.tbl_districts(dis_id, dis_city_id) NOT VALID;
+    ADD CONSTRAINT tbl_del_district_id_fkey FOREIGN KEY (del_ward_id, del_district_id, del_city_id) REFERENCES public.tbl_wards(ward_id, ward_dis_id, ward_city_id) NOT VALID;
 
 
 --

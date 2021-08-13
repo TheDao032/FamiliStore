@@ -81,12 +81,11 @@ router.post('/list-deliveries', deliveryValidation.listDeliveries, async (req, r
 
 
 router.post('/add-city', deliveryValidation.newCity, async (req, res) => {
-	const { cityId, cityName } = req.body
+	const { cityName } = req.body
 
 	const presentDate = new Date()
 
 	const newCity = {
-		ci_id: cityId,
 		ci_name: cityName,
 		ci_created_date: presentDate
 	}
