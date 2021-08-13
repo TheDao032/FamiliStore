@@ -9,11 +9,10 @@ const errorCode = 1
 const successCode = 0
 
 router.post('/add-father', categoriesValidation.newCategoryFather, async (req, res) => {
-	const { cateId, cateName } = req.body
+	const { cateName } = req.body
 
 	const presentDate = new Date()
 	const newFatherCate = {
-		cate_id: cateId, 
 		cate_name: cateName,
 		cate_created_date: presentDate,
 		cate_updated_date: presentDate
@@ -27,7 +26,7 @@ router.post('/add-father', categoriesValidation.newCategoryFather, async (req, r
 })
 
 router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res) => {
-	const { cateId, cateName, cateFather } = req.body
+	const { cateName, cateFather } = req.body
 
 	const categoriyFatherInfo = categoriesModel.findById(cateFather)
 
@@ -40,7 +39,6 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 
 	const presentDate = new Date()
 	const newFatherCate = {
-		cate_id: cateId, 
 		cate_name: cateName,
 		cate_father: cateFather,
 		cate_created_date: presentDate,
@@ -55,8 +53,6 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 })
 
 router.get('/list', async (req, res) => {
-
-	let fullCategories = []
 
 	const listCategories = await categoriesModel.findAll()
 
