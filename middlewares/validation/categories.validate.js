@@ -4,10 +4,9 @@ const newCategoryFather = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		cateId: { type: 'string', pattern: '', maxLength: 5 },
 			cateName: { type: 'string', pattern: '' }
   		},
-		required: ["cateId", "cateName"],
+		required: ['cateName'],
 		additionalProperties: true
 	}
 
@@ -29,11 +28,10 @@ const newCategoryChild = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		cateId: { type: 'string', pattern: '', maxLength: 5 },
 			cateName: { type: 'string', pattern: '' },
 			cateFather: { type: 'string', pattern: '', maxLength: 5 }
   		},
-		required: ["cateId", "cateName"],
+		required: ['cateName', 'cateFather'],
 		additionalProperties: true
 	}
 

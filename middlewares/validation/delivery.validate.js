@@ -4,7 +4,7 @@ const listDistricts = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', maxLength: 5 }
+			cityId: { type: ['string', 'integer'] }
   		},
 		required: ['cityId'],
 		additionalProperties: true
@@ -28,8 +28,8 @@ const listWards = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', maxLength: 5 },
-			districtId: { type: 'string', maxLength: 5 }
+			cityId: { type: ['string', 'integer'] },
+			districtId: { type: ['string', 'integer'] }
   		},
 		required: ['cityId', 'districtId'],
 		additionalProperties: true
@@ -53,7 +53,7 @@ const listDeliveries = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'integer' }
+			accId: { type: ['integer', 'string'] }
   		},
 		required: ['accId'],
 		additionalProperties: true
@@ -77,10 +77,9 @@ const newCity = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', pattern: '' },
 			cityName: { type: 'string', pattern: '' }
   		},
-		required: ['cityId', 'cityName'],
+		required: ['cityName'],
 		additionalProperties: true
 	}
 
@@ -102,11 +101,10 @@ const newDistrict = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', pattern: '' },
-			distId: { type: 'string', pattern: '' },
+			cityId: { type: ['string', 'integer'] },
 			distName: { type: 'string', pattern: '' }
   		},
-		required: ['cityId', 'distId', 'distName'],
+		required: ['cityId', 'distName'],
 		additionalProperties: true
 	}
 
@@ -128,13 +126,12 @@ const newWard = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', pattern: '' },
-			distId: { type: 'string', pattern: '' },
-			wardId: { type: 'string', pattern: '' },
+			cityId: { type: ['string', 'integer'] },
+			distId: { type: ['string', 'integer'] },
 			wardName: { type: 'string', pattern: '' },
 			wardShipPrice: { type: 'string', pattern: '' }
   		},
-		required: ['cityId', 'distId', 'wardId', 'wardName', 'wardShipPrice'],
+		required: ['cityId', 'distId', 'wardName', 'wardShipPrice'],
 		additionalProperties: true
 	}
 
@@ -156,10 +153,10 @@ const newDelivery = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cityId: { type: 'string', pattern: '', maxLength: 5 },
-			distId: { type: 'string', pattern: '', maxLength: 5 },
-			wardId: { type: 'string', pattern: '', maxLength: 5 },
-			accId: { type: 'integer' },
+			cityId: { type: ['string', 'integer'] },
+			distId: { type: ['string', 'integer'] },
+			wardId: { type: ['string', 'integer'] },
+			accId: { type: ['string', 'integer'] },
 			delDetailAddress: { type: 'string', pattern: '' }
   		},
 		required: ['cityId', 'distId', 'accId', 'delDetailAddress', 'wardId'],
