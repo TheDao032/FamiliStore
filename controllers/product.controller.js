@@ -55,22 +55,62 @@ router.get('/list', async (req, res) => {
 })
 
 
-router.get('/list-best-sale', async (req, res) => {
-	const { catID } = req.params
+router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
+	const { limit, page } = req.body
 
-	var cat = await knex('tbl_categories').where('cate_id', catID)
-	if (cat.length === 0) {
+	const offset = limit * (page - 1)
+
+	var result = await knex.raw(`with productSale as(
+		select sum(bde.bdetail_quantity) as quantity,pro.* from (tbl_product pro join
+		tbl_bill_detail bde on pro.prod_id = bde.bdetail_product_id)
+		group by pro.prod_id
+		order by quantity desc
+		limit ${limit} offset ${offset}
+	)
+	select distinct pr.*,img.prod_img_data from productSale pr left join tbl_product_images img
+	on img.prod_img_product_id = pr.prod_id order by pr.quantity desc`)
+	
+	result = result.rows
+
+	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
-			message: "Category is not valid"
+			message: "limit and page parameter is not valid",
+			statusCode: errorCode
 		})
 	}
 
+	//process return list
+	var prodList = []
 
-	var result = await knex.from('tbl_product')
-		.where('prod_category_id', catID)
+	var index = 0
+	while (index < result.length) {
+		let prodObj = {
+			prod_id: result[index].prod_id,
+			prod_name: result[index].prod_name,
+			prod_category_id: result[index].prod_category_id,
+			prod_amount: result[index].prod_amount,
+			prod_description: result[index].prod_description,
+			prod_created_date: result[index].prod_created_date,
+			prod_updated_date: result[index].prod_updated_date,
+			prod_price: result[index].prod_price,
+			quantity: result[index].quantity
+		}
+		let imageLink = result[index].prod_img_data
+
+		if (index === 0) {
+			prodObj['images'] = imageLink
+			prodList.push(prodObj)
+		}
+		if (result[index].prod_id !== prodList[prodList.length - 1].prod_id) {
+			prodObj['images'] = imageLink
+			prodList.push(prodObj)
+		}
+		index += 1
+	}
+
 	if (result) {
 		return res.status(200).json({
-			listProduct: result,
+			listProduct: prodList,
 			statusCode: successCode
 		})
 	}
@@ -82,7 +122,6 @@ router.get('/list-best-sale', async (req, res) => {
 	}
 
 })
-
 
 
 
@@ -458,6 +497,5 @@ router.post('/delete/:id', async (req, res) => {
 		statusCode: successCode
 	})
 })
-
 
 module.exports = router

@@ -29,6 +29,31 @@ const updateProduct = (req, res, next) => {
 }
 
 
+const listBestSale = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+			limit: { type: 'integer'},
+			page: { type: 'integer'}
+		},
+		required: ["limit", "page"],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors[0])
+	}
+
+	next()
+}
 module.exports = {
-    updateProduct
+    updateProduct,
+	listBestSale
 }

@@ -8,27 +8,6 @@ const moment = require('moment')
 const errorCode = 1
 const successCode = 0
 
-router.post('/list-details', billValidation.listBillDetail, async (req, res) => {
-	const { accId, billId } = req.body
-	
-	const result = await knex('tbl_bill')
-		.join('tbl_bill_detail', 'bill_id', 'bdetail_bill_id')
-		.join('tbl_product', 'prod_id', 'bdetail_product_id')
-		.where({ bill_account_id: accId, bill_id: billId, bill_status: 0 })
-
-	if (result.length === 0) {
-		return res.status(404).json({
-			listBillDetail: [],
-			statusCode: errorCode
-		})
-	}
-
-	return res.status(404).json({
-		listBillDetail: result,
-		statusCode: successCode
-	})
-})
-
 router.post('/add', billValidation.newBill, async (req, res) => {
 	const { accId, totalPrice, totalQuantity, listProduct } = req.body
 
@@ -47,7 +26,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 
 	listProduct.forEach((prod) => {
 		var exists = Object.keys(listProductDB).some(function(key) {
-			if(listProductDB[key]['prod_id'] === prod.prodId){
+			if(listProductDB[key]['prod_id'] === Number(prod.prodId)){
 				countId++
 
 				if((listProductDB[key]['prod_amount'] - prod.prodQuantity) >= 0){
@@ -138,9 +117,9 @@ router.get('/details/:id', async (req, res) => {
 			description: proBdetail.prod_description,
 			image: image,
 			categoryId: proBdetail.prod_category_id,
-			salePrice: Number(proBdetail.prod_sale_price),
+			salePrice: null,
 			quantity: proBdetail.bdetail_quantity,
-			TotalPrice: proBdetail.bdetail_quantity * Number(proBdetail.prod_sale_price)
+			TotalPrice: proBdetail.bdetail_quantity * Number(proBdetail.bdetail_product_price)
 		}
 		
 		listItem[index] = item
@@ -164,38 +143,38 @@ router.get('/history-bill/:id', async (req, res) => {
 		})
 	}
 
-	const resultProductBdetail = await knex('tbl_bill_detail')
+	const resultProductBdetail = await knex('tbl_bill')
+		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
-		.where({bdetail_bill_id: id})
+		.where({bill_account_id: id}).orderBy('bill_created_date', 'desc')
 
-	const bill = await knex('tbl_bill').where({bill_id: id})
-
-	if (bill.length === 0 || resultProductBdetail.length === 0) {
+	if (resultProductBdetail.length === 0) {
 		return res.status(404).json({
-			message: 'bill id not exists',
+			message: 'account id not exists',
 			statusCode: errorCode
 		})
 	}
-
-	var expectedDate = new Date(bill[0].bill_created_date)
-    expectedDate.setDate(expectedDate.getDate() + 2)
-
-	createdDate = moment(bill[0].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
-	expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
 	
 	var listItem = []
 	var index = 0
 
 	resultProductBdetail.forEach((proBdetail) =>{
+		var expectedDate = new Date(proBdetail.bill_created_date)
+		expectedDate.setDate(expectedDate.getDate() + 2)
+
+		var createdDate = moment(proBdetail.bill_created_date).format('DD/MM/YYYY HH:mm:ss')
+		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
+
 		var item = {
-			id: proBdetail.bdetail_product_id,
+			id: proBdetail.bdetail_id,
 			title: proBdetail.prod_name,
 			price: Number(proBdetail.bdetail_product_price),
 			description: proBdetail.prod_description,
-			status: bill[0].bill_status,
+			status: proBdetail.bill_status,
 			createDate: createdDate,
 			expectedDate: expectedDate
 		}
+
 		listItem[index] = item
 		index++
 	})

@@ -12,7 +12,7 @@ const newBill = (req, res, next) => {
 				items: {
 					type: 'object',
 					properties: {
-						prodId: { type: 'integer'},
+						prodId: { type: 'string'},
 						prodQuantity: {type:'integer'}
 					},
 					required: ["prodId", "prodQuantity"],
