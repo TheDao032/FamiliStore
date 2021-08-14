@@ -6,9 +6,10 @@ const listComment = (req, res, next) => {
 		type: 'object',
 		properties: {
 			productID: { type: 'integer' },
-			page: { type: 'integer' }
+			page: { type: 'integer' },
+			limit : {type:'integer'}
 		},
-		required: ["productID", "page"],
+		required: ["productID", "page", "limit"],
 		additionalProperties: true
 	}
 

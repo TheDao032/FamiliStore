@@ -7,13 +7,21 @@ const successCode = 0
 const errorCode = 1
 
 router.get('/list', validator.listComment, async (req, res) => {
-	const { productID, page } = req.body;
+	const { productID, page, limit } = req.body;
 	
+	
+	if (page  < 1 || limit < 1 || limit > 10) {
+		return res.status(400).json({
+			message: "limit and page parameter is not valid",
+			statusCode: errorCode
+		})
+	}
+
 	result = await knex.select('tbl_comment.cmt_id as review_id', 'tbl_comment.cmt_content as content', 'tbl_comment.cmt_vote as star', 'tbl_comment.cmt_acc_id as user_id', 'tbl_account.acc_email as user_name', 'tbl_account.acc_avatar as user_avatar', 'tbl_comment.cmt_create_date as createdAt').from('tbl_comment')
 		.join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
 		.where('tbl_comment.cmt_product_id', productID)
-		.limit(3)
-		.offset(page * 3)
+		.limit(limit)
+		.offset((page - 1) * limit)
 		.orderBy('tbl_comment.cmt_create_date', 'desc')
 	var avgStar = await knex.raw(`select round(avg(cmt_vote),2) from tbl_comment where cmt_product_id = ${productID}`)
 	var numberOneStar = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 1`)
@@ -32,7 +40,7 @@ router.get('/list', validator.listComment, async (req, res) => {
 		commentList : result
 	}
 
-	console.log(returnedObject)
+	
 
 	if (result) {
 		return res.status(200).json({
