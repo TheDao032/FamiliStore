@@ -92,20 +92,6 @@ ALTER TABLE public.tbl_bill OWNER TO postgres;
 -- Name: tbl_bill_detail; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.tbl_bill_detail (
-    bdetail_id integer NOT NULL,
-    bdetail_bill_id integer,
-    bdetail_product_id integer,
-    bdetail_quantity integer,
-    bdetail_product_price character varying(100),
-    bdetail_status integer DEFAULT 0,
-    bdetail_created_date date,
-    bdetail_updated_date date
-);
-
-
-ALTER TABLE public.tbl_bill_detail OWNER TO postgres;
-
 --
 -- Name: tbl_bill_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -119,6 +105,21 @@ CREATE SEQUENCE public.tbl_bill_detail_id_seq
 
 
 ALTER TABLE public.tbl_bill_detail_id_seq OWNER TO postgres;
+
+CREATE TABLE public.tbl_bill_detail (
+    bdetail_id integer DEFAULT nextval('public.tbl_bill_detail_id_seq'::regclass) NOT NULL,
+    bdetail_bill_id integer,
+    bdetail_product_id integer,
+    bdetail_quantity integer,
+    bdetail_product_price character varying(100),
+    bdetail_status integer DEFAULT 0,
+    bdetail_created_date date,
+    bdetail_updated_date date
+);
+
+
+ALTER TABLE public.tbl_bill_detail OWNER TO postgres;
+
 
 --
 -- Name: tbl_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -296,6 +297,7 @@ CREATE TABLE public.tbl_product (
     prod_created_date date,
     prod_updated_date date,
     prod_price character varying(100),
+	prod_description character varying(1000),
     prod_status integer DEFAULT 0
 );
 
