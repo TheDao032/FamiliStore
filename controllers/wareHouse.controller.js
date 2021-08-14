@@ -28,6 +28,14 @@ router.get('/list', async (req, res) => {
 })
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
+
+	if(isNaN(Number(id))){
+		return res.status(404).json({
+			message: 'id must be of integer type',
+			statusCode: errorCode
+		})
+	}
+	
 	const result = await wareHouseModel.findById(id)
 
 	if (result) {
@@ -78,6 +86,13 @@ router.post('/add', wareHouseValidation.newWareHouse, async (req, res) => {
 
 router.post('/delete/:id', async (req, res) => {
 	const { id } = req.params
+
+	if(isNaN(Number(id))){
+		return res.status(404).json({
+			message: 'id must be of integer type',
+			statusCode: errorCode
+		})
+	}
 
 	const result = await knex('tbl_ware_house').where('sto_id', id).update({ sto_status: 1 })
 
