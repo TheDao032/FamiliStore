@@ -18,7 +18,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	const accountDB = await knex('tbl_account').where("acc_id", accId)
 
 	if(accountDB.length === 0){
-		return res.status(404).json({
+		return res.status(400).json({
 			errorMessage: 'account id not exists',
 			statusCode: errorCode
 		})
@@ -43,14 +43,14 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	})
 	
 	if(countId !== listProduct.length){
-		return res.status(404).json({
+		return res.status(400).json({
 			errorMessage: 'product id not exists',
 			statusCode: errorCode
 		})
 	}
 
 	if(countAmount !== listProduct.length){
-		return res.status(404).json({
+		return res.status(400).json({
 			errorMessage: 'quantity exceeds the number that exists',
 			statusCode: errorCode
 		})
@@ -75,11 +75,12 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		statusCode: successCode
 	})
 })
+
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 
 	if(isNaN(Number(id))){
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'id must be of integer type',
 			statusCode: errorCode
 		})
@@ -93,7 +94,7 @@ router.get('/details/:id', async (req, res) => {
 	const bill = await knex('tbl_bill').where({bill_id: id})
 
 	if (bill.length === 0 || resultProductBdetail.length === 0) {
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'bill id not exists',
 			statusCode: errorCode
 		})
@@ -137,7 +138,7 @@ router.get('/history-bill/:id', async (req, res) => {
 	const { id } = req.params
 
 	if(isNaN(Number(id))){
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'id must be of integer type',
 			statusCode: errorCode
 		})
@@ -149,7 +150,7 @@ router.get('/history-bill/:id', async (req, res) => {
 		.where({bill_account_id: id}).orderBy('bill_created_date', 'desc')
 
 	if (resultProductBdetail.length === 0) {
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'account id not exists',
 			statusCode: errorCode
 		})
@@ -164,13 +165,19 @@ router.get('/history-bill/:id', async (req, res) => {
 
 		var createdDate = moment(proBdetail.bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-
+		var status = 'packing'
+		if(proBdetail.bill_status === 1){
+			status = 'transported'
+		}
+		else if(proBdetail.bill_status === 2){
+			status = 'recieve'
+		}
 		var item = {
 			id: proBdetail.bdetail_id,
 			title: proBdetail.prod_name,
 			price: Number(proBdetail.bdetail_product_price),
 			description: proBdetail.prod_description,
-			status: proBdetail.bill_status,
+			status: status,
 			createDate: createdDate,
 			expectedDate: expectedDate
 		}
@@ -180,7 +187,35 @@ router.get('/history-bill/:id', async (req, res) => {
 	})
 
 	return res.status(200).json({
-		listItemInBill: listItem,
+		listItemOfAccount: listItem,
+		statusCode: successCode
+	})
+})
+
+router.post('/update-status', billValidation.updateStatusBill, async (req, res) => {
+	const { billId, status } = req.body
+	var upStatus = 0
+
+	const resultBill = await knex('tbl_bill').where("bill_id", billId)
+
+	if(resultBill.length === 0){
+		return res.status(400).json({
+			errorMessage: 'bill id not exists',
+			statusCode: errorCode
+		})
+	}
+	//packing
+	if(status === 'transported'){
+		upStatus = 1
+	}
+	else if(status === 'recieve'){
+		upStatus = 2
+	}
+	let present = moment().format('YYYY-MM-DD HH:mm:ss')
+
+	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
+
+	return res.status(200).json({
 		statusCode: successCode
 	})
 })

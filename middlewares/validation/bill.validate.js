@@ -38,6 +38,31 @@ const newBill = (req, res, next) => {
 	next()
 }
 
+const updateStatusBill = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+			billId: { type: 'string', pattern: '' },
+    		status: { type: 'string', pattern: '' }
+  		},
+		required: ["billId", "status"],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json(validator.errors[0])
+	}
+
+	next()
+}
+
 const listBillDetail = (req, res, next) => {
 	const shema = {
   		type: 'object',
@@ -66,5 +91,6 @@ const listBillDetail = (req, res, next) => {
 
 module.exports = {
     newBill,
+	updateStatusBill,
     listBillDetail
 }
