@@ -86,7 +86,7 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 	)
 	select distinct pr.*,img.prod_img_data from productSale pr left join tbl_product_images img
 	on img.prod_img_product_id = pr.prod_id order by pr.quantity desc`)
-	
+
 	result = result.rows
 
 	if (page < 1 || limit < 1 || limit > 10) {
@@ -143,7 +143,7 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 
 router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
-	const { limit, page, catID} = req.body
+	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
 
 
@@ -183,7 +183,7 @@ router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
 			prod_created_date: result[index].prod_created_date,
 			prod_updated_date: result[index].prod_updated_date,
 			prod_price: result[index].prod_price,
-			avgStar : result[index].avgstar
+			avgStar: result[index].avgstar
 		}
 		let imageLink = result[index].prod_img_data
 		if (index === 0) {
@@ -196,6 +196,7 @@ router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
 		}
 		index += 1
 	}
+
 
 	if (result) {
 		return res.status(200).json({
@@ -213,7 +214,7 @@ router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
 })
 
 router.get('/list-by-cat', async (req, res) => {
-	const { limit, page } = req.body
+	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
 
 
@@ -226,6 +227,7 @@ router.get('/list-by-cat', async (req, res) => {
 
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
+		where tbl_product.prod_category_id = ${catID}
 		order by prod_created_date desc
 		offset ${offset}
 		limit ${limit}
@@ -265,8 +267,12 @@ router.get('/list-by-cat', async (req, res) => {
 		index += 1
 	}
 
+	var numberOfProduct = await knex.raw(`select count(prod_id) from tbl_categories join tbl_product on tbl_product.prod_category_id = tbl_categories.cate_id where tbl_categories.cate_id = ${catID}`)
+
+
 	if (result) {
 		return res.status(200).json({
+			numberProduct : numberOfProduct.rows[0],
 			listProduct: prodList,
 			statusCode: successCode
 		})
