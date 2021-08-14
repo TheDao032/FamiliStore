@@ -166,7 +166,7 @@ router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id order by avgStar desc`)
 
 	result = result.rows
-	console.log(result)
+
 
 
 	//process return list
@@ -236,7 +236,6 @@ router.get('/list-by-cat', async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 
 	result = result.rows
-	console.log(result)
 
 
 	//process return list
@@ -309,7 +308,6 @@ router.get('/details/:id', async (req, res) => {
 		.then(async (rows) => {
 			prodObject = rows[0];
 
-			console.log(rows[0].prod_created_date)
 			var imageResult = await knex.from('tbl_product_images')
 				.where('prod_img_product_id', prodObject.prod_id);
 			prodObject['prod_img'] = imageResult.map(attr => attr.prod_img_data);
@@ -370,7 +368,7 @@ router.post('/add', async (req, res) => {
 	if (errorFromValidateImage !== '') {
 		errorMessage = errorMessage + errorFromValidateImage
 	}
-	console.log(errorMessage)
+
 	if (errorMessage !== "") {
 		return res.status(400).json({
 			message: errorMessage,
