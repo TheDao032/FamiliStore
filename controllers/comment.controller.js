@@ -8,9 +8,9 @@ const errorCode = 1
 
 router.get('/list', validator.listComment, async (req, res) => {
 	const { productID, page, limit } = req.body;
-	
-	
-	if (page  < 1 || limit < 1 || limit > 10) {
+
+
+	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
 			message: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -31,24 +31,24 @@ router.get('/list', validator.listComment, async (req, res) => {
 	var numberFiveStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 5`)
 
 	var returnedObject = {
-		avgStar : avgStar.rows[0].round,
+		avgStar: avgStar.rows[0].round,
 		numberOneStar: numberOneStar.rows[0].count,
 		numberTwoStars: numberTwoStars.rows[0].count,
 		numberThreeStars: numberThreeStars.rows[0].count,
 		numberFourStars: numberFourStars.rows[0].count,
 		numberFiveStars: numberFiveStars.rows[0].count,
-		commentList : result
+		commentList: result
 	}
 
-	
+
 
 	if (result) {
 		return res.status(200).json({
 			listComment: returnedObject,
-			statusCode: successCode	
+			statusCode: successCode
 		})
 	}
-	
+
 	return res.status(500).json({
 		listComment: [],
 		statusCode: errorCode
@@ -103,7 +103,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 
 	if (comment.length === 0) {
 		return res.status(400).json({
-			message: "user cannot edit comment of another user",
+			message: "user cannot edit comment of another user or comment doesn't exists",
 			statusCode: errorCode
 		})
 	}

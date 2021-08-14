@@ -424,15 +424,22 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 		.where('prod_name', prodName)
 		.andWhere('prod_category_id', prodCategoryID)
 
+	var updateProduct = await knex('tbl_product')
+								.where('prod_id', id)
+
 	var cat = await knex('tbl_categories')
 		.where('cate_id', prodCategoryID)
-
+	
 	if (cat.length === 0) {
 		errorMessage = " Category doesn't exists!"
 	}
 
 	if (prod.length !== 0) {
-		errorMessage = errorMessage + " Product record with the same name exists!"
+		errorMessage = errorMessage + " Product record with the same name exist!"
+	}
+
+	if(updateProduct.length === 0){
+		errorMessage = errorMessage + " Product record to update doesn't exist!"
 	}
 
 	if (errorMessage !== '') {
@@ -445,11 +452,11 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	await knex('tbl_product')
 		.where('prod_id', id)
 		.update({
-			prod_name: typeof prodName !== 'undefined' ? prodName : prod[0].prod_name,
-			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : prod[0].prod_category_id,
-			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : prod[0].prod_amount,
-			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : prod[0].prod_price,
-			prod_description: typeof prodDescription !== 'undefined' ? prodDescription : prod[0].prod_price,
+			prod_name: typeof prodName !== 'undefined' ? prodName : updateProduct[0].prod_name,
+			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : updateProduct[0].prod_category_id,
+			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : updateProduct[0].prod_amount,
+			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : updateProduct[0].prod_price,
+			prod_description: typeof prodDescription !== 'undefined' ? prodDescription : updateProduct[0].prod_price,
 			prod_status: 1,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
 		})

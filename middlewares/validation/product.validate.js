@@ -81,10 +81,10 @@ const updateProduct = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			prodName: { type: 'string', pattern: '' },
-			prodCategoryID: { type: 'string', pattern: '' },
-			prodAmount: { type: 'integer', pattern: '' },
-			prodPrice: { type: 'integer', pattern: '' }
+			prodName: { type: 'string' },
+			prodCategoryID: { type: 'integer' },
+			prodAmount: { type: 'integer'},
+			prodPrice: { type: 'integer' }
 		},
 		required: [],
 		additionalProperties: true
