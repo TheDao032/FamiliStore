@@ -1,5 +1,5 @@
 --
--- PostgreSQL database dump
+-- postgresQL database dump
 --
 
 -- Dumped from database version 13.3 (Ubuntu 13.3-1.pgdg20.04+1)
@@ -489,12 +489,12 @@ COPY public.tbl_comment (cmt_id, cmt_content, cmt_product_id, cmt_vote, cmt_stat
 -- Data for Name: tbl_delivery_address; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, del_city_id, del_user_id, del_status, del_ward) FROM stdin;
+COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, del_city_id, del_user_id, del_status, del_ward_id) FROM stdin;
 \.
 
 
 --
--- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+-- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
@@ -886,6 +886,6 @@ GRANT ALL ON LANGUAGE plpgsql TO postgres;
 
 
 --
--- PostgreSQL database dump complete
+-- postgresQL database dump complete
 --
 
