@@ -50,7 +50,7 @@ router.post('/login', authenticationValidate.login, (req, res) => {
 })
 
 router.post('/register', authenticationValidate.register, async (req, res) => {
-	const {passWord, email, fullName, phoneNumber, role } = req.body
+	const { passWord, email, fullName, phoneNumber, role } = req.body
 	let dateOb = new Date()
 
 	// check unique email

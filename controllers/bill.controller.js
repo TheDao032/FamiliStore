@@ -74,7 +74,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 
 
 	return res.status(200).json({
-		message: result.rows[0].message,
+		errorMessage: result.rows[0].message,
 		statusCode: successCode
 	})
 })
@@ -85,7 +85,7 @@ router.get('/details/:id', async (req, res) => {
 
 	if(isNaN(Number(id))){
 		return res.status(400).json({
-			message: 'id must be of integer type',
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
@@ -100,7 +100,7 @@ router.get('/details/:id', async (req, res) => {
 
 	if (bill.length === 0 || resultProductBdetail.length === 0) {
 		return res.status(400).json({
-			message: 'bill id not exists',
+			errorMessage: 'bill id not exists',
 			statusCode: errorCode
 		})
 	}
@@ -145,7 +145,7 @@ router.get('/history-bill/:id', async (req, res) => {
 
 	if(isNaN(Number(id))){
 		return res.status(400).json({
-			message: 'id must be of integer type',
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
@@ -157,7 +157,7 @@ router.get('/history-bill/:id', async (req, res) => {
 
 	if (resultProductBdetail.length === 0) {
 		return res.status(400).json({
-			message: 'account id not exists',
+			errorMessage: 'account id not exists',
 			statusCode: errorCode
 		})
 	}
@@ -248,7 +248,7 @@ router.get('/test', async (req, res) => {
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
-			message: "limit and page parameter is not valid",
+			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
 		})
 	}

@@ -34,7 +34,7 @@ router.get('/details/:id', async (req, res) => {
 	
 	if(isNaN(Number(id))){
 		return res.status(400).json({
-			message: 'id must be of integer type',
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
@@ -158,7 +158,7 @@ router.post('/delete/:id',async (req, res) => {
 
 	if(isNaN(Number(id))){
 		return res.status(400).json({
-			message: 'id must be of integer type',
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
