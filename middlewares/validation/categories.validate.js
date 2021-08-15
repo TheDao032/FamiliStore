@@ -18,7 +18,7 @@ const newCategoryFather = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -43,7 +43,7 @@ const newCategoryChild = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -69,7 +69,7 @@ const updateCategory = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -93,7 +93,7 @@ const listCategoryChild = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -117,7 +117,7 @@ const deleteCategory = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()

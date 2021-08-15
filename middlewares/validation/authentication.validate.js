@@ -19,7 +19,7 @@ const login = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -46,7 +46,7 @@ const register = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -71,7 +71,7 @@ const confirmToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -97,7 +97,7 @@ const forgotPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -123,7 +123,7 @@ const newPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -148,7 +148,7 @@ const refreshToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()

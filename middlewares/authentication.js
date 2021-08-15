@@ -21,7 +21,7 @@ const commonService = require('../services/commonService')
 const verifyToken = (req, res, next) => {
     req.account = undefined
     if (!req.headers || !req.headers.authorization)
-        return res.status(401).json({
+        return res.status(400).json({
             errorMessage: 'Unauthorized User!',
             statusCode: 3, //
         })
@@ -29,7 +29,7 @@ const verifyToken = (req, res, next) => {
     const token = req.headers.authorization
     return jsonWebToken.verify(token, environment.secret, async (err, decode) => {
         if (err)
-            return res.status(401).json({
+            return res.status(400).json({
                 errorMessage: err,
                 statusCode: 2,
             })
@@ -37,7 +37,7 @@ const verifyToken = (req, res, next) => {
         const roleId = await authenticationService.getRole(account.accId)
         
 		if (roleId === '') {
-			return res.status(401).json({
+			return res.status(400).json({
                 statusCode: 6,
             })
 		}
