@@ -1,6 +1,8 @@
 const moment = require('moment')
 const environment = require('../environments/environment')
 const knex = require('../utils/dbConnection')
+const bcrypt = require('bcrypt')
+const accountModel = require('../models/account.model')
 
 const errorCode = 1
 const successCode = 0
@@ -8,48 +10,50 @@ const successCode = 0
 const getRole = async (acc_id) => {
 	const accRole = await knex('tbl_account').where({ acc_id: acc_id }).select('acc_role')
 
-	if (accRole.lenght !== 0) {
+	if (accRole.length !== 0) {
 		return accRole[0].acc_role
 	} else {
-		throw new Error('acc_id does not exist')
+		return ''
 	}
 }
 
-const authenticate = (username, password, callback) => {
-	knex('tbl_account').where({ acc_username: username, acc_password: password }).select('*')
-		.then((result) => {
-			if (result.lenght === 0) {
-				throw new Error('User Not Found')
-			}
 
-			const { acc_id, acc_full_name } = result[0]
-			const auth = {
-				username,
-				acc_id,
+const authenticate = async (email, password, callback, req, res) => {
+	const result = await accountModel.findActiveUser(email)
+
+	if (result.length === 0) {
+		return res.status(500).json({ 
+			errorMessage: 'User Does Not Exist!',
+			statusCode: errorCode
+		})
+	}
+
+	if (!bcrypt.compareSync(password, result[0].acc_password)) {
+		return res.status(500).json({ 
+			errorMessage: 'Password Incorrect!',
+			statusCode: errorCode
+		})
+	}
+
+	const { acc_id, acc_status } = result[0]
+	const auth = {
+		accStaus: acc_status,
+		accId: acc_id,
+	}
+	const info = await Promise.all([
+		auth, 
+		getRole(acc_id).then((role) => {
+			return {
+				role,
+				accStatus: acc_status,
+				accId: acc_id
 			}
-			console.log(auth)
-			return Promise.all([
-				auth, 
-				getRole(acc_id).then((role_id) => {
-					return {
-						role_id,
-						acc_full_name,
-						acc_id
-					}
-				})
-			])
 		})
-		.then(([auth, info]) => {
-			console.log('auth', auth)
-			console.log('info', info)
-			const user = {
-				...info
-			}
-			callback(null, auth, user)
-		})
-		.catch((err) => {
-			throw new Error(err.toString())
-		})
+	])
+	const user = {
+		...info[1]
+	}
+	callback(null, auth, user)
 }
 
 module.exports = {
