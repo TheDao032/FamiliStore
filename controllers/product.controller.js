@@ -185,7 +185,7 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
 	from tbl_product join tbl_comment on tbl_product.prod_id = tbl_comment.cmt_product_id
 	where tbl_product.prod_category_id = ${catID}`)
-	result = result.rows
+
 
 	numberPage = Number(numberPage.rows[0].count)
 	if (numberPage > limit) {
@@ -194,6 +194,8 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	else {
 		numberPage = 1
 	}
+
+
 	var result = await knex.raw(`with product as(
 		select tbl_product.*, round(avg(tbl_comment.cmt_vote),2) as avgStar
 		from tbl_product join tbl_comment on tbl_product.prod_id = tbl_comment.cmt_product_id
@@ -206,7 +208,6 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id order by avgStar desc`)
 
 	result = result.rows
-
 
 
 	//process return list
@@ -287,7 +288,7 @@ router.post('/list-by-cat', async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 
 	result = result.rows
-
+		console.log(result)
 
 	//process return list
 	var prodList = []
@@ -382,7 +383,7 @@ router.post('/add', async (req, res) => {
 
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodDescription, prodStatus } = req.body
 	var images = req.files //need to get image from input type file, name is 'image'
-
+	console.log(req.body)
 	var errorMessage = "";
 	//validate field
 	if (prodName === undefined || prodCategoryID === undefined || prodAmount === undefined || prodPrice === undefined || req.files.image === undefined) {
