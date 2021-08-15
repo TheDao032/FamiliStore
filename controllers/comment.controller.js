@@ -6,7 +6,7 @@ const validator = require('../middlewares/validation/comment.validate')
 const successCode = 0
 const errorCode = 1
 
-router.get('/list', validator.listComment, async (req, res) => {
+router.post('/list', validator.listComment, async (req, res) => {
 	const { productID, page, limit } = req.body;
 
 

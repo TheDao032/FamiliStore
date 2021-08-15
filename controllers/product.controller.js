@@ -9,7 +9,7 @@ const validator = require('../middlewares/validation/product.validate')
 const successCode = 0
 const errorCode = 1
 
-router.get('/list', validator.listProduct, async (req, res) => {
+router.post('/list', validator.listProduct, async (req, res) => {
 	const { page, limit } = req.body
 	const offset = limit * (page - 1)
 
@@ -72,7 +72,7 @@ router.get('/list', validator.listProduct, async (req, res) => {
 })
 
 
-router.get('/list-best-sale', validator.listBestSale, async (req, res) => {
+router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 	const { limit, page } = req.body
 
 	const offset = limit * (page - 1)
@@ -142,7 +142,7 @@ router.get('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 
 
-router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
+router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
 
@@ -213,7 +213,7 @@ router.get('/list-suggestion', validator.listSuggestion, async (req, res) => {
 
 })
 
-router.get('/list-by-cat', async (req, res) => {
+router.post('/list-by-cat', async (req, res) => {
 	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
 
