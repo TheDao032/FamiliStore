@@ -18,7 +18,7 @@ const listDistricts = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -43,7 +43,7 @@ const listWards = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -67,7 +67,7 @@ const listDeliveries = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -91,7 +91,7 @@ const newCity = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -116,7 +116,7 @@ const newDistrict = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -143,7 +143,7 @@ const newWard = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -171,7 +171,7 @@ const newDelivery = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
