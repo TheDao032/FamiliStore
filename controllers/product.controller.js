@@ -72,7 +72,7 @@ router.get('/list', validator.listProduct, async (req, res) => {
 })
 
 
-router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
+router.get('/list-best-sale', validator.listBestSale, async (req, res) => {
 	const { limit, page } = req.body
 
 	const offset = limit * (page - 1)
@@ -224,7 +224,8 @@ router.get('/list-by-cat', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-
+	
+	//cat not exists
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
 		where tbl_product.prod_category_id = ${catID}
