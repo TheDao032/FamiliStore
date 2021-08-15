@@ -1,4 +1,4 @@
-const { ClientCredentials, ResourceOwnerPassword, AuthorizationCode } = require('simple-oauth2');
+const { ClientCredentials, ResourceOwnerPassword, AuthorizationCode } = require('simple-oauth2')
 const jsonWebToken = require('jsonwebtoken')
 const environment = require('../environments/environment')
 
@@ -21,32 +21,30 @@ const commonService = require('../services/commonService')
 const verifyToken = (req, res, next) => {
     req.account = undefined
     if (!req.headers || !req.headers.authorization)
-        return res.status(401).json({
-            err: 'Unauthorized User!',
-            code: 3, //
+        return res.status(400).json({
+            errorMessage: 'Unauthorized User!',
+            statusCode: 3, //
         })
 
     const token = req.headers.authorization
-    return jsonWebToken.verify(token, environment.secret, (err, decode) => {
+    return jsonWebToken.verify(token, environment.secret, async (err, decode) => {
         if (err)
-            return res.status(401).json({
-                err,
-                code: 2, //
+            return res.status(400).json({
+                errorMessage: err,
+                statusCode: 2,
             })
         const account = decode
-        return authenticationService
-            .getRole(account.acc_id)
-            .then((role_id) => {
-                account.acc_role = role_id
-                req.account = account
+        const roleId = await authenticationService.getRole(account.accId)
+        
+		if (roleId === '') {
+			return res.status(400).json({
+                statusCode: 6,
             })
-            .catch(() =>
-                res.status(401).json({
-                    err,
-                    code: 6, //
-                })
-            )
-            .then(next)
+		}
+		account.accRole = roleId
+        req.account = account
+
+		next()
     })
 }
 
@@ -78,9 +76,9 @@ function saveValuesToCookie(token, res) {
 }
 
 async function getTokenFromCode(auth_code, res) {
-	const client = new AuthorizationCode(config);
+	const client = new AuthorizationCode(config)
 	const result = await client.getToken({
-		code: auth_code,
+		statusCode: auth_code,
 		redirect_uri: environment.APP_REDIRECT_URI,
 		scope: environment.APP_SCOPE
 	})
@@ -106,7 +104,7 @@ function clearCookies(res) {
 }
 
 async function getAccessToken(data, res) {
-	const client = new AuthorizationCode(config);
+	const client = new AuthorizationCode(config)
 	const accessToken = data.access_token
 	if (accessToken) {
 		const newDate = new Date(data.expires_at).getTime()

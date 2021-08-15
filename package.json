@@ -1,16 +1,25 @@
 {
   "dependencies": {
+    "@sendgrid/mail": "^7.4.5",
+    "ajv": "^8.6.2",
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
+    "cloudinary": "^1.26.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "express-fileupload": "^1.2.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.7",
     "moment": "^2.29.1",
     "morgan": "^1.10.0",
+    "multer": "^1.4.2",
     "nodemon": "^2.0.12",
     "path": "^0.12.7",
     "pg": "^8.6.0",
-    "simple-oauth2": "^4.2.0"
+    "randomstring": "^1.2.1",
+    "simple-oauth2": "^4.2.0",
+    "streamifier": "^0.1.1"
   },
   "name": "20424010",
   "description": "path: ./environments/environment.js # Start Server \tcommand line: node app.js",

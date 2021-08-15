@@ -1,18 +1,6 @@
-const environment = require('../environments/environment')
+var environment = process.env.NODE_ENV || 'development'
+var config = require('../knexfile.js')[environment]
 
-const knex = require('knex')({
-	client: environment.configDatabase.client,
-    connection: {
-    	host: environment.configDatabase.host,
-		port: environment.configDatabase.port,
-      	user: environment.configDatabase.user,
-      	password: environment.configDatabase.password,
-      	database: environment.configDatabase.dbName
-    },
-	pool: {
-		min: environment.configDatabase.minPool,
-		max: environment.configDatabase.maxPool
-	}
-})
+const knex = require('knex')(config)
 
 module.exports = knex
