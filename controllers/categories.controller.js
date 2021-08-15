@@ -164,7 +164,7 @@ router.post('/update', categoriesValidation.updateCategory, async (req, res) => 
 	let presentDate = new Date()
 	const cateUpdate = {
 		cate_name: cateName,
-		cate_father: cateFather,
+		cate_father: cateFather && cateFather !== '' ? cateFather : null,
 		cate_updated_date: presentDate
 	}
 
