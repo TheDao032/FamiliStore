@@ -137,7 +137,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 })
 
 router.post('/delete', validator.deleteComment, async (req, res) => {
-	const { commentID, accountID } = req.query
+	const { commentID, accountID } = req.body
 
 	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
 	if (comment.length === 0) {
