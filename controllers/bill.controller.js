@@ -66,7 +66,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 									[listObjectToJson, accId, totalPrice, totalQuantity,present,0, ''])
 
 	if(result.rows[0].resultcode === 1){
-		return res.status(500).json({
+		return res.status(400).json({
 			errorMessage: result.rows[0].message,
 			statusCode: errorCode
 		})
@@ -289,7 +289,7 @@ router.get('/test', async (req, res) => {
 		})
 	}
 	else {
-		return res.status(500).json({
+		return res.status(200).json({
 			listProduct: [],
 			statusCode: errorCode
 		})

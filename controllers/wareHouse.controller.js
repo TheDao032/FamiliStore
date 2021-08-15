@@ -21,7 +21,7 @@ router.get('/list', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listWareHouse: [],
 		statusCode: errorCode
 	})
@@ -30,8 +30,8 @@ router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 
 	if(isNaN(Number(id))){
-		return res.status(404).json({
-			message: 'id must be of integer type',
+		return res.status(400).json({
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
@@ -45,7 +45,7 @@ router.get('/details/:id', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listWareHouse: [],
 		statusCode: errorCode
 	})
@@ -88,8 +88,8 @@ router.post('/delete/:id', async (req, res) => {
 	const { id } = req.params
 
 	if(isNaN(Number(id))){
-		return res.status(404).json({
-			message: 'id must be of integer type',
+		return res.status(400).json({
+			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}

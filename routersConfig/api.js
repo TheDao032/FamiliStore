@@ -18,7 +18,7 @@ API.use('/delivery', deliveriesController)
 API.use('/comment', commentController)
 
 API.use((req, res, next) => {
-	return res.status(404).json({
+	return res.status(400).json({
 		errorMessage: 'API Url Not Found',
 		statusCode: 1
 	})
@@ -26,7 +26,7 @@ API.use((req, res, next) => {
 
 API.use((err, req, res, next) => {
 	return res.status(500).json({
-		errorMessage: err,
+		err,
 		statusCode: 1
 	})
 })

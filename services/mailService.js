@@ -16,7 +16,7 @@ const sendMail = async (mailOptions, req, res) => {
     
     await sendgrid.send(mailOptions, (error, result) => {
 		if (error) {
-			return res.status(400).json({
+			return res.status(500).json({
 				errorMessage: error,
 				statusCode: errorCode
 			})
