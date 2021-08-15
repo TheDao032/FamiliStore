@@ -142,7 +142,7 @@ CREATE TABLE public.tbl_categories (
     cate_id integer DEFAULT nextval('public.tbl_categories_id_seq'::regclass) NOT NULL,
     cate_name character varying(100),
     cate_status integer DEFAULT 0,
-    cate_father integer,
+    cate_father character varying(5) DEFAULT NULL::character varying,
     cate_created_date date,
     cate_updated_date date
 );
