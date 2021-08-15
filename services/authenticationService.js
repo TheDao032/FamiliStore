@@ -22,14 +22,14 @@ const authenticate = async (email, password, callback, req, res) => {
 	const result = await accountModel.findActiveUser(email)
 
 	if (result.length === 0) {
-		return res.status(500).json({ 
+		return res.status(400).json({ 
 			errorMessage: 'User Does Not Exist!',
 			statusCode: errorCode
 		})
 	}
 
 	if (!bcrypt.compareSync(password, result[0].acc_password)) {
-		return res.status(500).json({ 
+		return res.status(400).json({ 
 			errorMessage: 'Password Incorrect!',
 			statusCode: errorCode
 		})

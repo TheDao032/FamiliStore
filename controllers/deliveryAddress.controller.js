@@ -17,7 +17,7 @@ router.get('/list-cities', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listcities: [],
 		statuscode: errorcode
 	})
@@ -35,7 +35,7 @@ router.post('/list-ward', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listcities: [],
 		statuscode: errorcode
 	})
@@ -53,7 +53,7 @@ router.post('/list-districts', deliveryValidation.listDistricts, async (req, res
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listDistricts: [],
 		statusCode: errorCode
 	})

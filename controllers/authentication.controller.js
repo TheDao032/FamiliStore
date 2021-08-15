@@ -220,7 +220,7 @@ router.post('/refresh-token', authenticationValidate.refreshToken, async (req, r
 
 	jsonWebToken.verify(accessToken, environment.secret, { ignoreExpiration: true }, async (err, decode) => {
         if (err) {
-			return res.status(401).json({
+			return res.status(500).json({
                 err,
                 statusCode: 3,
             })
@@ -240,7 +240,7 @@ router.post('/refresh-token', authenticationValidate.refreshToken, async (req, r
 			})
 		}
 
-		return res.status(401).json({
+		return res.status(400).json({
 			errorMessage: 'InValid Refresh Token',
 			statusCode: 2,
 		})
