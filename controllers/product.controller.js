@@ -287,7 +287,7 @@ router.post('/list-by-cat', async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 
 	result = result.rows
-		console.log(result)
+
 
 	//process return list
 	var prodList = []
