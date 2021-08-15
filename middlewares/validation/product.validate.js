@@ -20,7 +20,7 @@ const listProduct = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -46,7 +46,7 @@ const listSuggestion = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -72,7 +72,7 @@ const listByCategory = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -98,7 +98,7 @@ const updateProduct = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
@@ -124,7 +124,7 @@ const listBestSale = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(400).json(validator.errors[0])
+		return res.status(500).json(validator.errors[0])
 	}
 
 	next()
