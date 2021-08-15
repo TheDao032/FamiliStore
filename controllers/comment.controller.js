@@ -12,7 +12,7 @@ router.get('/list', validator.listComment, async (req, res) => {
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
-			message: "limit and page parameter is not valid",
+			errorerrorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
 		})
 	}
@@ -49,7 +49,7 @@ router.get('/list', validator.listComment, async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listComment: [],
 		statusCode: errorCode
 	})
@@ -63,14 +63,14 @@ router.post('/add', validator.newComment, async (req, res) => {
 
 	if (acc.length === 0) {
 		return res.status(400).json({
-			message: "account doesn't exist",
+			errorMessage: "account doesn't exist",
 			statusCode: errorCode
 		})
 	}
 
 	if (prod.length === 0) {
 		return res.status(400).json({
-			message: "product doesn't exist",
+			errorMessage: "product doesn't exist",
 			statusCode: errorCode
 		})
 	}
@@ -79,7 +79,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 	var isValid = regex.test(vote)
 	if (!isValid) {
 		return res.status(400).json({
-			message: "vote value is not valid, need to be from 0 to 5",
+			errorMessage: "vote value is not valid, need to be from 0 to 5",
 			statusCode: errorCode
 		})
 	}
@@ -103,7 +103,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 
 	if (comment.length === 0) {
 		return res.status(400).json({
-			message: "user cannot edit comment of another user or comment doesn't exist",
+			errorMessage: "user cannot edit comment of another user or comment doesn't exist",
 			statusCode: errorCode
 		})
 	}
@@ -111,7 +111,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 	var isValid = regex.test(vote)
 	if (!isValid) {
 		return res.status(400).json({
-			message: "vote value is not valid, need to be from 0 to 5",
+			errorMessage: "vote value is not valid, need to be from 0 to 5",
 			statusCode: errorCode
 		})
 	}
@@ -119,7 +119,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 	if (vote != undefined && content != undefined) {
 		if (vote == comment[0].cmt_vote && content == comment[0].cmt_content) {
 			return res.status(400).json({
-				message: "vote and content of new comment need to be different with the old one",
+				errorMessage: "vote and content of new comment need to be different with the old one",
 				statusCode: errorCode
 			})
 		}
@@ -143,16 +143,11 @@ router.post('/delete', validator.deleteComment, async (req, res) => {
 	var comment = await knex('tbl_comment').where('cmt_id', id).andWhere('cmt_acc_id', accountID)
 	if (comment.length === 0) {
 		return res.status(400).json({
-			message: "user cannot delete comment of another user",
+			errorMessage: "user cannot delete comment of another user",
 			statusCode: errorCode
 		})
 	}
-	await knex('tbl_comment').where('cmt_id', commentId).del().catch((error) => {
-		return res.status(500).json({
-			message: error,
-			statusCode: errorCode
-		})
-	})
+	await knex('tbl_comment').where('cmt_id', commentId).del()
 
 	return res.status(200).json({
 		statusCode: successCode

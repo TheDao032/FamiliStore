@@ -23,7 +23,7 @@ router.get('/list', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(400).json({
 		listAccounts: [],
 		statusCode: errorCode
 	})
@@ -33,7 +33,7 @@ router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 	
 	if(isNaN(Number(id))){
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'id must be of integer type',
 			statusCode: errorCode
 		})
@@ -58,7 +58,7 @@ router.get('/details/:id', async (req, res) => {
 		})
 	}
 
-	return res.status(500).json({ 
+	return res.status(400).json({ 
 		account: [],
 		statusCode: errorCode
 	})
@@ -118,14 +118,14 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 	const accInfo = await accountModel.findById(accId)
 
 	if (accInfo.length === 0) {
-		return res.status(500).json({ 
+		return res.status(400).json({ 
 			errorMessage: 'User Does Not Exist!',
 			statusCode: errorCode
 		})
 	}
 
 	if (!bcrypt.compareSync(accOldPassword, accInfo[0].acc_password)) {
-		return res.status(500).json({ 
+		return res.status(400).json({ 
 			errorMessage: 'Password Incorrect!',
 			statusCode: errorCode
 		})
@@ -157,7 +157,7 @@ router.post('/delete/:id',async (req, res) => {
 	const { id } = req.params
 
 	if(isNaN(Number(id))){
-		return res.status(404).json({
+		return res.status(400).json({
 			message: 'id must be of integer type',
 			statusCode: errorCode
 		})
@@ -178,7 +178,7 @@ router.post('/update-role', accountValidation.updateRoleAccount, async (req, res
 	const { role } = req.account
 
 	if (!roleModel.checkAdminRole(role)) {
-		return res.status(500).json({
+		return res.status(400).json({
 			errorMessage: 'permission access denied'
 		})
 	}
