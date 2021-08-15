@@ -29,7 +29,7 @@ const newCategoryChild = (req, res, next) => {
   		type: 'object',
   		properties: {
 			cateName: { type: 'string', pattern: '' },
-			cateFather: { type: 'string', pattern: '', maxLength: 5 }
+			cateFather: { type: ['string', 'integer'] }
   		},
 		required: ['cateName', 'cateFather'],
 		additionalProperties: true
@@ -53,9 +53,9 @@ const updateCategory = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		cateId: { type: 'string', pattern: '', maxLength: 5 },
+    		cateId: { type: ['string', 'integer'] },
 			cateName: { type: 'string', pattern: '' },
-			cateFather: { type: 'string', pattern: '', maxLength: 5 }
+			cateFather: { type: ['string', 'integer'] }
   		},
 		required: ["cateId"],
 		additionalProperties: true
@@ -79,7 +79,7 @@ const listCategoryChild = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cateFather: { type: 'string', pattern: '' }
+			cateFather: { type: ['string', 'integer']}
   		},
 		required: ["cateFather"],
 		additionalProperties: true
@@ -103,7 +103,7 @@ const deleteCategory = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cateId: { type: 'string', pattern: '', maxLength: 5 }
+			cateId: { type: ['string', 'integer'] },
   		},
 		required: ["cateId"],
 		additionalProperties: true
