@@ -75,9 +75,9 @@ router.post('/add', validator.newComment, async (req, res) => {
 		})
 	}
 
-	var regex = new RegExp('[0-5]')
-	var isValid = regex.test(vote)
-	if (!isValid) {
+	
+	var isNotValid = vote > 5 || vote < 0
+	if (isNotValid) {
 		return res.status(400).json({
 			errorMessage: "vote value is not valid, need to be from 0 to 5",
 			statusCode: errorCode
@@ -107,9 +107,8 @@ router.post('/update', validator.updateComment, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	var regex = new RegExp('[0-5]')
-	var isValid = regex.test(vote)
-	if (!isValid) {
+	var isNotValid = vote > 5 || vote < 0
+	if (isNotValid) {
 		return res.status(400).json({
 			errorMessage: "vote value is not valid, need to be from 0 to 5",
 			statusCode: errorCode
@@ -138,16 +137,16 @@ router.post('/update', validator.updateComment, async (req, res) => {
 })
 
 router.post('/delete', validator.deleteComment, async (req, res) => {
-	const { commentId, accountID } = req.query
+	const { commentID, accountID } = req.query
 
-	var comment = await knex('tbl_comment').where('cmt_id', id).andWhere('cmt_acc_id', accountID)
+	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
 	if (comment.length === 0) {
 		return res.status(400).json({
 			errorMessage: "user cannot delete comment of another user",
 			statusCode: errorCode
 		})
 	}
-	await knex('tbl_comment').where('cmt_id', commentId).del()
+	await knex('tbl_comment').where('cmt_id', commentID).del()
 
 	return res.status(200).json({
 		statusCode: successCode
