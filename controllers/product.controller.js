@@ -13,6 +13,26 @@ router.post('/list', validator.listProduct, async (req, res) => {
 	const { page, limit } = req.body
 	const offset = limit * (page - 1)
 
+
+	if (page < 1 || limit < 1 || limit > 10) {
+		return res.status(400).json({
+			errorMessage: "limit and page parameter is not valid",
+			statusCode: errorCode
+		})
+	}
+
+	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
+	from tbl_product`)
+
+
+	numberPage = Number(numberPage.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
+
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
 		order by prod_created_date desc
@@ -23,13 +43,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 	result = result.rows
 
-	if (page < 1 || limit < 1 || limit > 10) {
-		return res.status(400).json({
-			errorMessage: "limit and page parameter is not valid",
-			statusCode: errorCode
-		})
-	}
-	//process return list
+
 	var prodList = []
 
 	var index = 0
@@ -49,7 +63,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			index = i + 1
 			imageLink.push(result[i].prod_img_data)
 
-			if ((i >= result.length - 1) || (i != 0 && result[index].prod_id != result[index - 1].prod_id)) {
+			if ((i >= result.length - 1) || (result[index].prod_id != result[index - 1].prod_id)) {
 				break;
 			}
 		}
@@ -59,12 +73,13 @@ router.post('/list', validator.listProduct, async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
+			numberOfPage: numberPage,
 			listProduct: prodList,
 			statusCode: successCode
 		})
 	}
 	else {
-		return res.status(200).json({
+		return res.status(500).json({
 			listProduct: [],
 			statusCode: errorCode
 		})
@@ -76,6 +91,13 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 	const { limit, page } = req.body
 
 	const offset = limit * (page - 1)
+
+	if (page < 1 || limit < 1 || limit > 10) {
+		return res.status(400).json({
+			errorMessage: "limit and page parameter is not valid",
+			statusCode: errorCode
+		})
+	}
 
 	var result = await knex.raw(`with productSale as(
 		select sum(bde.bdetail_quantity) as quantity,pro.* from (tbl_product pro join
@@ -89,11 +111,16 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 	result = result.rows
 
-	if (page < 1 || limit < 1 || limit > 10) {
-		return res.status(400).json({
-			errorMessage: "limit and page parameter is not valid",
-			statusCode: errorCode
-		})
+
+
+	var numberPage = await knex.raw('select count(DISTINCT bdetail_product_id) from tbl_bill_detail')
+
+	numberPage = Number(numberPage.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
 	}
 
 	//process return list
@@ -127,6 +154,7 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
+			numberOfPage: numberPage,
 			listProduct: prodList,
 			statusCode: successCode
 		})
@@ -154,6 +182,18 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 		})
 	}
 
+	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
+	from tbl_product join tbl_comment on tbl_product.prod_id = tbl_comment.cmt_product_id
+	where tbl_product.prod_category_id = ${catID}`)
+	result = result.rows
+
+	numberPage = Number(numberPage.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
 	var result = await knex.raw(`with product as(
 		select tbl_product.*, round(avg(tbl_comment.cmt_vote),2) as avgStar
 		from tbl_product join tbl_comment on tbl_product.prod_id = tbl_comment.cmt_product_id
@@ -200,6 +240,7 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
+			numberOfPage: numberPage,
 			listProduct: prodList,
 			statusCode: successCode
 		})
@@ -216,7 +257,16 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 router.post('/list-by-cat', async (req, res) => {
 	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
-
+	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
+	from tbl_product 
+	where tbl_product.prod_category_id = ${catID}`)
+	numberPage = Number(numberPage.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
@@ -224,7 +274,7 @@ router.post('/list-by-cat', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	
+
 	//cat not exists
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
@@ -237,7 +287,7 @@ router.post('/list-by-cat', async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 
 	result = result.rows
-
+		console.log(result)
 
 	//process return list
 	var prodList = []
@@ -272,7 +322,8 @@ router.post('/list-by-cat', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			numberProduct : numberOfProduct.rows[0],
+			numberOfPage: numberPage,
+			numberProduct: numberOfProduct.rows[0],
 			listProduct: prodList,
 			statusCode: successCode
 		})
@@ -417,11 +468,11 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 		.andWhere('prod_category_id', prodCategoryID)
 
 	var updateProduct = await knex('tbl_product')
-								.where('prod_id', id)
+		.where('prod_id', id)
 
 	var cat = await knex('tbl_categories')
 		.where('cate_id', prodCategoryID)
-	
+
 	if (cat.length === 0) {
 		errorMessage = " Category doesn't exists!"
 	}
@@ -430,7 +481,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 		errorMessage = errorMessage + " Product record with the same name exist!"
 	}
 
-	if(updateProduct.length === 0){
+	if (updateProduct.length === 0) {
 		errorMessage = errorMessage + " Product record to update doesn't exist!"
 	}
 
