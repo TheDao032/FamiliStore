@@ -437,7 +437,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	if (errorMessage !== '') {
 		return res.status(400).json({
 			errorMessage: errorMessage,
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
@@ -493,7 +493,7 @@ router.post('/update-image/:id', async (req, res) => {
 	if (errorMessage !== '') {
 		return res.status(400).json({
 			errorMessage: errorMessage,
-			code: errorCode
+			statusCode: errorCode
 		})
 	}
 
