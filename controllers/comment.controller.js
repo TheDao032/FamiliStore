@@ -103,7 +103,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 
 	if (comment.length === 0) {
 		return res.status(400).json({
-			message: "user cannot edit comment of another user or comment doesn't exists",
+			message: "user cannot edit comment of another user or comment doesn't exist",
 			statusCode: errorCode
 		})
 	}
