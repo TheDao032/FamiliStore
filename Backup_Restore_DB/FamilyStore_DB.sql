@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.3 (Ubuntu 13.3-1.pgdg20.04+1)
--- Dumped by pg_dump version 13.3
+-- Dumped from database version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -89,24 +89,6 @@ CREATE TABLE public.tbl_bill (
 ALTER TABLE public.tbl_bill OWNER TO postgres;
 
 --
--- Name: tbl_bill_detail; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.tbl_bill_detail (
-    bdetail_id integer NOT NULL,
-    bdetail_bill_id integer,
-    bdetail_product_id integer,
-    bdetail_quantity integer,
-    bdetail_product_price character varying(100),
-    bdetail_status integer DEFAULT 0,
-    bdetail_created_date date,
-    bdetail_updated_date date
-);
-
-
-ALTER TABLE public.tbl_bill_detail OWNER TO postgres;
-
---
 -- Name: tbl_bill_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -121,11 +103,29 @@ CREATE SEQUENCE public.tbl_bill_detail_id_seq
 ALTER TABLE public.tbl_bill_detail_id_seq OWNER TO postgres;
 
 --
+-- Name: tbl_bill_detail; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tbl_bill_detail (
+    bdetail_id integer DEFAULT nextval('public.tbl_bill_detail_id_seq'::regclass) NOT NULL,
+    bdetail_bill_id integer,
+    bdetail_product_id integer,
+    bdetail_quantity integer,
+    bdetail_product_price character varying(100),
+    bdetail_status integer DEFAULT 0,
+    bdetail_created_date date,
+    bdetail_updated_date date
+);
+
+
+ALTER TABLE public.tbl_bill_detail OWNER TO postgres;
+
+--
 -- Name: tbl_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
 CREATE SEQUENCE public.tbl_categories_id_seq
-    START WITH 1
+    START WITH 10
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
@@ -142,7 +142,7 @@ CREATE TABLE public.tbl_categories (
     cate_id integer DEFAULT nextval('public.tbl_categories_id_seq'::regclass) NOT NULL,
     cate_name character varying(100),
     cate_status integer DEFAULT 0,
-    cate_father character varying(5) DEFAULT NULL::character varying,
+    cate_father integer,
     cate_created_date date,
     cate_updated_date date
 );
@@ -262,7 +262,7 @@ ALTER TABLE public.tbl_districts_id_seq OWNER TO postgres;
 CREATE TABLE public.tbl_districts (
     dis_id integer DEFAULT nextval('public.tbl_districts_id_seq'::regclass) NOT NULL,
     dis_name character varying(50),
-    dis_city_id integer,
+    dis_city_id integer NOT NULL,
     dis_created_date date,
     dis_updated_date date
 );
@@ -296,6 +296,7 @@ CREATE TABLE public.tbl_product (
     prod_created_date date,
     prod_updated_date date,
     prod_price character varying(100),
+    prod_description character varying(1000),
     prod_status integer DEFAULT 0
 );
 
@@ -366,8 +367,8 @@ ALTER TABLE public.tbl_wards_id_seq OWNER TO postgres;
 CREATE TABLE public.tbl_wards (
     ward_id integer DEFAULT nextval('public.tbl_wards_id_seq'::regclass) NOT NULL,
     ward_name character varying(100),
-    ward_city_id integer,
-    ward_dis_id integer,
+    ward_city_id integer NOT NULL,
+    ward_dis_id integer NOT NULL,
     ward_created_date date,
     ward_updated_date date,
     ward_ship_price character varying(100)
@@ -447,13 +448,13 @@ COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_n
 30	$2b$04$EyGd4UPQri20XxWQzjnM1eSIcVAvwMbAAwA56Pv7wWemSaOwWojni	\N	hiyaco5622@186site.com	84586072996	Ari Test	USER	\N	0	2021-08-08	2021-08-08	\N	\N
 26	$2b$04$3RN.vPzEWOhYlTOb6uT2jOgGb7MZ7mwzoJZ7Km2jSS4mIiURHNAeS	\N	ccy00683@zwoho.com	\N	\N	USER	\N	0	2021-08-07	2021-08-07	\N	\N
 34	$2b$04$/ilyen07RnNT0y0A6/LvY./dovvJeC7802/4imCy.JLWUlrqA5MAC	$2b$04$wjwH4ojs4sH6pZI3NMkyEuAVYyJxRBN4VgrsmccZl702HcXzwGj7a	jdh22516@zwoho.com	84111111111	jdh22516@zwoho.comjdh22516@zwoho.2512516@zwoho.comjdh22516@zwoho.comjdh22516@zwoho.com	USER	\N	2	2021-08-08	\N	\N	\N
-2	$2b$04$BAaV2SDvid3kCWxYwnRSwuRdzV5aANU3wMCo4O2dsUiS5gHNgiB5i	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-03	2021-08-09	\N	ECdK9ANZcxEE2jNLafLVV1fHrsBlbfyD5wc5Eqf2PBDaTVE1tpfCffNtMcFu8kIECPh95YyhirnyGuHW4s7DcgAuWKgM5vOH6PD0
 35	$2b$04$je.zbrRMdvoRZHFhm5cR8Ovi23IUq988ihg0lpBzbMqNAsPT00lo.	\N	fdg17060@eoopy.com	8411111111111	fdg17060@eoopy.com	USER	\N	0	2021-08-08	2021-08-08	\N	pDisdTEgOHUeWmb2BCACHaECN0IIfWjkJ2qcksa77aXOVWX2q2h9RnK8jmP5qbmPkqDMPYiL6yNaU3XD5pExFizUIcDpioyutIAm
 36	$2b$04$dLhDrWL30wa4Wqynm8j4z.AwrzA124OSJCRZFRTT7OSYMzz7NV1/K	\N	ssv19243@zwoho.com	841111111111	ssv19243@zwoho.com	USER	\N	0	2021-08-08	2021-08-08	\N	erY0n6fv6nSy71yZLwwehSXDv50HRJUDb1T2VDNXsn8AndSQeM6QMgCIM9MK8EVQXI6rqljGWOe9h3Dq1chzzBwFOmEeApGKXp8O
 31	$2b$04$QoR.9x24S.WWIT/PNhj60O.V1rmxaK18UthawZQ.s9lLGgZz2MCky	$2b$04$r2yxpn0RNqkxmUMDO3dDU.J4AbARZ0xi6vjdP530m.9Jnj2bOmxnK	hicosap661@186site.com	84586072996	Ari Test Không Xác Thực Test Xong Xóa Dùm Nha Cảm Ơn	USER	\N	2	2021-08-08	\N	\N	jJXDR3xdbEUHw5eIzSKBxWPuU6JIAncLFjrj6NcWQIOBQvmxChugitWWvmvd4AuSmPC6JM2myI0nmJ1DODAjRurfyFBvXoLiVxEC
 37	$2b$04$g3mp5v.p/8iDn.LZE.VxU.zjUJvyRw0SzPFykWzHwfc.OQaodSOy.	$2b$04$Kn9OP/zbTvGhP2Yy7mR8ce21IXNPt37bfMlRh0duQDjcZjLx.0M4W	fee42886@cuoly.com	84123456789	fee42886@cuoly.com	USER	\N	2	2021-08-08	2021-08-08	\N	IYkZvHGFbTKiTvZdhAYLNncc91ZBdkhyWIPtUfOr9BycW0jK25cXakocNrsfxvVh6cqU1WUhIbQUNK2xI9N5PDI7BxY1AnQtl0HG
 38	$2b$04$skUdhPN9RhDYbTvWZJCrpeSpX3H6xMA5BuTJ5NCiEkfgX4KnCYmXu	$2b$04$.DqujUk8ai/v9MteAEsqu./uleiwpcPFgVKxhqv.OK1QPnBEJ5ibm	sju73859@zwoho.com	8413456978	sju73859@zwoho.com	USER	\N	2	2021-08-08	\N	\N	fmdJDI2gi6qEr20FvG1Uau94RUIueXBSy5e1PMH8LTMU67CsOArzsys2yGNVudB30TpiyZCrao1LcTwWIJiiFEDoik3N9IbKF4yT
 39	$2b$04$y/ZDuuf6KrgpVkYcBgwSWONshyV7IqtbmuG2dxZnKe6L3sEMupksq	\N	vho23272@cuoly.com	8412346589	vho23272@cuoly.com	USER	\N	0	2021-08-08	2021-08-08	$2b$04$pnUHeOe2g6zxexvkNgPztupjTqDHy4dl9JL9Y2PvZYqvKFdeDyGdS	UetOJB709OPeVhGEvxVniXFLLdw8wXnUlteIsaab5ARZjPE67TnUTxureJIsnd6J4GjzCSm6hbfVLuSmr9nyYVZVJyGzBPw6HcHz
+2	$2b$04$BAaV2SDvid3kCWxYwnRSwuRdzV5aANU3wMCo4O2dsUiS5gHNgiB5i	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-03	2021-08-09	\N	uTFWNxL7eineUO10toEwpXmfGtnU0xC6IuyljHUKf1xgtnisi6x5MLk1EJTuC6i4Y9P0c0nGzbieF4rdiGW2Hi3VY8lAo7qprpvf
 \.
 
 
@@ -476,6 +477,32 @@ COPY public.tbl_bill_detail (bdetail_id, bdetail_bill_id, bdetail_product_id, bd
 
 
 --
+-- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tbl_categories (cate_id, cate_name, cate_status, cate_father, cate_created_date, cate_updated_date) FROM stdin;
+1	Category 1	0	\N	2001-01-01	2001-01-01
+2	Category 2	0	\N	2001-01-01	2001-01-01
+3	Category 3	0	\N	2001-01-01	2001-01-01
+4	cate_4	0	1	2021-08-15	2021-08-15
+5	cate_5	0	1	2021-08-15	2021-08-15
+6	cate_6	0	2	2021-08-15	2021-08-15
+7	cate_7	0	2	2021-08-15	2021-08-15
+8	cate_8	0	3	2021-08-15	2021-08-15
+9	cate_9	0	3	2021-08-15	2021-08-15
+\.
+
+
+--
+-- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
+1	Hồ Chí Minh	\N	\N
+\.
+
+
+--
 -- Data for Name: tbl_comment; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -487,16 +514,7 @@ COPY public.tbl_comment (cmt_id, cmt_content, cmt_product_id, cmt_vote, cmt_stat
 -- Data for Name: tbl_delivery_address; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, del_city_id, del_user_id, del_status, del_ward) FROM stdin;
-\.
-
-
---
--- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
---
-
-COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
-1	Hồ Chí Minh	\N	\N
+COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, del_city_id, del_user_id, del_status, del_ward_id) FROM stdin;
 \.
 
 
@@ -510,22 +528,11 @@ COPY public.tbl_districts (dis_id, dis_name, dis_city_id, dis_created_date, dis_
 
 
 --
--- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.tbl_categories (cate_id, cate_name, cate_status, cate_father, cate_created_date, cate_updated_date) FROM stdin;
-1	Category 1	0	\N	2001-01-01	2001-01-01
-2	Category 2	0	\N	2001-01-01	2001-01-01
-3	Category 33	0		2001-01-01	2001-01-01
-\.
-
-
---
 -- Data for Name: tbl_product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod_created_date, prod_updated_date, prod_price, prod_status) FROM stdin;
-3	Product2	1	20	2021-08-09	\N	30000	1
+COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod_created_date, prod_updated_date, prod_price, prod_description, prod_status) FROM stdin;
+3	Product2	1	20	2021-08-09	\N	30000	\N	1
 \.
 
 
@@ -534,11 +541,6 @@ COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod
 --
 
 COPY public.tbl_product_images (prod_img_id, prod_img_product_id, prod_img_data, prod_img_status) FROM stdin;
-6	3	http://res.cloudinary.com/nthedao/image/upload/v1628535566/yfccv0fgm6j8at6uaoyr.png	0
-7	3	http://res.cloudinary.com/nthedao/image/upload/v1628535566/b7zqkhfl8kktsn9cdl6u.png	0
-8	3	http://res.cloudinary.com/nthedao/image/upload/v1628535566/rloh92czo3kgigooevip.png	0
-9	3	http://res.cloudinary.com/nthedao/image/upload/v1628535566/bbbwrmijm8mgjpvbsrfb.png	0
-10	3	http://res.cloudinary.com/nthedao/image/upload/v1628535566/krzrotbqddic8aumwr2j.png	0
 \.
 
 
@@ -590,6 +592,20 @@ SELECT pg_catalog.setval('public.tbl_bill_id_seq', 2, true);
 
 
 --
+-- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_categories_id_seq', 1, true);
+
+
+--
+-- Name: tbl_cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_cities_id_seq', 1, false);
+
+
+--
 -- Name: tbl_comment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -601,6 +617,13 @@ SELECT pg_catalog.setval('public.tbl_comment_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.tbl_delivery_address_id_seq', 1, false);
+
+
+--
+-- Name: tbl_districts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tbl_districts_id_seq', 1, false);
 
 
 --
@@ -618,12 +641,6 @@ SELECT pg_catalog.setval('public.tbl_product_image_id_seq', 10, true);
 
 
 --
--- Name: tbl_ware_house_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.tbl_ware_house_id_seq', 1, false);
-
---
 -- Name: tbl_wards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -631,23 +648,10 @@ SELECT pg_catalog.setval('public.tbl_wards_id_seq', 1, false);
 
 
 --
--- Name: tbl_districts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_districts_id_seq', 1, false);
-
-
---
--- Name: tbl_cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.tbl_cities_id_seq', 1, false);
-
---
--- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.tbl_categories_id_seq', 1, false);
+SELECT pg_catalog.setval('public.tbl_ware_house_id_seq', 1, false);
 
 
 --
@@ -864,23 +868,6 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 ALTER TABLE ONLY public.tbl_ware_house
     ADD CONSTRAINT tbl_ware_house_product_fkey FOREIGN KEY (sto_product_id) REFERENCES public.tbl_product(prod_id);
-
-
---
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA public FROM postgres;
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
---
--- Name: LANGUAGE plpgsql; Type: ACL; Schema: -; Owner: postgres
---
-
-GRANT ALL ON LANGUAGE plpgsql TO postgres;
 
 
 --
