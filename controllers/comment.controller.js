@@ -12,7 +12,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
-			errorerrorMessage: "limit and page parameter is not valid",
+			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
 		})
 	}
