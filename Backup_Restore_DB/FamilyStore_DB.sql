@@ -510,7 +510,7 @@ SELECT pg_catalog.setval('public.tbl_bill_id_seq', 2, true);
 -- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_categories_id_seq', 1, true);
+SELECT pg_catalog.setval('public.tbl_categories_id_seq', 10, true);
 
 
 --
