@@ -15,7 +15,9 @@ const findAll = async () => {
 
 const findFather = async () => {
     const info = await knex('tbl_categories')
-                    .where({ cate_father: null })
+                    .select('cate_father')
+                    .distinctOn('cate_father')
+                    .whereNot({ cate_father: null })
 
     return info
 }
