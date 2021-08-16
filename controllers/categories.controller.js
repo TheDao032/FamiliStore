@@ -54,22 +54,22 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 
 router.get('/list', async (req, res) => {
 
-	const listCategories = await categoriesModel.findAll()
-
+	const allCategories = await categoriesModel.findAll()
 	const listCategoriesFather = await categoriesModel.findFather()
 	
 	const result = await Promise.all([
 		listCategoriesFather.map((item) => {
-		const listChild = listCategories.filter((info) => info.cate_father === item.cate_id)
+			const fatherInfo = allCategories.find((info) => info.cate_id === item.cate_father)
+			const listChild = allCategories.filter((info) => info.cate_father === item.cate_father)
 
-		return {
-			cateId: item.cate_id,
-			cateName: item.cate_name,
-			subCategories: listChild.map((itemChild) => {
-				return {
-					cateId: itemChild.cate_id,
-					CateName: itemChild.cate_name
-				}
+			return {
+				cateId: fatherInfo.cate_id,
+				cateName: fatherInfo.cate_name,
+				subCategories: listChild.map((itemChild) => {
+					return {
+						cateId: itemChild.cate_id,
+						CateName: itemChild.cate_name
+					}
 			})
 		}
 	})])
@@ -88,26 +88,28 @@ router.get('/list', async (req, res) => {
 })
 
 router.get('/list-father', async (req, res) => {
-	const result = await knex.from('tbl_categories')
-		.where({ cate_father: null})
+	const allCategories = await categoriesModel.findAll()
+	const listCategoriesFather = await categoriesModel.findFather()
 
-	if (result) {
-		let listCategoriesFather = []
-		result.forEach((element) => {
-			const categoriesInfo = {
-				cateId: element.cate_id,
-				cateName: element.cate_name
+	const result = await Promise.all([
+		listCategoriesFather.map((element) => {
+			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
+
+			return {
+				cateId: fatherInfo.cate_id,
+				cateName: fatherInfo.cate_name
 			}
-			listCategoriesFather.push(categoriesInfo)
-		});
-
+		})
+	])
+	
+	if (result) {
 		return res.status(200).json({
-			listCategories: listCategoriesFather,
+			listCategories: result[0],
 			statusCode: successCode
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listCategories: [],
 		statusCode: errorCode
 	})
@@ -143,7 +145,7 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 		})
 	}
 
-	return res.status(500).json({
+	return res.status(200).json({
 		listCategories: [],
 		statusCode: errorCode
 	})

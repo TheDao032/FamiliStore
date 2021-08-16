@@ -682,14 +682,6 @@ ALTER TABLE ONLY public.tbl_account
 
 
 --
--- Name: tbl_bill_detail tbl_bill_detail_product_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.tbl_bill_detail
-    ADD CONSTRAINT tbl_bill_detail_product_fkey FOREIGN KEY (bdetail_product_id) REFERENCES public.tbl_product(prod_id);
-
-
---
 -- Name: tbl_bill_detail tbl_bill_detal_bill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
