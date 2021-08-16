@@ -32,7 +32,7 @@ const newComment = (req, res, next) => {
 		properties: {
 			productID: { type: 'integer' },
 			accountID: { type: 'integer' },
-			content: { type: 'string', pattern: '' },
+			content: { type: 'string', pattern: '' ,  maxLength: 200},
 			vote: { type: 'integer' }
 		},
 		required: ["productID", "accountID", "content", "vote"],
@@ -58,7 +58,7 @@ const updateComment  = (req, res, next) => {
 		properties: {
 			commentID: { type: 'integer' },
 			accountID: { type: 'integer' },
-			content: { type: 'string', pattern: '' },
+			content: { type: 'string', pattern: '',  maxLength: 200},
 			vote: { type: 'integer' }
 		},
 		required: ["commentID", "accountID"],

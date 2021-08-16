@@ -56,7 +56,7 @@ const listByCategory = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			catID: {type : 'string', pattern : ''},
+			catID: {type : 'integer', pattern : ''},
 			page: { type: 'integer'},
 			limit: { type: 'integer'}
 		},
@@ -77,11 +77,13 @@ const listByCategory = (req, res, next) => {
 
 	next()
 }
+
+
 const updateProduct = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			prodName: { type: 'string' },
+			prodName: { type: 'string' , maxLength: 60},
 			prodCategoryID: { type: 'integer' },
 			prodAmount: { type: 'integer'},
 			prodPrice: { type: 'integer' }

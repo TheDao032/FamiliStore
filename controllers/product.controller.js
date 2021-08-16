@@ -257,7 +257,7 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 
 })
 
-router.post('/list-by-cat', async (req, res) => {
+router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
 	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
@@ -384,7 +384,7 @@ router.get('/details/:id', async (req, res) => {
 router.post('/add', async (req, res) => {
 
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodDescription, prodStatus } = req.body
-	
+
 	var images = req.files //need to get image from input type file, name is 'image'
 
 	var errorMessage = "";
@@ -399,6 +399,34 @@ router.post('/add', async (req, res) => {
 	if (prodName === '' || prodCategoryID === '' || prodAmount === '' || prodPrice === '') {
 		return res.status(400).json({
 			errorMessage: 'Some required fields are blank ',
+			statusCode: errorCode
+		})
+	}
+
+	if (prodName.length > 60) {
+		return res.status(400).json({
+			errorMessage: 'Product name accept only the length smaller than 60',
+			statusCode: errorCode
+		})
+	}
+
+	if (prodDescription.length > 1000) {
+		return res.status(400).json({
+			errorMessage: 'Product description accept only the length smaller than 1000',
+			statusCode: errorCode
+		})
+	}
+
+	if (prodAmount > 10000 || prodAmount < 0) {
+		return res.status(400).json({
+			errorMessage: 'Ammount is not valid !',
+			statusCode: errorCode
+		})
+	}
+
+	if (prodPrice > 1000000000 || prodPrice < 0) {
+		return res.status(400).json({
+			errorMessage: 'Product price is not valid !',
 			statusCode: errorCode
 		})
 	}
@@ -428,7 +456,7 @@ router.post('/add', async (req, res) => {
 
 		images = imageService.getImage(images)
 	}
-	
+
 	if (errorMessage !== "") {
 		return res.status(400).json({
 			errorMessage: errorMessage,
@@ -469,6 +497,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	const { id } = req.params
 
 	var errorMessage = ''
+
 	if (prodCategoryID != undefined) {
 		var cat = await knex('tbl_categories')
 			.where('cate_id', prodCategoryID)
@@ -479,20 +508,24 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	}
 
 	if (prodName != undefined && prodCategoryID != undefined) {
-		if (prod.length !== 0) {
-			errorMessage = errorMessage + " Product record with the same name and same category exist!"
-		}
 		var prod = await knex('tbl_product')
 			.where('prod_name', prodName)
 			.andWhere('prod_category_id', prodCategoryID)
+		if (prod.length !== 0 && prodName != '') {
+			errorMessage = errorMessage + " Product record with the same name and same category exist!"
+		}
+
 	}
 
 	var updateProduct = await knex('tbl_product')
 		.where('prod_id', id)
-	console.log(updateProduct)
 
 	if (updateProduct.length === 0) {
 		errorMessage = errorMessage + " Product record to update doesn't exist!"
+	}
+
+	if (prodName != undefined && prodName == '') {
+		errorMessage = errorMessage + " Name cannot be blank!"
 	}
 
 	if (errorMessage !== '') {
@@ -502,6 +535,42 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 		})
 	}
 
+
+	if (prodName != undefined) {
+		if (prodName.length > 1000) {
+			return res.status(400).json({
+				errorMessage: 'Product description accept only the length smaller than 1000',
+				statusCode: errorCode
+			})
+		}
+	}
+
+	if (prodDescription != undefined) {
+		if (prodDescription.length > 1000) {
+			return res.status(400).json({
+				errorMessage: 'Product description accept only the length smaller than 1000',
+				statusCode: errorCode
+			})
+		}
+	}
+
+	if (prodAmount != undefined) {
+		if (prodAmount > 10000 || prodAmount < 0) {
+			return res.status(400).json({
+				errorMessage: 'Ammount is not valid !',
+				statusCode: errorCode
+			})
+		}
+	}
+
+	if (prodPrice != undefined) {
+		if (prodPrice > 1000000000 || prodPrice < 0) {
+			return res.status(400).json({
+				errorMessage: 'Product price is not valid !',
+				statusCode: errorCode
+			})
+		}
+	}
 	await knex('tbl_product')
 		.where('prod_id', id)
 		.update({
