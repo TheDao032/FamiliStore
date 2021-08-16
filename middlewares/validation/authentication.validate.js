@@ -30,7 +30,7 @@ const register = (req, res, next) => {
   		type: 'object',
   		properties: {
     		passWord: { type: 'string', pattern: '', minLength: 1 },
-    		email: { type: 'string', pattern: '', maxLength: 100 },
+    		email: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
     		role: { type: 'string', pattern: '', maxLength: 5}
   		},
