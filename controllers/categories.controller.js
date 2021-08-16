@@ -56,6 +56,8 @@ router.get('/list', async (req, res) => {
 
 	const allCategories = await categoriesModel.findAll()
 	const listCategoriesFather = await categoriesModel.findFather()
+
+
 	
 	const result = await Promise.all([
 		listCategoriesFather.map((item) => {
@@ -193,6 +195,10 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
+		.del()
+
+	await knex('tbl_categories')
+		.where({ cate_father: cateId })
 		.del()
 
 	return res.status(200).json({
