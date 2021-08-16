@@ -25,12 +25,8 @@ const  validateNumberOfFiles = (files) => {
     if (files.length !== undefined) {
         if (files.length > 5)
             return false;
-        return true;
     }
-    else if (typeof files === 'object') {
-        return true;
-    }
-    return false;
+    return true;
 }
 
 const validateValidImage = (images) => {
@@ -44,11 +40,11 @@ const validateValidImage = (images) => {
         var isValidImage = validateImage(images)
 
         var isValidNumberOfFile = validateNumberOfFiles(images)
-
+        console.log('test')
         if (!isValidImage)
             errorMessage = errorMessage + " Invalid image!"
         if (!isValidNumberOfFile)
-            errorMessage = errorMessage + " Invalid number of files!"
+            errorMessage = errorMessage + " Invalid number of files, user can upload maximum 5 images for each product!"
     }
     return errorMessage
 }
