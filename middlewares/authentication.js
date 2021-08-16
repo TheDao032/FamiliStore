@@ -29,7 +29,7 @@ const verifyToken = (req, res, next) => {
     const token = req.headers.authorization
     return jsonWebToken.verify(token, environment.secret, async (err, decode) => {
         if (err)
-            return res.status(400).json({
+            return res.status(401).json({
                 errorMessage: err,
                 statusCode: 2,
             })
