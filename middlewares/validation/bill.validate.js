@@ -4,16 +4,16 @@ const newBill = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string', pattern: '' },
-    		totalPrice: { type: 'string', pattern: '' },
-    		totalQuantity: { type: 'integer'},
+			accId: { type: 'integer' },
+    		totalPrice: { type: 'string', pattern: '', maxLength: 100 },
+    		totalQuantity: { type: 'integer' },
     		listProduct: { 
 				type: 'array', 
 				items: {
 					type: 'object',
 					properties: {
-						prodId: { type: 'string'},
-						prodQuantity: {type:'integer'}
+						prodId: { type: 'integer' },
+						prodQuantity: {type: 'integer' }
 					},
 					required: ["prodId", "prodQuantity"],
 					additionalProperties: true
@@ -43,7 +43,7 @@ const updateStatusBill = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			billId: { type: 'string', pattern: '' },
+			billId: { type: 'integer' },
     		status: { type: 'string', pattern: '' }
   		},
 		required: ["billId", "status"],

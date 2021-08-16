@@ -80,12 +80,15 @@ const getImage = (images) => {
 }
 
 const getImageLength = (images) => {
-    if (images.length === undefined) {// number of uploaded image is 1
+    if(images == null){
+        return 0
+    }
+    if (images.image.length === undefined) {// number of uploaded image is 1
         return 1;
     }
     else {
         var count = 0;
-        for (let i = 0; i < images.length; i++) {
+        for (let i = 0; i < images.image.length; i++) {
             count++;
         }
         return count;

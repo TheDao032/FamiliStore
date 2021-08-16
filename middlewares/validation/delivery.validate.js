@@ -53,7 +53,7 @@ const listDeliveries = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: ['integer', 'string'] }
+			accId: { type: 'integer' }
   		},
 		required: ['accId'],
 		additionalProperties: true
