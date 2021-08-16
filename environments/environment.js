@@ -1,7 +1,7 @@
 const env = {
 	portServer: process.env.PORT || 3000,
 	configDatabase: {
-		connectionString: 'postgres://postgres:2705@localhost:5432/FamilyStore_db'
+		connectionString: 'postgres://postgres:Batman.2075@localhost:5432/FamilyStore_db'
 	},
 	secret: process.env.SECRET || 'family_store_secret',
 	APP_ID: process.env.APP_ID || 'test_id',

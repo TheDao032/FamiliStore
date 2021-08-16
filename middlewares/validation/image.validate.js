@@ -40,7 +40,7 @@ const validateValidImage = (images) => {
         var isValidImage = validateImage(images)
 
         var isValidNumberOfFile = validateNumberOfFiles(images)
-        console.log('test')
+
         if (!isValidImage)
             errorMessage = errorMessage + " Invalid image!"
         if (!isValidNumberOfFile)
