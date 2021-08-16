@@ -27,9 +27,6 @@ uploads/*
 # tmp
 tmp/*
 
-#environments
-environments
-
 # things
 yarn.lock
 package-lock.json

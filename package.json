@@ -2,6 +2,7 @@
   "dependencies": {
     "@sendgrid/mail": "^7.4.5",
     "ajv": "^8.6.2",
+    "babel-jest": "^27.0.6",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "cloudinary": "^1.26.3",
@@ -9,6 +10,7 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-fileupload": "^1.2.1",
+    "jest": "^27.0.6",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.7",
     "moment": "^2.29.1",
@@ -19,15 +21,19 @@
     "pg": "^8.6.0",
     "randomstring": "^1.2.1",
     "simple-oauth2": "^4.2.0",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "supertest": "^6.1.5"
   },
   "name": "20424010",
   "description": "path: ./environments/environment.js # Start Server \tcommand line: node app.js",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx jest",
     "start": "nodemon app.js"
+  },
+  "jest": {
+    "transform": {}
   },
   "author": "Nguyen The Dao 20424010",
   "license": "ISC"

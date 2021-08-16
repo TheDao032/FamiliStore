@@ -22,7 +22,7 @@ router.post('/login', authenticationValidate.login, (req, res) => {
 
 	authenticationService.authenticate(email, passWord, async (err, auth = null, user = null) => {
 		if (err) {
-			res.status(401).json({
+			res.status(500).json({
 				err,
 				statusCode: 2
 			})
