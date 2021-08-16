@@ -4,7 +4,7 @@ const updateAccountPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-		  accId: { type: ['integer', 'string'] },
+		  accId: { type: 'integer' },
 		  accOldPassword: { type: 'string', pattern: '' },
 		  accNewPassword: { type: 'string', pattern: '', minLength: 1 },
 		  accConfirmPassword: { type: 'string', pattern: '', minLength: 1 },
@@ -31,7 +31,7 @@ const updateRoleAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: ['integer', 'string'] },
+			accId: { type: 'integer' },
 			accRole: { type: 'string', pattern: '' , maxLength: 5 },
   		},
 		required: ['accId' , 'accRole'],
@@ -57,9 +57,9 @@ const updateAccount = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer' },
-    		email: { type: 'string', pattern: '' },
-    		phoneNumber: { type: 'string', pattern: '' },
-    		role: { type: 'string', pattern: '' }
+    		email: { type: 'string', pattern: '', maxLength: 100 },
+    		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
+    		role: { type: 'string', pattern: '', maxLength: 5 }
   		},
 		required: ['accId'],
 		additionalProperties: true

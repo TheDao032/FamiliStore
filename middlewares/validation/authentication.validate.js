@@ -30,7 +30,7 @@ const register = (req, res, next) => {
   		type: 'object',
   		properties: {
     		passWord: { type: 'string', pattern: '', minLength: 1 },
-    		email: { type: 'string', pattern: '' },
+    		email: { type: 'string', pattern: '', maxLength: 100 },
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
     		role: { type: 'string', pattern: '', maxLength: 5}
   		},
@@ -56,7 +56,7 @@ const confirmToken = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: ['integer', 'string']},
+			accId: { type: 'integer' },
 			accToken: { type: 'string', pattern: '', }
 		},
 		required: ["accId", "accToken"],
@@ -83,7 +83,7 @@ const forgotPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			email: { type: 'string', pattern: '' }
+			email: { type: 'string', pattern: '', maxLength: 100 }
 		},
 		required: ["email"],
 		additionalProperties: false
@@ -107,7 +107,7 @@ const newPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			accId: { type: ['integer', 'string']},
+			accId: { type: 'integer' },
 			accPassword: { type: 'string', pattern: '' , minLength: 1 },
 			tokenChangePass: { type: 'string', pattern: '' }
 		},

@@ -4,15 +4,14 @@ const newWareHouse = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			stoAccountId: { type: 'integer'},
-			stoProductName: { type: 'string', pattern: '' },
-			stoAmount: { type: 'integer'},
-			stoCategoryId: { type: 'string', pattern: ''},
-			stoOriginPrice: { type: 'string', pattern: '' },
-			stoProductId: { type: 'integer'},
-			cost: { type: 'string', pattern: '' }
+			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
+			stoAmount: { type: 'integer' },
+			stoCategoryId: { type: 'integer' },
+			stoOriginPrice: { type: 'string', pattern: '', maxLength: 100 },
+			stoProductId: { type: 'integer' },
+			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
-		required: ["stoAccountId", "stoCategoryId", "stoProductId"],
+		required: ['stoAccountId', 'stoCategoryId', 'stoProductId'],
 		additionalProperties: true
 	}
 	const ajv = new ajvLib({
@@ -33,16 +32,16 @@ const updateWareHouse = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			stoId: { type: 'integer'},
-			stoAccountId: { type: 'integer'},
-			stoProductName: { type: 'string', pattern: '' },
+			stoId: { type: 'integer' },
+			stoAccountId: { type: 'integer' },
+			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
 			stoAmount: { type: 'integer',},
-			stoCategoryId: { type: 'string', pattern: '' },
-			stoOriginPrice: { type: 'string', pattern: '' },
-			stoProductId: { type: 'integer'},
-			cost: { type: 'string', pattern: '' }
+			stoCategoryId: { type: 'integer' },
+			stoOriginPrice: { type: 'string', pattern: '', maxLength: 100 },
+			stoProductId: { type: 'integer' },
+			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
-		required: ["stoId","stoAccountId", "stoCategoryId", "stoProductId"],
+		required: ['stoId', 'stoAccountId', 'stoCategoryId', 'stoProductId'],
 		additionalProperties: true
 	}
 

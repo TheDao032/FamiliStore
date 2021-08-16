@@ -4,7 +4,7 @@ const newCategoryFather = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cateName: { type: 'string', pattern: '' }
+			cateName: { type: 'string', pattern: '', maxLength: 100 }
   		},
 		required: ['cateName'],
 		additionalProperties: true
@@ -28,7 +28,7 @@ const newCategoryChild = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cateName: { type: 'string', pattern: '' },
+			cateName: { type: 'string', pattern: '', maxLength: 100 },
 			cateFather: { type: 'integer' }
   		},
 		required: ['cateName', 'cateFather'],
@@ -54,7 +54,7 @@ const updateCategory = (req, res, next) => {
   		type: 'object',
   		properties: {
     		cateId: { type: 'integer' },
-			cateName: { type: 'string', pattern: '' },
+			cateName: { type: 'string', pattern: '', maxLength: 100 },
 			cateFather: { type: 'integer' }
   		},
 		required: ["cateId"],
@@ -79,7 +79,7 @@ const listCategoryChild = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cateFather: { type: 'integer'}
+			cateFather: { type: 'integer' }
   		},
 		required: ["cateFather"],
 		additionalProperties: true
