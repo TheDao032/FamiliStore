@@ -61,20 +61,40 @@ router.get('/list', async (req, res) => {
 	
 	const result = await Promise.all([
 		listCategoriesFather.map((item) => {
-			const fatherInfo = allCategories.find((info) => info.cate_id === item.cate_father)
-			const listChild = allCategories.filter((info) => info.cate_father === item.cate_father)
+			let fatherInfo
+			let listChild
 
+			if (item.cate_father === null) {
+				let checkExist = listCategoriesFather.find((info) => info.cate_id === item.cate_id)
+				if (checkExist) {
+					fatherInfo = allCategories.find((info) => info.cate_id === item.cate_id)
+
+					return {
+						cateId: fatherInfo.cate_id,
+						cateName: fatherInfo.cate_name,
+						subCategories: {}
+					}
+				} else {
+					return null
+				}
+				
+			}
+
+			fatherInfo = allCategories.find((info) => info.cate_id === item.cate_father)
+			listChild = allCategories.filter((info) => info.cate_father === item.cate_father)
+			
 			return {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name,
 				subCategories: listChild.map((itemChild) => {
-					return {
-						cateId: itemChild.cate_id,
-						CateName: itemChild.cate_name
-					}
-			})
-		}
-	})])
+						return {
+							cateId: itemChild.cate_id,
+							CateName: itemChild.cate_name
+						}
+				})
+			}
+		}).filter((result) => result !== null)
+	])
 	
 	if (result) {
 		return res.status(200).json({
@@ -95,12 +115,29 @@ router.get('/list-father', async (req, res) => {
 
 	const result = await Promise.all([
 		listCategoriesFather.map((element) => {
-			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
+			let fatherInfo
+			if (element.cate_father === null) {
+				let checkExist = listCategoriesFather.find((info) => info.cate_id === element.cate_id)
+
+				if (checkExist) {
+					fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
+
+					return {
+						cateId: fatherInfo.cate_id,
+						cateName: fatherInfo.cate_name,
+					}
+				} else {
+					return null
+				}
+			}
+			fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
 
 			return {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name
 			}
+		}).filter((result) => {
+			return result !== null
 		})
 	])
 	
