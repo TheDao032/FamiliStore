@@ -29,7 +29,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "npx jest --watchAll",
+    "test": "npx jest",
     "start": "nodemon app.js"
   },
   "jest": {
