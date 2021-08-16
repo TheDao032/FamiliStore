@@ -56,7 +56,7 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: ['string', 'integer'] },
+			accId: { type: 'integer' },
     		email: { type: 'string', pattern: '' },
     		phoneNumber: { type: 'string', pattern: '' },
     		role: { type: 'string', pattern: '' }
@@ -83,7 +83,7 @@ const avatar = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		accId: { type: ['string', 'integer'] },
+    		accId: { type: 'integer' },
   		},
 		required: ['accId'],
 		additionalProperties: true

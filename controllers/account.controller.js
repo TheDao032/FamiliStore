@@ -41,6 +41,13 @@ router.get('/details/:id', async (req, res) => {
 
 	const result = await accountModel.findById(id)
 
+	if (result.length === 0) {
+		return res.status(200).json({
+			account: [],
+			statusCode: errorCode
+		})
+	}
+
 	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
 
 	const responseResult = {
@@ -48,41 +55,46 @@ router.get('/details/:id', async (req, res) => {
 		fullName: result[0].acc_full_name,
 		phoneNumber: result[0].acc_phone_number,
 		avatar: result[0].acc_avatar,
-		deliveryAddress,
+		deliveryAddress: deliveryAddress[0]
 	}
 
-	if (responseResult) {
-		return res.status(200).json({
-			account: responseResult,
-			statusCode: successCode
-		})
-	}
-
-	return res.status(400).json({ 
-		account: [],
-		statusCode: errorCode
+	return res.status(200).json({
+		account: responseResult,
+		statusCode: successCode
 	})
 })
 
 router.post('/update', accountValidation.updateAccount, async (req, res) => {
 	const avatar = req.files
-	const checkAvatar = avatar.image ? true : false
+	let checkAvatar = false
+	if (avatar) {
+		checkAvatar = avatar.image ? true : false
+	}
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
 	
 	let date_ob = new Date()
 
-	const verifying = await knex('tbl_account')
-						.where('acc_email', accEmail ? accEmail : '')
-						.whereNot('acc_id', accId)
+	if (accEmail && accEmail !== '') {
+		const emailInfo = await knex('tbl_account')
+		.where('acc_email', accEmail ? accEmail : '')
+		.whereNot('acc_id', accId)
 
-	if (verifying.length != 0) {
-		return res.status(400).json({
-			errorMessage: 'Email exist',
-			statusCode: errorCode
-		})
+		if (emailInfo.length != 0) {
+			return res.status(400).json({
+				errorMessage: 'Email exist',
+				statusCode: errorCode
+			})
+		}
 	}
 
 	const result = await accountModel.findById(accId)
+
+	if (result.length === 0) {
+		res.status(400).json({
+			errorMessage: 'Account Does Not Exist',
+			statusCode: errorCode
+		})
+	}
 
 	if (checkAvatar) {
 		if (result[0].acc_avatar === null) {
@@ -140,7 +152,7 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 
 	let date_ob = new Date()
 
-	const hashPassword = bcrypt.hashSync(accNewPassWord, 3)
+	const hashPassword = bcrypt.hashSync(accNewPassword, 3)
 	const account = {
 		acc_password: hashPassword,
 		acc_updated_date: date_ob

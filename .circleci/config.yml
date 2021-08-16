@@ -1,0 +1,39 @@
+# This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
+version: 2.1
+
+orbs:
+  heroku: circleci/heroku@0.0.10
+
+# Define the jobs we want to run for this project
+jobs:
+  build:
+    docker:
+      - image: circleci/node:16
+ 
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies 
+
+          command: |
+            npm install -save
+  test:
+    docker:
+      - image: circleci/node:16
+ 
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies 
+
+          command: |
+            npm test
+            
+
+# Orchestrate our job run sequence
+workflows:
+  build_and_test:
+    jobs:
+      - build
+      - heroku/deploy-via-git
+      
