@@ -242,10 +242,10 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 		.where({ cate_father: cateFather })
 
 	const fatherInfo = await categoriesModel.findById(cateFather)
-
+	
 	if (!fatherInfo) {
 		return res.status(400).json({
-			errorMessage: 'Category Does Not Exist',
+			errorMessage: 'Category Father Does Not Exist',
 			statusCode: errorCode
 		})
 	}

@@ -1,5 +1,7 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 const newBill = (req, res, next) => {
 	const shema = {
   		type: 'object',
