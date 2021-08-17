@@ -1,5 +1,5 @@
 const ajvLib = require('ajv')
-
+const errorCode = 1
 //comment validation
 const listProduct = (req, res, next) => {
 	const shema = {
@@ -107,10 +107,10 @@ const updateProduct = (req, res, next) => {
 
 	const validator = ajv.compile(shema)
 	const valid = validator(req.body)
-
+	
 	if (!valid) {
 		return res.status(400).json({
-			errorMessage: validator.errors[0].message,
+			errorMessage: "Value " + validator.errors[0].message,
 			statusCode: errorCode
 		})
 	}
@@ -139,7 +139,7 @@ const listBestSale = (req, res, next) => {
 
 	if (!valid) {
 		return res.status(400).json({
-			errorMessage: validator.errors[0].message,
+			errorMessage: "Value " + validator.errors[0].message,
 			statusCode: errorCode
 		})
 	}
