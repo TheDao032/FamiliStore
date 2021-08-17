@@ -11,6 +11,17 @@ const successCode = 0
 router.post('/add-father', categoriesValidation.newCategoryFather, async (req, res) => {
 	const { cateName } = req.body
 
+	const allCategories = await categoriesModel.findAll()
+
+	const checkExist = allCategories.find((item) => item.cate_name.toLowerCase() === cateName.toLowerCase())
+
+	if (checkExist) {
+		return res.status(400).json({
+			errorMessage: 'Category Name Has Already Existed',
+			statusCode: errorCode
+		})
+	}
+
 	const presentDate = new Date()
 	const newFatherCate = {
 		cate_name: cateName,
@@ -27,6 +38,17 @@ router.post('/add-father', categoriesValidation.newCategoryFather, async (req, r
 
 router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res) => {
 	const { cateName, cateFather } = req.body
+
+	const allCategories = await categoriesModel.findAll()
+
+	const checkExist = allCategories.find((item) => item.cate_name.toLowerCase() === cateName.toLowerCase())
+
+	if (checkExist) {
+		return res.status(400).json({
+			errorMessage: 'Category Name Has Already Existed',
+			statusCode: errorCode
+		})
+	}
 
 	const categoriyFatherInfo = categoriesModel.findById(cateFather)
 
@@ -81,7 +103,8 @@ router.get('/list', async (req, res) => {
 				subCategories: listChild.map((itemChild) => {
 						return {
 							cateId: itemChild.cate_id,
-							CateName: itemChild.cate_name
+							cateName: itemChild.cate_name,
+							createDate: itemChild.cate_created_date
 						}
 				})
 			}
@@ -96,7 +119,8 @@ router.get('/list', async (req, res) => {
 				subCategories: listChild.map((itemChild) => {
 						return {
 							cateId: itemChild.cate_id,
-							CateName: itemChild.cate_name
+							cateName: itemChild.cate_name,
+							createDate: itemChild.cate_created_date
 						}
 				})
 			}
@@ -109,27 +133,18 @@ router.get('/list', async (req, res) => {
 		})
 
 		if (page || limit) {
-			let paginationResult = {}
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
+			let totalPage = Math.floor(result[0].length / parseInt(limit))
 
-			if (endIndex < result[0].length) {
-				paginationResult.next = {
-					page: parseInt(page) + 1,
-					limit: parseInt(limit)
-				}
+			if (result[0].length % parseInt(limit) !== 0) {
+				totalPage = totalPage + 1
 			}
 	
-			if (startIndex > 0) {
-				paginationResult.previous = {
-					page: parseInt(page) - 1,
-					limit: parseInt(limit)
-				}
-			}
-	
-			paginationResult.listCategories = result[0].slice(startIndex, endIndex)
+			const paginationResult = result[0].slice(startIndex, endIndex)
 	
 			return res.status(200).json({
+				totalPage,
 				paginationResult,
 				statusCode: successCode
 			})
@@ -166,21 +181,21 @@ router.get('/list-father', async (req, res) => {
 
 	const result = await Promise.all([
 		listCategoriesFatherWithChild.map((element) => {
-			let fatherInfo
-			fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
+			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
 
 			return {
 				cateId: fatherInfo.cate_id,
-				cateName: fatherInfo.cate_name
+				cateName: fatherInfo.cate_name,
+				createDate: fatherInfo.cate_created_date
 			}
 		}),
 		filterList.map((element) => {
-			let fatherInfo
-			fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
+			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
 
 			return {
 				cateId: fatherInfo.cate_id,
-				cateName: fatherInfo.cate_name
+				cateName: fatherInfo.cate_name,
+				createDate: fatherInfo.cate_created_date
 			}
 		})
 	])
@@ -191,27 +206,18 @@ router.get('/list-father', async (req, res) => {
 		})
 
 		if (page || limit) {
-			let paginationResult = {}
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
-	
-			if (endIndex < result[0].length) {
-				paginationResult.next = {
-					page: parseInt(page) + 1,
-					limit: parseInt(limit)
-				}
+			let totalPage = Math.floor(result[0].length / parseInt(limit))
+
+			if (result[0].length % parseInt(limit) !== 0) {
+				totalPage = totalPage + 1
 			}
 	
-			if (startIndex > 0) {
-				paginationResult.previous = {
-					page: parseInt(page) - 1,
-					limit: parseInt(limit)
-				}
-			}
-	
-			paginationResult.listCategories = result[0].slice(startIndex, endIndex)
+			const paginationResult = result[0].slice(startIndex, endIndex)
 	
 			return res.status(200).json({
+				totalPage,
 				paginationResult,
 				statusCode: successCode
 			})
@@ -229,6 +235,7 @@ router.get('/list-father', async (req, res) => {
 })
 
 router.post('/list-child', categoriesValidation.listCategoryChild, async (req, res) => {
+	const { page, limit } = req.query
 	const { cateFather } = req.body
 
 	const result = await knex.from('tbl_categories')
@@ -236,30 +243,59 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 
 	const fatherInfo = await categoriesModel.findById(cateFather)
 
-	if (result) {
+	if (!fatherInfo) {
+		return res.status(400).json({
+			errorMessage: 'Category Does Not Exist',
+			statusCode: errorCode
+		})
+	}
+
+	if (result.length !== 0) {
 		let listCategoriesChild = []
 		result.forEach((element) => {
 			const categoriesInfo = {
 				cateId: element.cate_id,
-				cateName: element.cate_name
+				cateName: element.cate_name,
+				createDate: element.cate_created_date
 			}
 			listCategoriesChild.push(categoriesInfo)
 		});
 
-		const listCategoriesFather = {
-			cateId: fatherInfo[0].cate_id,
-			cateName: fatherInfo[0].cate_name, 
-			subCategories: listCategoriesChild
+		if (page || limit) {
+			let startIndex = (parseInt(page) - 1) * parseInt(limit)
+			let endIndex = (parseInt(page) * parseInt(limit))
+			let totalPage = Math.floor(listCategoriesChild.length / parseInt(limit))
+
+			if (listCategoriesChild.length % parseInt(limit) !== 0) {
+				totalPage = totalPage + 1
+			}
+	
+			const paginationResult = listCategoriesChild.slice(startIndex, endIndex)
+	
+			return res.status(200).json({
+				cateId: fatherInfo[0].cate_id,
+				cateName: fatherInfo[0].cate_name,
+				createDate: fatherInfo[0].cate_created_date,
+				totalPage,
+				subCategories: paginationResult,
+				statusCode: successCode
+			})
 		}
 
 		return res.status(200).json({
-			listCategories: listCategoriesFather,
+			cateId: fatherInfo[0].cate_id,
+			cateName: fatherInfo[0].cate_name,
+			createDate: fatherInfo[0].cate_created_date,
+			subCategories: listCategoriesChild,
 			statusCode: successCode
 		})
 	}
 
 	return res.status(200).json({
-		listCategories: [],
+		cateId: fatherInfo[0].cate_id,
+		cateName: fatherInfo[0].cate_name,
+		createDate: fatherInfo[0].cate_created_date,
+		subCategories: [],
 		statusCode: errorCode
 	})
 })
@@ -269,17 +305,41 @@ router.post('/update', categoriesValidation.updateCategory, async (req, res) => 
 
 	const result = await categoriesModel.findById(cateId)
 
+	const allCategories = await categoriesModel.findAll()
+
+	const checkExist = allCategories.find((info) => (info.cate_name.toLowerCase() === cateName.toLowerCase()) && (info.cate_id !== cateId))
+
+	if (checkExist) {
+		return res.status(400).json({
+			errorMessage: 'Category Name Has Already Existed',
+			statusCode: errorCode
+		})
+	}
+
 	if (result.length === 0) {
-		res.status(400).json({
+		return res.status(400).json({
 			errorMessage: 'Category Id Not Found',
 			statusCode: errorCode
 		})
 	}
 
+	const checkCateFather = cateFather && cateFather !== ''
+
+	if (checkCateFather) {
+		const fatherInfo = await categoriesModel.findById(cateFather)
+
+		if (!fatherInfo) {
+			return res.status(400).json({
+				errorMessage: 'Category Father Id Not Found',
+				statusCode: errorCode
+			})
+		}
+	}
+
 	let presentDate = new Date()
 	const cateUpdate = {
 		cate_name: cateName,
-		cate_father: cateFather && cateFather !== '' ? cateFather : null,
+		cate_father: checkCateFather ? cateFather : result[0].cate_father,
 		cate_updated_date: presentDate
 	}
 
@@ -303,6 +363,14 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 			statusCode: errorCode
 		})
 	}
+
+	await knex('tbl_product')
+		.where({ prod_category_id: cateId })
+		.del()
+
+	await knex('tbl_ware_house')
+		.where({ sto_category_id: cateId })
+		.del()
 
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
