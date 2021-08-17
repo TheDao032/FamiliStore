@@ -80,12 +80,6 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			statusCode: successCode
 		})
 	}
-	else {
-		return res.status(500).json({
-			listProduct: [],
-			statusCode: errorCode
-		})
-	}
 })
 
 
