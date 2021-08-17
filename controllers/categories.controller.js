@@ -65,6 +65,11 @@ router.get('/list', async (req, res) => {
 			let listChild
 
 			if (item.cate_father === null) {
+				const index = listCategoriesFather.indexOf(item)
+				if (index > -1) {
+					listCategoriesFather.splice(index, 1)
+				}
+
 				let checkExist = listCategoriesFather.find((info) => info.cate_id === item.cate_id)
 
 				if (!checkExist) {
@@ -147,6 +152,11 @@ router.get('/list-father', async (req, res) => {
 		listCategoriesFather.map((element) => {
 			let fatherInfo
 			if (element.cate_father === null) {
+				const index = listCategoriesFather.indexOf(element)
+				if (index > -1) {
+					listCategoriesFather.splice(index, 1)
+				}
+
 				let checkExist = listCategoriesFather.find((info) => info.cate_id === element.cate_id)
 
 				if (!checkExist) {
