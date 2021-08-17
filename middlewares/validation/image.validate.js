@@ -21,7 +21,7 @@ const validateImage = (images) => {
     return isValidImage
 }
 
-const  validateNumberOfFiles = (files) => {
+const validateNumberOfFiles = (files) => {
     if (files.length !== undefined) {
         if (files.length > 5)
             return false;
@@ -31,10 +31,7 @@ const  validateNumberOfFiles = (files) => {
 
 const validateValidImage = (images) => {
     var errorMessage = ''
-
-    if (images === null) {
-        errorMessage = errorMessage + ' Product needs to contain image!'
-    } else {
+    if (images != null) {
         var images = images.image
 
         var isValidImage = validateImage(images)
