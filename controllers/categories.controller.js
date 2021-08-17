@@ -58,36 +58,22 @@ router.get('/list', async (req, res) => {
 
 	const allCategories = await categoriesModel.findAll()
 	const listCategoriesFather = await categoriesModel.findFather()
+	const listCategoriesFatherWithoutChild = await categoriesModel.findAllFather()
+
+	const filterList = listCategoriesFatherWithoutChild.filter((info) => {
+		const checkExist = listCategoriesFather.find((item) => item.cate_father === info.cate_id)
+		if (checkExist) {
+			return false
+		}
+
+		return true
+	})
+
 	
 	const result = await Promise.all([
 		listCategoriesFather.map((item) => {
-			let fatherInfo
-			let listChild
-
-			if (item.cate_father === null) {
-				const index = listCategoriesFather.indexOf(item)
-				if (index > -1) {
-					listCategoriesFather.splice(index, 1)
-				}
-
-				let checkExist = listCategoriesFather.find((info) => info.cate_id === item.cate_id)
-
-				if (!checkExist) {
-					fatherInfo = allCategories.find((info) => info.cate_id === item.cate_id)
-
-					return {
-						cateId: fatherInfo.cate_id,
-						cateName: fatherInfo.cate_name,
-						subCategories: {}
-					}
-				} else {
-					return null
-				}
-				
-			}
-
-			fatherInfo = allCategories.find((info) => info.cate_id === item.cate_father)
-			listChild = allCategories.filter((info) => info.cate_father === item.cate_father)
+			const fatherInfo = allCategories.find((info) => info.cate_id === item.cate_father)
+			const listChild = allCategories.filter((info) => info.cate_father === item.cate_father)
 			
 			return {
 				cateId: fatherInfo.cate_id,
@@ -99,10 +85,29 @@ router.get('/list', async (req, res) => {
 						}
 				})
 			}
-		}).filter((result) => result !== null)
+		}),
+		filterList.map((item) => {
+			const fatherInfo = allCategories.find((info) => info.cate_id === item.cate_id)
+			const listChild = allCategories.filter((info) => info.cate_father === item.cate_id)
+			
+			return {
+				cateId: fatherInfo.cate_id,
+				cateName: fatherInfo.cate_name,
+				subCategories: listChild.map((itemChild) => {
+						return {
+							cateId: itemChild.cate_id,
+							CateName: itemChild.cate_name
+						}
+				})
+			}
+		})
 	])
 	
 	if (result) {
+		result[1].forEach((item) => {
+			result[0].push(item)
+		})
+
 		if (page || limit) {
 			let paginationResult = {}
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
@@ -146,42 +151,45 @@ router.get('/list-father', async (req, res) => {
 	const { page, limit } = req.query
 
 	const allCategories = await categoriesModel.findAll()
-	const listCategoriesFather = await categoriesModel.findFather()
+	const listCategoriesFatherWithChild = await categoriesModel.findFather()
+
+	const listCategoriesFatherWithoutChild = await categoriesModel.findAllFather()
+
+	const filterList = listCategoriesFatherWithoutChild.filter((info) => {
+		const checkExist = listCategoriesFatherWithChild.find((item) => item.cate_father === info.cate_id)
+		if (checkExist) {
+			return false
+		}
+
+		return true
+	})
 
 	const result = await Promise.all([
-		listCategoriesFather.map((element) => {
+		listCategoriesFatherWithChild.map((element) => {
 			let fatherInfo
-			if (element.cate_father === null) {
-				const index = listCategoriesFather.indexOf(element)
-				if (index > -1) {
-					listCategoriesFather.splice(index, 1)
-				}
-
-				let checkExist = listCategoriesFather.find((info) => info.cate_id === element.cate_id)
-
-				if (!checkExist) {
-					fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
-
-					return {
-						cateId: fatherInfo.cate_id,
-						cateName: fatherInfo.cate_name,
-					}
-				} else {
-					return null
-				}
-			}
 			fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
 
 			return {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name
 			}
-		}).filter((result) => {
-			return result !== null
+		}),
+		filterList.map((element) => {
+			let fatherInfo
+			fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
+
+			return {
+				cateId: fatherInfo.cate_id,
+				cateName: fatherInfo.cate_name
+			}
 		})
 	])
 	
 	if (result) {
+		result[1].forEach((item) => {
+			result[0].push(item)
+		})
+
 		if (page || limit) {
 			let paginationResult = {}
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
