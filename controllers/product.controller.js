@@ -507,22 +507,24 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 		}
 	}
 
-	if (prodName != undefined && prodCategoryID != undefined) {
-		var prod = await knex('tbl_product')
-			.where('prod_name', prodName)
-			.andWhere('prod_category_id', prodCategoryID)
-		if (prod.length !== 0 && prodName != '') {
-			errorMessage = errorMessage + " Product record with the same name and same category exist!"
-		}
-
-	}
-
 	var updateProduct = await knex('tbl_product')
 		.where('prod_id', id)
 
 	if (updateProduct.length === 0) {
 		errorMessage = errorMessage + " Product record to update doesn't exist!"
 	}
+
+	if (prodName != undefined && prodCategoryID != undefined) {
+			var prod = await knex('tbl_product')
+				.where('prod_name', prodName)
+				.andWhere('prod_category_id', prodCategoryID)
+				.andWhere('prod_id', '!=', id)
+			if (prod.length !== 0 && prodName != '') {
+				errorMessage = errorMessage + " Product record with the same name and same category exist!"
+			}
+	}
+
+
 
 	if (prodName != undefined && prodName == '') {
 		errorMessage = errorMessage + " Name cannot be blank!"
