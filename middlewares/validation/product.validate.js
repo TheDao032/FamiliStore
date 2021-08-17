@@ -1,5 +1,5 @@
 const ajvLib = require('ajv')
-
+const errorCode = 1
 //comment validation
 const listProduct = (req, res, next) => {
 	const shema = {
@@ -8,7 +8,7 @@ const listProduct = (req, res, next) => {
 			page: { type: 'integer' },
 			limit: { type: 'integer' }
 		},
-		required: ['page', 'limit'],
+		required: ["page", "limit"],
 		additionalProperties: true
 	}
 
@@ -35,9 +35,9 @@ const listSuggestion = (req, res, next) => {
 		properties: {
 			page: { type: 'integer' },
 			limit: { type: 'integer' },
-			catID : { type: 'integer' }
+			catID : {type: 'integer'}
 		},
-		required: ['page', 'limit', 'catID'],
+		required: ["page", "limit", "catID"],
 		additionalProperties: true
 	}
 
@@ -66,7 +66,7 @@ const listByCategory = (req, res, next) => {
 			page: { type: 'integer'},
 			limit: { type: 'integer'}
 		},
-		required: ['catID', 'page', 'limit'],
+		required: ["catID", "page", "limit"],
 		additionalProperties: true
 	}
 
@@ -95,7 +95,7 @@ const updateProduct = (req, res, next) => {
 			prodName: { type: 'string' , maxLength: 60},
 			prodCategoryID: { type: 'integer' },
 			prodAmount: { type: 'integer'},
-			prodPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 }
+			prodPrice: { type: 'integer' }
 		},
 		required: [],
 		additionalProperties: true
@@ -107,10 +107,10 @@ const updateProduct = (req, res, next) => {
 
 	const validator = ajv.compile(shema)
 	const valid = validator(req.body)
-
+	
 	if (!valid) {
 		return res.status(400).json({
-			errorMessage: validator.errors[0].message,
+			errorMessage: "Value " + validator.errors[0].message,
 			statusCode: errorCode
 		})
 	}
@@ -126,7 +126,7 @@ const listBestSale = (req, res, next) => {
 			limit: { type: 'integer'},
 			page: { type: 'integer'}
 		},
-		required: ['limit', 'page'],
+		required: ["limit", "page"],
 		additionalProperties: true
 	}
 
@@ -139,7 +139,7 @@ const listBestSale = (req, res, next) => {
 
 	if (!valid) {
 		return res.status(400).json({
-			errorMessage: validator.errors[0].message,
+			errorMessage: "Value " + validator.errors[0].message,
 			statusCode: errorCode
 		})
 	}

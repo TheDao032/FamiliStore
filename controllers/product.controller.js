@@ -80,12 +80,6 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			statusCode: successCode
 		})
 	}
-	else {
-		return res.status(500).json({
-			listProduct: [],
-			statusCode: errorCode
-		})
-	}
 })
 
 
@@ -384,7 +378,7 @@ router.get('/details/:id', async (req, res) => {
 router.post('/add', async (req, res) => {
 
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodDescription, prodStatus } = req.body
-
+	
 	var images = req.files //need to get image from input type file, name is 'image'
 
 	var errorMessage = "";
@@ -416,17 +410,34 @@ router.post('/add', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
+	let regexPattern = /^\d+$/
+	let resultInteger = regexPattern.test(prodPrice);
+
+	if (!resultInteger) {
+		return res.status(400).json({
+			errorMessage: 'Product price must be integer !',
+			statusCode: errorCode
+		})
+	}
+	resultInteger = regexPattern.test(prodAmount);
+
+	if (!resultInteger) {
+		return res.status(400).json({
+			errorMessage: 'Product amount must be integer !',
+			statusCode: errorCode
+		})
+	}
 
 	if (prodAmount > 10000 || prodAmount < 0) {
 		return res.status(400).json({
-			errorMessage: 'Ammount is not valid !',
+			errorMessage: 'Ammount is not valid, must be smaller than 10000 and greater than 0!',
 			statusCode: errorCode
 		})
 	}
 
 	if (prodPrice > 1000000000 || prodPrice < 0) {
 		return res.status(400).json({
-			errorMessage: 'Product price is not valid !',
+			errorMessage: 'Product price is not valid, must be smaller than 1000000000 or greater than 0 !',
 			statusCode: errorCode
 		})
 	}
@@ -497,7 +508,6 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	const { id } = req.params
 
 	var errorMessage = ''
-
 	if (prodCategoryID != undefined) {
 		var cat = await knex('tbl_categories')
 			.where('cate_id', prodCategoryID)
@@ -515,13 +525,13 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	}
 
 	if (prodName != undefined && prodCategoryID != undefined) {
-			var prod = await knex('tbl_product')
-				.where('prod_name', prodName)
-				.andWhere('prod_category_id', prodCategoryID)
-				.andWhere('prod_id', '!=', id)
-			if (prod.length !== 0 && prodName != '') {
-				errorMessage = errorMessage + " Product record with the same name and same category exist!"
-			}
+		var prod = await knex('tbl_product')
+			.where('prod_name', prodName)
+			.andWhere('prod_category_id', prodCategoryID)
+			.andWhere('prod_id', '!=', id)
+		if (prod.length !== 0 && prodName != '') {
+			errorMessage = errorMessage + " Product record with the same name and same category exist!"
+		}
 	}
 
 
@@ -559,7 +569,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	if (prodAmount != undefined) {
 		if (prodAmount > 10000 || prodAmount < 0) {
 			return res.status(400).json({
-				errorMessage: 'Ammount cannot greater than 10000 !',
+				errorMessage: 'Ammount cannot greater than 10000 or smaller than 0 !',
 				statusCode: errorCode
 			})
 		}
@@ -568,7 +578,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	if (prodPrice != undefined) {
 		if (prodPrice > 1000000000 || prodPrice < 0) {
 			return res.status(400).json({
-				errorMessage: 'Product price is not valid !',
+				errorMessage: 'Product price is not valid, cannot greater than 1000000000 or smaller than 0 !',
 				statusCode: errorCode
 			})
 		}
@@ -621,7 +631,7 @@ router.post('/update-image/:id', async (req, res) => {
 	prodImgNumber = prodImgNumber.rows[0].count
 
 
-	if (5 - prodImgNumber + numberOfOldImage - numberOfNewImage < 0) {
+	if (5 - prodImgNumber + numberOfOldImage - numberOfNewImage <= 0) {
 		return res.status(400).json({
 			errorMessage: "Number of image to update and number of image to delete is not valid, note that one product can have only 5 images",
 			statusCode: errorCode
