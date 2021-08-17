@@ -13,18 +13,4 @@ API.use('/ware-house', wareHouseController)
 API.use('/delivery', deliveriesController)
 API.use('/comment', commentController)
 
-API.use((req, res, next) => {
-	return res.status(400).json({
-		errorMessage: 'API Url Not Found',
-		statusCode: 1
-	})
-})
-
-API.use((err, req, res, next) => {
-	return res.status(500).json({
-		err,
-		statusCode: 1
-	})
-})
-
 module.exports = API

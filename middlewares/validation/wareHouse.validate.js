@@ -7,7 +7,7 @@ const newWareHouse = (req, res, next) => {
 			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
 			stoAmount: { type: 'integer' },
 			stoCategoryId: { type: 'integer' },
-			stoOriginPrice: { type: 'string', pattern: '', maxLength: 100 },
+			stoOriginPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
@@ -22,7 +22,10 @@ const newWareHouse = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -37,7 +40,7 @@ const updateWareHouse = (req, res, next) => {
 			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
 			stoAmount: { type: 'integer',},
 			stoCategoryId: { type: 'integer' },
-			stoOriginPrice: { type: 'string', pattern: '', maxLength: 100 },
+			stoOriginPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
@@ -53,7 +56,10 @@ const updateWareHouse = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

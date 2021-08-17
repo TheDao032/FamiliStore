@@ -8,7 +8,7 @@ const listProduct = (req, res, next) => {
 			page: { type: 'integer' },
 			limit: { type: 'integer' }
 		},
-		required: ["page", "limit"],
+		required: ['page', 'limit'],
 		additionalProperties: true
 	}
 
@@ -20,7 +20,10 @@ const listProduct = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -32,9 +35,9 @@ const listSuggestion = (req, res, next) => {
 		properties: {
 			page: { type: 'integer' },
 			limit: { type: 'integer' },
-			catID : {type: 'integer'}
+			catID : { type: 'integer' }
 		},
-		required: ["page", "limit", "catID"],
+		required: ['page', 'limit', 'catID'],
 		additionalProperties: true
 	}
 
@@ -46,7 +49,10 @@ const listSuggestion = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -60,7 +66,7 @@ const listByCategory = (req, res, next) => {
 			page: { type: 'integer'},
 			limit: { type: 'integer'}
 		},
-		required: ["catID", "page", "limit"],
+		required: ['catID', 'page', 'limit'],
 		additionalProperties: true
 	}
 
@@ -72,7 +78,10 @@ const listByCategory = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -86,7 +95,7 @@ const updateProduct = (req, res, next) => {
 			prodName: { type: 'string' , maxLength: 60},
 			prodCategoryID: { type: 'integer' },
 			prodAmount: { type: 'integer'},
-			prodPrice: { type: 'integer' }
+			prodPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 }
 		},
 		required: [],
 		additionalProperties: true
@@ -100,7 +109,10 @@ const updateProduct = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -114,7 +126,7 @@ const listBestSale = (req, res, next) => {
 			limit: { type: 'integer'},
 			page: { type: 'integer'}
 		},
-		required: ["limit", "page"],
+		required: ['limit', 'page'],
 		additionalProperties: true
 	}
 
@@ -126,7 +138,10 @@ const listBestSale = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

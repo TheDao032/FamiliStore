@@ -18,7 +18,10 @@ const listDistricts = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -43,7 +46,10 @@ const listWards = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -67,7 +73,10 @@ const listDeliveries = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -91,7 +100,10 @@ const newCity = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -116,7 +128,10 @@ const newDistrict = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -129,7 +144,7 @@ const newWard = (req, res, next) => {
 			cityId: { type: 'integer' },
 			distId: { type: 'integer' },
 			wardName: { type: 'string', pattern: '' },
-			wardShipPrice: { type: 'string', pattern: '' }
+			wardShipPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 }
   		},
 		required: ['cityId', 'distId', 'wardName', 'wardShipPrice'],
 		additionalProperties: true
@@ -143,7 +158,10 @@ const newWard = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -171,7 +189,10 @@ const newDelivery = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
