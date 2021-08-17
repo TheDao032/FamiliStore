@@ -54,10 +54,10 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 
 router.get('/list', async (req, res) => {
 
+	const { page, limit } = req.query
+
 	const allCategories = await categoriesModel.findAll()
 	const listCategoriesFather = await categoriesModel.findFather()
-
-
 	
 	const result = await Promise.all([
 		listCategoriesFather.map((item) => {
@@ -66,7 +66,8 @@ router.get('/list', async (req, res) => {
 
 			if (item.cate_father === null) {
 				let checkExist = listCategoriesFather.find((info) => info.cate_id === item.cate_id)
-				if (checkExist) {
+
+				if (!checkExist) {
 					fatherInfo = allCategories.find((info) => info.cate_id === item.cate_id)
 
 					return {
@@ -97,19 +98,48 @@ router.get('/list', async (req, res) => {
 	])
 	
 	if (result) {
+		if (page || limit) {
+			let paginationResult = {}
+			let startIndex = (parseInt(page) - 1) * parseInt(limit)
+			let endIndex = (parseInt(page) * parseInt(limit))
+
+			if (endIndex < result[0].length) {
+				paginationResult.next = {
+					page: parseInt(page) + 1,
+					limit: parseInt(limit)
+				}
+			}
+	
+			if (startIndex > 0) {
+				paginationResult.previous = {
+					page: parseInt(page) - 1,
+					limit: parseInt(limit)
+				}
+			}
+	
+			paginationResult.listCategories = result[0].slice(startIndex, endIndex)
+	
+			return res.status(200).json({
+				paginationResult,
+				statusCode: successCode
+			})
+		}
+		
 		return res.status(200).json({
-			listCategories: result[0],
+			paginationResult: result[0],
 			statusCode: successCode
 		})
 	}
 
-	return res.status(500).json({
-		listCategories: [],
+	return res.status(200).json({
+		paginationResult: {},
 		statusCode: errorCode
 	})
 })
 
 router.get('/list-father', async (req, res) => {
+	const { page, limit } = req.query
+
 	const allCategories = await categoriesModel.findAll()
 	const listCategoriesFather = await categoriesModel.findFather()
 
@@ -119,7 +149,7 @@ router.get('/list-father', async (req, res) => {
 			if (element.cate_father === null) {
 				let checkExist = listCategoriesFather.find((info) => info.cate_id === element.cate_id)
 
-				if (checkExist) {
+				if (!checkExist) {
 					fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
 
 					return {
@@ -142,27 +172,53 @@ router.get('/list-father', async (req, res) => {
 	])
 	
 	if (result) {
+		if (page || limit) {
+			let paginationResult = {}
+			let startIndex = (parseInt(page) - 1) * parseInt(limit)
+			let endIndex = (parseInt(page) * parseInt(limit))
+	
+			if (endIndex < result[0].length) {
+				paginationResult.next = {
+					page: parseInt(page) + 1,
+					limit: parseInt(limit)
+				}
+			}
+	
+			if (startIndex > 0) {
+				paginationResult.previous = {
+					page: parseInt(page) - 1,
+					limit: parseInt(limit)
+				}
+			}
+	
+			paginationResult.listCategories = result[0].slice(startIndex, endIndex)
+	
+			return res.status(200).json({
+				paginationResult,
+				statusCode: successCode
+			})
+		}
 		return res.status(200).json({
-			listCategories: result[0],
+			paginationResult: result[0],
 			statusCode: successCode
 		})
 	}
 
 	return res.status(200).json({
-		listCategories: [],
+		paginationResult: {},
 		statusCode: errorCode
 	})
 })
 
 router.post('/list-child', categoriesValidation.listCategoryChild, async (req, res) => {
 	const { cateFather } = req.body
+
 	const result = await knex.from('tbl_categories')
 		.where({ cate_father: cateFather })
 
 	const fatherInfo = await categoriesModel.findById(cateFather)
 
 	if (result) {
-
 		let listCategoriesChild = []
 		result.forEach((element) => {
 			const categoriesInfo = {

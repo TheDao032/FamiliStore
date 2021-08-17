@@ -1,5 +1,7 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 const login = (req, res, next) => {
 	const shema = {
 		type: 'object',
@@ -7,7 +9,7 @@ const login = (req, res, next) => {
 			email: { type: 'string', pattern: '' },
 			passWord: { type: 'string', pattern: '', }
 		},
-		required: ["email", "passWord"],
+		required: ['email', 'passWord'],
 		additionalProperties: false
 	}
 
@@ -19,7 +21,10 @@ const login = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -34,7 +39,7 @@ const register = (req, res, next) => {
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
     		role: { type: 'string', pattern: '', maxLength: 5}
   		},
-		required: ["passWord", "email"],
+		required: ['passWord', 'email'],
 		additionalProperties: true
 	}
 
@@ -46,7 +51,10 @@ const register = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -59,7 +67,7 @@ const confirmToken = (req, res, next) => {
 			accId: { type: 'integer' },
 			accToken: { type: 'string', pattern: '', }
 		},
-		required: ["accId", "accToken"],
+		required: ['accId', 'accToken'],
 		additionalProperties: false
 	}
 
@@ -71,7 +79,10 @@ const confirmToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -85,7 +96,7 @@ const forgotPassword = (req, res, next) => {
 		properties: {
 			email: { type: 'string', pattern: '', maxLength: 100 }
 		},
-		required: ["email"],
+		required: ['email'],
 		additionalProperties: false
 	}
 
@@ -97,7 +108,10 @@ const forgotPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -111,7 +125,7 @@ const newPassword = (req, res, next) => {
 			accPassword: { type: 'string', pattern: '' , minLength: 1 },
 			tokenChangePass: { type: 'string', pattern: '' }
 		},
-		required: ["accId", "accPassword", "tokenChangePass"],
+		required: ['accId', 'accPassword', 'tokenChangePass'],
 		additionalProperties: false
 	}
 
@@ -123,7 +137,10 @@ const newPassword = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -136,7 +153,7 @@ const refreshToken = (req, res, next) => {
 			accessToken: { type: 'string', pattern: '' },
 			refreshToken: { type: 'string', pattern: '' }
 		},
-		required: ["accessToken", "refreshToken"],
+		required: ['accessToken', 'refreshToken'],
 		additionalProperties: false
 	}
 
@@ -148,7 +165,10 @@ const refreshToken = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
