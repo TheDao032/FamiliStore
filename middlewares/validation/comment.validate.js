@@ -1,5 +1,7 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 //comment validation
 const listComment = (req, res, next) => {
 	const shema = {

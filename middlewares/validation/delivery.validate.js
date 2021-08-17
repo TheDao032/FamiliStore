@@ -1,5 +1,7 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 const listDistricts = (req, res, next) => {
 	const shema = {
   		type: 'object',
