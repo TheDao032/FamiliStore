@@ -6,13 +6,14 @@ const imageService = require('../services/imageService')
 const imageValidator = require('../middlewares/validation/image.validate')
 const commonService = require('../services/commonService')
 const validator = require('../middlewares/validation/product.validate')
+const productModel = require('../models/product.model')
 const successCode = 0
 const errorCode = 1
 
 router.post('/list', validator.listProduct, async (req, res) => {
 	const { page, limit } = req.body
 	const offset = limit * (page - 1)
-
+	
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
@@ -20,7 +21,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-
+	
 	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
 	from tbl_product`)
 
@@ -686,23 +687,8 @@ router.post('/delete/:id', async (req, res) => {
 			statusCode: 1
 		})
 	}
-	//delete comment
-	await knex('tbl_comment').where('cmt_product_id', id).del()
-
-	//delete image of product
-	await knex('tbl_product_images').where('prod_img_product_id', id).del()
-		.returning('*')
-		.then((deleted) => {
-			for (let i = 0; i < deleted.length; i++) {
-				imageService.deleteImage(deleted[i].prod_img_data);
-			}
-
-		})
-
-	//delete product
-
-	await knex('tbl_product').where('prod_id', id).del()
-
+	//call function
+	productModel.deleteProduct(id)
 
 	return res.status(200).json({
 		statusCode: successCode
