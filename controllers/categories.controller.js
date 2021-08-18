@@ -1,4 +1,5 @@
 const express = require('express')
+const moment = require('moment')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
@@ -102,11 +103,13 @@ router.get('/list', async (req, res) => {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name,
 				subCategories: listChild.map((itemChild) => {
-						return {
-							cateId: itemChild.cate_id,
-							cateName: itemChild.cate_name,
-							createDate: itemChild.cate_created_date
-						}
+					const createDate = moment(new Date(itemChild.cate_created_date)).format("DD-MM-YYYY")					
+
+					return {
+						cateId: itemChild.cate_id,
+						cateName: itemChild.cate_name,
+						createDate
+					}
 				})
 			}
 		}),
@@ -118,11 +121,13 @@ router.get('/list', async (req, res) => {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name,
 				subCategories: listChild.map((itemChild) => {
-						return {
-							cateId: itemChild.cate_id,
-							cateName: itemChild.cate_name,
-							createDate: itemChild.cate_created_date
-						}
+					const createDate = moment(new Date(itemChild.cate_created_date)).format("DD-MM-YYYY")
+
+					return {
+						cateId: itemChild.cate_id,
+						cateName: itemChild.cate_name,
+						createDate
+					}
 				})
 			}
 		})
@@ -185,20 +190,22 @@ router.get('/list-father', async (req, res) => {
 	const result = await Promise.all([
 		listCategoriesFatherWithChild.map((element) => {
 			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_father)
+			const createDate = moment(new Date(fatherInfo.cate_created_date)).format("DD-MM-YYYY")
 
 			return {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name,
-				createDate: fatherInfo.cate_created_date
+				createDate
 			}
 		}),
 		filterList.map((element) => {
 			const fatherInfo = allCategories.find((info) => info.cate_id === element.cate_id)
+			const createDate = moment(new Date(fatherInfo.cate_created_date)).format("DD-MM-YYYY")
 
 			return {
 				cateId: fatherInfo.cate_id,
 				cateName: fatherInfo.cate_name,
-				createDate: fatherInfo.cate_created_date
+				createDate
 			}
 		})
 	])
@@ -371,22 +378,26 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 		})
 	}
 
-	const productsByCate = await productModel(cateId)
-	productsByCate.forEach(async (item) => {
-		await productModel.deleteProduct(item.prod_id)
-	})
-	
+	const listChildByCateId = await categoriesModel.findChild(cateId)
 
-	await knex('tbl_ware_house')
-		.where({ sto_category_id: cateId })
-		.del()
+	if (listChildByCateId.length !== 0) {
+		return res.status(400).json({
+			errorMessage: 'Category Still Has Sub Cateogory',
+			statusCode: errorCode
+		})
+	}
+
+	const productsByCate = await productModel.findByCateId(cateId)
+
+	if (productsByCate.length !== 0) {
+		return res.status(400).json({
+			errorMessage: 'Category Still Has Products',
+			statusCode: errorCode
+		})
+	}
 
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
-		.del()
-
-	await knex('tbl_categories')
-		.where({ cate_father: cateId })
 		.del()
 
 	return res.status(200).json({

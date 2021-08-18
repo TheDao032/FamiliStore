@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
--- Dumped by pg_dump version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+-- Dumped from database version 13.3 (Ubuntu 13.3-1.pgdg20.04+1)
+-- Dumped by pg_dump version 13.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -17,7 +17,59 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: tbl_account_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: proc_update_product_insert_bill_detail(json, integer, character varying, integer, timestamp without time zone, integer, text); Type: PROCEDURE; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, totalprice character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	temp integer;
+	BEGIN
+		BEGIN
+			insert into tbl_bill(
+				bill_account_id,
+				bill_total_price,
+				bill_total_quantity,
+				bill_created_date
+			)
+			values(accId, totalPrice, totalQuantity, timeCurrent);
+			select max(bill_id) as maxId into temp from tbl_bill where bill_account_id = accId;
+			
+			update tbl_product
+			set prod_amount = prod_amount - pro.prodQuantity,
+				prod_updated_date = timeCurrent
+			from (
+				select (l->>'prodId')::int as prodId, (l->>'prodQuantity'):: int as prodQuantity
+				from json_array_elements(listProduct) as l
+			) pro
+			where tbl_product.prod_id = pro.prodId;
+
+			insert into tbl_bill_detail(
+				bdetail_bill_id, bdetail_product_id, bdetail_quantity, bdetail_product_price, bdetail_created_date
+			)
+			select temp, (l->>'prodId')::int as prodId, (l->>'prodQuantity'):: int as prodQuantity, tblPro.prod_price, timeCurrent
+			from json_array_elements(listProduct) as l, tbl_product as tblPro
+			where (l->>'prodId')::int = tblPro.prod_id;
+			
+			exception when others then
+				resultCode = temp;
+				GET STACKED DIAGNOSTICS
+					message = MESSAGE_TEXT;
+				ROLLBACK;
+				return;
+		END;
+		commit;
+		resultCode = 0;
+		message = 'success';
+	END;
+$$;
+
+
+ALTER PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, totalprice character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text) OWNER TO pnnyoamvocwgoi;
+
+--
+-- Name: tbl_account_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_account_id_seq
@@ -28,14 +80,14 @@ CREATE SEQUENCE public.tbl_account_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_account_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_account_id_seq OWNER TO pnnyoamvocwgoi;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: tbl_account; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_account; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_account (
@@ -55,10 +107,10 @@ CREATE TABLE public.tbl_account (
 );
 
 
-ALTER TABLE public.tbl_account OWNER TO postgres;
+ALTER TABLE public.tbl_account OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_bill_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_bill_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_bill_id_seq
@@ -69,10 +121,10 @@ CREATE SEQUENCE public.tbl_bill_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_bill_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_bill_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_bill; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_bill; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_bill (
@@ -86,10 +138,10 @@ CREATE TABLE public.tbl_bill (
 );
 
 
-ALTER TABLE public.tbl_bill OWNER TO postgres;
+ALTER TABLE public.tbl_bill OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_bill_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_bill_detail_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_bill_detail_id_seq
@@ -100,10 +152,10 @@ CREATE SEQUENCE public.tbl_bill_detail_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_bill_detail_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_bill_detail_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_bill_detail; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_bill_detail; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_bill_detail (
@@ -118,24 +170,24 @@ CREATE TABLE public.tbl_bill_detail (
 );
 
 
-ALTER TABLE public.tbl_bill_detail OWNER TO postgres;
+ALTER TABLE public.tbl_bill_detail OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_categories_id_seq
-    START WITH 10
+    START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
 
-ALTER TABLE public.tbl_categories_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_categories_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_categories; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_categories; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_categories (
@@ -148,10 +200,10 @@ CREATE TABLE public.tbl_categories (
 );
 
 
-ALTER TABLE public.tbl_categories OWNER TO postgres;
+ALTER TABLE public.tbl_categories OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_cities_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_cities_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_cities_id_seq
@@ -162,10 +214,10 @@ CREATE SEQUENCE public.tbl_cities_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_cities_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_cities_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_cities; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_cities; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_cities (
@@ -176,10 +228,10 @@ CREATE TABLE public.tbl_cities (
 );
 
 
-ALTER TABLE public.tbl_cities OWNER TO postgres;
+ALTER TABLE public.tbl_cities OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_comment_id_seq
@@ -190,10 +242,10 @@ CREATE SEQUENCE public.tbl_comment_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_comment_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_comment_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_comment; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_comment; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_comment (
@@ -208,10 +260,10 @@ CREATE TABLE public.tbl_comment (
 );
 
 
-ALTER TABLE public.tbl_comment OWNER TO postgres;
+ALTER TABLE public.tbl_comment OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_delivery_address_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_delivery_address_id_seq
@@ -222,10 +274,10 @@ CREATE SEQUENCE public.tbl_delivery_address_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_delivery_address_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_delivery_address_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_delivery_address; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_delivery_address (
@@ -239,10 +291,10 @@ CREATE TABLE public.tbl_delivery_address (
 );
 
 
-ALTER TABLE public.tbl_delivery_address OWNER TO postgres;
+ALTER TABLE public.tbl_delivery_address OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_districts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_districts_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_districts_id_seq
@@ -253,10 +305,10 @@ CREATE SEQUENCE public.tbl_districts_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_districts_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_districts_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_districts; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_districts; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_districts (
@@ -268,10 +320,10 @@ CREATE TABLE public.tbl_districts (
 );
 
 
-ALTER TABLE public.tbl_districts OWNER TO postgres;
+ALTER TABLE public.tbl_districts OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_product_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_product_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_product_id_seq
@@ -282,10 +334,10 @@ CREATE SEQUENCE public.tbl_product_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_product_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_product_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_product; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_product; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_product (
@@ -301,10 +353,10 @@ CREATE TABLE public.tbl_product (
 );
 
 
-ALTER TABLE public.tbl_product OWNER TO postgres;
+ALTER TABLE public.tbl_product OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_product_image_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_product_image_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_product_image_id_seq
@@ -315,10 +367,10 @@ CREATE SEQUENCE public.tbl_product_image_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_product_image_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_product_image_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_product_images; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_product_images; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_product_images (
@@ -329,10 +381,10 @@ CREATE TABLE public.tbl_product_images (
 );
 
 
-ALTER TABLE public.tbl_product_images OWNER TO postgres;
+ALTER TABLE public.tbl_product_images OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_roles; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_roles; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_roles (
@@ -344,10 +396,10 @@ CREATE TABLE public.tbl_roles (
 );
 
 
-ALTER TABLE public.tbl_roles OWNER TO postgres;
+ALTER TABLE public.tbl_roles OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_wards_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_wards_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_wards_id_seq
@@ -358,10 +410,10 @@ CREATE SEQUENCE public.tbl_wards_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_wards_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_wards_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_wards; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_wards; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_wards (
@@ -375,10 +427,10 @@ CREATE TABLE public.tbl_wards (
 );
 
 
-ALTER TABLE public.tbl_wards OWNER TO postgres;
+ALTER TABLE public.tbl_wards OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE SEQUENCE public.tbl_ware_house_id_seq
@@ -389,10 +441,10 @@ CREATE SEQUENCE public.tbl_ware_house_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_ware_house_id_seq OWNER TO postgres;
+ALTER TABLE public.tbl_ware_house_id_seq OWNER TO pnnyoamvocwgoi;
 
 --
--- Name: tbl_ware_house; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tbl_ware_house; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 CREATE TABLE public.tbl_ware_house (
@@ -410,10 +462,10 @@ CREATE TABLE public.tbl_ware_house (
 );
 
 
-ALTER TABLE public.tbl_ware_house OWNER TO postgres;
+ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
 
 --
--- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_number, acc_full_name, acc_role, acc_avatar, acc_status, acc_created_date, acc_updated_date, acc_token_forgot, acc_refresh_token) FROM stdin;
@@ -454,29 +506,139 @@ COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_n
 37	$2b$04$g3mp5v.p/8iDn.LZE.VxU.zjUJvyRw0SzPFykWzHwfc.OQaodSOy.	$2b$04$Kn9OP/zbTvGhP2Yy7mR8ce21IXNPt37bfMlRh0duQDjcZjLx.0M4W	fee42886@cuoly.com	84123456789	fee42886@cuoly.com	USER	\N	2	2021-08-08	2021-08-08	\N	IYkZvHGFbTKiTvZdhAYLNncc91ZBdkhyWIPtUfOr9BycW0jK25cXakocNrsfxvVh6cqU1WUhIbQUNK2xI9N5PDI7BxY1AnQtl0HG
 38	$2b$04$skUdhPN9RhDYbTvWZJCrpeSpX3H6xMA5BuTJ5NCiEkfgX4KnCYmXu	$2b$04$.DqujUk8ai/v9MteAEsqu./uleiwpcPFgVKxhqv.OK1QPnBEJ5ibm	sju73859@zwoho.com	8413456978	sju73859@zwoho.com	USER	\N	2	2021-08-08	\N	\N	fmdJDI2gi6qEr20FvG1Uau94RUIueXBSy5e1PMH8LTMU67CsOArzsys2yGNVudB30TpiyZCrao1LcTwWIJiiFEDoik3N9IbKF4yT
 39	$2b$04$y/ZDuuf6KrgpVkYcBgwSWONshyV7IqtbmuG2dxZnKe6L3sEMupksq	\N	vho23272@cuoly.com	8412346589	vho23272@cuoly.com	USER	\N	0	2021-08-08	2021-08-08	$2b$04$pnUHeOe2g6zxexvkNgPztupjTqDHy4dl9JL9Y2PvZYqvKFdeDyGdS	UetOJB709OPeVhGEvxVniXFLLdw8wXnUlteIsaab5ARZjPE67TnUTxureJIsnd6J4GjzCSm6hbfVLuSmr9nyYVZVJyGzBPw6HcHz
-2	$2b$04$BAaV2SDvid3kCWxYwnRSwuRdzV5aANU3wMCo4O2dsUiS5gHNgiB5i	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-03	2021-08-09	\N	uTFWNxL7eineUO10toEwpXmfGtnU0xC6IuyljHUKf1xgtnisi6x5MLk1EJTuC6i4Y9P0c0nGzbieF4rdiGW2Hi3VY8lAo7qprpvf
+2	$2b$04$BAaV2SDvid3kCWxYwnRSwuRdzV5aANU3wMCo4O2dsUiS5gHNgiB5i	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-03	2021-08-09	\N	FT08eU2s4wvqSizhWzR1WNamWdZEJNHapEFBi0ITJJV3OTxwj0FZjHrWddl0ula1AO3w0FoWBO18NgPhl5pLcn7cInCdyg2gUMvT
+40	$2b$04$LgpnKpIeNbSZq06mG.p9deLPN9/fyHQ1oMy68ihYSsVqhSO.K0PKW	\N	yiyiw94212@cfcjy.com	84586072996	Test 18/8/20218	USER	\N	0	2021-08-18	2021-08-18	\N	xLNnnWMfaHL7pI5t8avZCCQm2KVgdF3bq9FzEIRjf4GLOKMlTgw9HUMgYupqNwPKeSzUyPwpd2nyT8yDLN88gsx7UJ2dXytm7R8Q
 \.
 
 
 --
--- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: tbl_bill; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_bill (bill_id, bill_account_id, bill_total_price, bill_total_quantity, bill_status, bill_created_date, bill_updated_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_bill_detail; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_bill_detail (bdetail_id, bdetail_bill_id, bdetail_product_id, bdetail_quantity, bdetail_product_price, bdetail_status, bdetail_created_date, bdetail_updated_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_categories; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 COPY public.tbl_categories (cate_id, cate_name, cate_status, cate_father, cate_created_date, cate_updated_date) FROM stdin;
-1	Category 1	0	\N	2001-01-01	2001-01-01
-2	Category 2	0	\N	2001-01-01	2001-01-01
 3	Category 3	0	\N	2001-01-01	2001-01-01
-4	cate_4	0	1	2021-08-15	2021-08-15
-5	cate_5	0	1	2021-08-15	2021-08-15
+83	12321	0	\N	2021-08-18	2021-08-18
 6	cate_6	0	2	2021-08-15	2021-08-15
 7	cate_7	0	2	2021-08-15	2021-08-15
 8	cate_8	0	3	2021-08-15	2021-08-15
-9	cate_9	0	3	2021-08-15	2021-08-15
+84	333	0	\N	2021-08-18	2021-08-18
+85	32	0	\N	2021-08-18	2021-08-18
+9	cate_10	0	3	2021-08-15	2021-08-16
+91	123456789	0	1	2021-08-18	2021-08-18
+92	1234567891	0	1	2021-08-18	2021-08-18
+14	Thức uống	0	\N	2021-08-17	2021-08-17
+96	1231	0	1	2021-08-18	2021-08-18
+18	Category 4	0	\N	2021-08-17	2021-08-17
+97	demo	0	1	2021-08-18	2021-08-18
+98	asdasdsa	0	1	2021-08-18	2021-08-18
+99	asdsadsa	0	1	2021-08-18	2021-08-18
+95	cake	0	2	2021-08-18	2021-08-18
+19	Category 54	0	\N	2021-08-17	2021-08-18
+56	Cate Tuan Anh	0	\N	2021-08-17	2021-08-18
+103	234234234234	0	\N	2021-08-18	2021-08-18
+70	144	0	1	2021-08-17	2021-08-18
+57	Tuấn Anh con 11	0	56	2021-08-17	2021-08-18
+104	danh mục 14	0	\N	2021-08-18	2021-08-18
+43	cherry	0	2	2021-08-17	2021-08-17
+45	avocado	0	2	2021-08-17	2021-08-17
+4	avocado	0	2	2021-08-15	2021-08-17
+49	cherry	0	1	2021-08-17	2021-08-17
+58	Tuấn Anh Nhỏ	0	56	2021-08-17	2021-08-17
+59	1	0	56	2021-08-17	2021-08-17
+60	2	0	56	2021-08-17	2021-08-17
+61	3	0	56	2021-08-17	2021-08-17
+62	4	0	56	2021-08-17	2021-08-17
+63	5	0	56	2021-08-17	2021-08-17
+64	6	0	56	2021-08-17	2021-08-17
+65	7	0	56	2021-08-17	2021-08-17
+66	8	0	56	2021-08-17	2021-08-17
+67	9	0	56	2021-08-17	2021-08-17
+68	12	0	56	2021-08-17	2021-08-17
+69	11	0	56	2021-08-17	2021-08-17
+78	Tuấn Anh nè 	0	56	2021-08-17	2021-08-17
+2	Category 2	0	\N	2001-01-01	2021-08-17
+1	Dương đào@	0	\N	2001-01-01	2021-08-17
 \.
 
 
 --
--- Data for Name: tbl_roles; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: tbl_cities; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_cities (ci_id, ci_name, ci_created_date, ci_updated_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_comment; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_comment (cmt_id, cmt_content, cmt_product_id, cmt_vote, cmt_status, cmt_create_date, cmt_update_date, cmt_acc_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_delivery_address; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_delivery_address (del_id, del_detail_address, del_district_id, del_city_id, del_user_id, del_status, del_ward_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_districts; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_districts (dis_id, dis_name, dis_city_id, dis_created_date, dis_updated_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tbl_product; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod_created_date, prod_updated_date, prod_price, prod_description, prod_status) FROM stdin;
+28	test	4	3000	2021-08-17	2021-08-17	123	test test	1
+33	demohihi	49	123	2021-08-17	\N	123	12312	1
+38	2	58	2	2021-08-18	\N	2	2	1
+39	3	61	3	2021-08-18	\N	3	3	1
+40	44	8	4	2021-08-18	2021-08-18	4	4	1
+\.
+
+
+--
+-- Data for Name: tbl_product_images; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_product_images (prod_img_id, prod_img_product_id, prod_img_data, prod_img_status) FROM stdin;
+156	38	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629249399/skvmha5zqkerpjvysazc.jpg	0
+157	39	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629249511/hck0nqydizo0ug787tlp.jpg	0
+158	40	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629249562/rbb1xfc8e45miey4l7xa.jpg	0
+161	28	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629264000/ylsihu4ceupkxfscqskq.jpg	0
+162	28	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629264000/vl9l1puvybkyeujynw96.jpg	0
+163	28	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629264000/mykszd3dczxvxllh8rg1.jpg	0
+149	33	http://res.cloudinary.com/gvlt-qlqtpm/image/upload/v1629222095/w22sowkjcb4ifsqoscsy.jpg	0
+\.
+
+
+--
+-- Data for Name: tbl_roles; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 COPY public.tbl_roles (rol_id, rol_name, role_status, rol_create_date, rol_update_date) FROM stdin;
@@ -486,91 +648,107 @@ USER	user	0	2021-08-05	2021-08-05
 
 
 --
--- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Data for Name: tbl_wards; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
 --
 
-SELECT pg_catalog.setval('public.tbl_account_id_seq', 39, true);
+COPY public.tbl_wards (ward_id, ward_name, ward_city_id, ward_dis_id, ward_created_date, ward_updated_date, ward_ship_price) FROM stdin;
+\.
 
 
 --
--- Name: tbl_bill_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Data for Name: tbl_ware_house; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount, sto_category_id, sto_origin_price, sto_created_date, sto_updated_date, sto_product_id, cost, sto_status) FROM stdin;
+\.
+
+
+--
+-- Name: tbl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+SELECT pg_catalog.setval('public.tbl_account_id_seq', 40, true);
+
+
+--
+-- Name: tbl_bill_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_bill_detail_id_seq', 1, false);
 
 
 --
--- Name: tbl_bill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_bill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_bill_id_seq', 2, true);
 
 
 --
--- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
-SELECT pg_catalog.setval('public.tbl_categories_id_seq', 10, true);
+SELECT pg_catalog.setval('public.tbl_categories_id_seq', 104, true);
 
 
 --
--- Name: tbl_cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_cities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_cities_id_seq', 1, false);
 
 
 --
--- Name: tbl_comment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_comment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_comment_id_seq', 1, false);
 
 
 --
--- Name: tbl_delivery_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_delivery_address_id_seq', 1, false);
 
 
 --
--- Name: tbl_districts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_districts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_districts_id_seq', 1, false);
 
 
 --
--- Name: tbl_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
-SELECT pg_catalog.setval('public.tbl_product_id_seq', 3, true);
-
-
---
--- Name: tbl_product_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.tbl_product_image_id_seq', 10, true);
+SELECT pg_catalog.setval('public.tbl_product_id_seq', 42, true);
 
 
 --
--- Name: tbl_wards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_product_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+SELECT pg_catalog.setval('public.tbl_product_image_id_seq', 163, true);
+
+
+--
+-- Name: tbl_wards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_wards_id_seq', 1, false);
 
 
 --
--- Name: tbl_ware_house_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 SELECT pg_catalog.setval('public.tbl_ware_house_id_seq', 1, false);
 
 
 --
--- Name: tbl_account tbl_account_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_account tbl_account_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_account
@@ -578,7 +756,7 @@ ALTER TABLE ONLY public.tbl_account
 
 
 --
--- Name: tbl_bill_detail tbl_bill_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_bill_detail tbl_bill_detail_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_bill_detail
@@ -586,7 +764,7 @@ ALTER TABLE ONLY public.tbl_bill_detail
 
 
 --
--- Name: tbl_bill tbl_bill_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_bill tbl_bill_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_bill
@@ -594,7 +772,7 @@ ALTER TABLE ONLY public.tbl_bill
 
 
 --
--- Name: tbl_categories tbl_categiries_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_categories tbl_categiries_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_categories
@@ -602,7 +780,7 @@ ALTER TABLE ONLY public.tbl_categories
 
 
 --
--- Name: tbl_cities tbl_cities_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_cities tbl_cities_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_cities
@@ -610,7 +788,7 @@ ALTER TABLE ONLY public.tbl_cities
 
 
 --
--- Name: tbl_comment tbl_comment_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_comment tbl_comment_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_comment
@@ -618,7 +796,7 @@ ALTER TABLE ONLY public.tbl_comment
 
 
 --
--- Name: tbl_delivery_address tbl_delivery_address_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address tbl_delivery_address_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_delivery_address
@@ -626,7 +804,7 @@ ALTER TABLE ONLY public.tbl_delivery_address
 
 
 --
--- Name: tbl_districts tbl_districts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_districts tbl_districts_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_districts
@@ -634,7 +812,7 @@ ALTER TABLE ONLY public.tbl_districts
 
 
 --
--- Name: tbl_product_images tbl_product_images_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_product_images tbl_product_images_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_product_images
@@ -642,7 +820,7 @@ ALTER TABLE ONLY public.tbl_product_images
 
 
 --
--- Name: tbl_product tbl_product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_product tbl_product_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_product
@@ -650,7 +828,7 @@ ALTER TABLE ONLY public.tbl_product
 
 
 --
--- Name: tbl_roles tbl_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_roles tbl_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_roles
@@ -658,7 +836,7 @@ ALTER TABLE ONLY public.tbl_roles
 
 
 --
--- Name: tbl_wards tbl_wards_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_wards tbl_wards_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_wards
@@ -666,7 +844,7 @@ ALTER TABLE ONLY public.tbl_wards
 
 
 --
--- Name: tbl_ware_house tbl_ware_house_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_ware_house tbl_ware_house_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_ware_house
@@ -674,7 +852,7 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 
 --
--- Name: tbl_account tbl_account_roles_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_account tbl_account_roles_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_account
@@ -682,7 +860,7 @@ ALTER TABLE ONLY public.tbl_account
 
 
 --
--- Name: tbl_bill_detail tbl_bill_detal_bill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_bill_detail tbl_bill_detal_bill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_bill_detail
@@ -690,7 +868,7 @@ ALTER TABLE ONLY public.tbl_bill_detail
 
 
 --
--- Name: tbl_comment tbl_cmt_acc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_comment tbl_cmt_acc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_comment
@@ -698,7 +876,7 @@ ALTER TABLE ONLY public.tbl_comment
 
 
 --
--- Name: tbl_comment tbl_cmt_prod_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_comment tbl_cmt_prod_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_comment
@@ -706,7 +884,7 @@ ALTER TABLE ONLY public.tbl_comment
 
 
 --
--- Name: tbl_delivery_address tbl_del_acc_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address tbl_del_acc_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_delivery_address
@@ -714,7 +892,7 @@ ALTER TABLE ONLY public.tbl_delivery_address
 
 
 --
--- Name: tbl_delivery_address tbl_del_district_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_delivery_address tbl_del_district_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_delivery_address
@@ -722,7 +900,7 @@ ALTER TABLE ONLY public.tbl_delivery_address
 
 
 --
--- Name: tbl_districts tbl_districts_cities_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_districts tbl_districts_cities_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_districts
@@ -730,7 +908,7 @@ ALTER TABLE ONLY public.tbl_districts
 
 
 --
--- Name: tbl_product_images tbl_prod_img_prod_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_product_images tbl_prod_img_prod_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_product_images
@@ -738,7 +916,7 @@ ALTER TABLE ONLY public.tbl_product_images
 
 
 --
--- Name: tbl_product tbl_product_categories_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_product tbl_product_categories_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_product
@@ -746,7 +924,7 @@ ALTER TABLE ONLY public.tbl_product
 
 
 --
--- Name: tbl_wards tbl_ward_dis_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_wards tbl_ward_dis_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_wards
@@ -754,7 +932,7 @@ ALTER TABLE ONLY public.tbl_wards
 
 
 --
--- Name: tbl_ware_house tbl_ware_house_account_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_ware_house tbl_ware_house_account_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_ware_house
@@ -762,7 +940,7 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 
 --
--- Name: tbl_ware_house tbl_ware_house_categories_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_ware_house tbl_ware_house_categories_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_ware_house
@@ -770,11 +948,29 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 
 --
--- Name: tbl_ware_house tbl_ware_house_product_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tbl_ware_house tbl_ware_house_product_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
 ALTER TABLE ONLY public.tbl_ware_house
     ADD CONSTRAINT tbl_ware_house_product_fkey FOREIGN KEY (sto_product_id) REFERENCES public.tbl_product(prod_id);
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: pnnyoamvocwgoi
+--
+
+REVOKE ALL ON SCHEMA public FROM postgres;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO pnnyoamvocwgoi;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- Name: LANGUAGE plpgsql; Type: ACL; Schema: -; Owner: postgres
+--
+
+GRANT ALL ON LANGUAGE plpgsql TO pnnyoamvocwgoi;
 
 
 --
