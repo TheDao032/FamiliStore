@@ -363,7 +363,7 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 	const { cateId } = req.body
 
 	const result = await categoriesModel.findById(cateId)
-
+	
 	if (result.length === 0) {
 		res.status(400).json({
 			errorMessage: 'Catetegory Is Not Found',
@@ -371,16 +371,18 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 		})
 	}
 
-	const productsByCate = await productModel(cateId)
+	const productsByCate = await productModel.findByCateId(cateId)
 	productsByCate.forEach(async (item) => {
+
 		await productModel.deleteProduct(item.prod_id)
+	
 	})
 	
-
+	
 	await knex('tbl_ware_house')
 		.where({ sto_category_id: cateId })
 		.del()
-
+	
 	await knex('tbl_categories')
 		.where({ cate_id: cateId })
 		.del()
