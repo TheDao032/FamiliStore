@@ -109,8 +109,6 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 	result = result.rows
 
-
-
 	var numberPage = await knex.raw('select count(DISTINCT bdetail_product_id) from tbl_bill_detail')
 
 	numberPage = Number(numberPage.rows[0].count)

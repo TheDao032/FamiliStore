@@ -12,6 +12,23 @@ const successCode = 0
 router.post('/add', billValidation.newBill, async (req, res) => {
 	const { accId, totalPrice, totalQuantity, listProduct } = req.body
 
+	let regexPattern = /^\d+$/
+	let resultInteger = regexPattern.test(totalPrice);
+
+	if (!resultInteger) {
+		return res.status(400).json({
+			errorMessage: 'Total price must be integer !',
+			statusCode: errorCode
+		})
+	}
+
+	if(isNaN(Number(accId))){
+		return res.status(400).json({
+			errorMessage: 'Account id must be of integer type',
+			statusCode: errorCode
+		})
+	}
+
 	var countId = 0
 	var countAmount = 0
 
@@ -72,9 +89,8 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-
 	return res.status(200).json({
-		errorMessage: result.rows[0].message,
+		message: result.rows[0].message,
 		statusCode: successCode
 	})
 })
@@ -172,12 +188,15 @@ router.get('/history-bill/:id', async (req, res) => {
 		var createdDate = moment(proBdetail.bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
 		var status = 'packing'
+
 		if(proBdetail.bill_status === 1){
 			status = 'transported'
 		}
+
 		else if(proBdetail.bill_status === 2){
 			status = 'recieve'
 		}
+
 		var item = {
 			id: proBdetail.bdetail_id,
 			title: proBdetail.prod_name,
@@ -203,7 +222,12 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	const { billId, status } = req.body
 	var upStatus = 0
 
-
+	if(isNaN(Number(billId))){
+		return res.status(400).json({
+			errorMessage: 'Bill id must be of integer type',
+			statusCode: errorCode
+		})
+	}
 	const resultBill = await knex('tbl_bill').where("bill_id", billId)
 
 	if(resultBill.length === 0){
@@ -212,13 +236,16 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 			statusCode: errorCode
 		})
 	}
+
 	//packing
 	if(status === 'transported'){
 		upStatus = 1
 	}
+
 	else if(status === 'recieve'){
 		upStatus = 2
 	}
+
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
@@ -255,8 +282,8 @@ router.get('/test', async (req, res) => {
 
 	//process return list
 	var prodList = []
-
 	var index = 0
+
 	while (index < result.length) {
 		let prodObj = {
 			prod_id: result[index].prod_id,
@@ -269,16 +296,19 @@ router.get('/test', async (req, res) => {
 			prod_price: result[index].prod_price,
 			quantity: result[index].quantity
 		}
+
 		let imageLink = result[index].prod_img_data
 
 		if (index === 0) {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
 		}
+
 		if (result[index].prod_id !== prodList[prodList.length - 1].prod_id) {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
 		}
+
 		index += 1
 	}
 
@@ -288,8 +318,9 @@ router.get('/test', async (req, res) => {
 			statusCode: successCode
 		})
 	}
+
 	else {
-		return res.status(200).json({
+		return res.status(400).json({
 			listProduct: [],
 			statusCode: errorCode
 		})

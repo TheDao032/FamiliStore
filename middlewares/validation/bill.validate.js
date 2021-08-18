@@ -7,7 +7,7 @@ const newBill = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer' },
-    		totalPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
+    		totalPrice: { type: 'string', pattern: '', maxLength: 100 },
     		totalQuantity: { type: 'integer' },
     		listProduct: { 
 				type: 'array', 
