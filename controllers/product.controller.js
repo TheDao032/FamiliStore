@@ -57,10 +57,11 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			prod_category_name: result[index].cate_name,
 			prod_amount: result[index].prod_amount,
 			prod_description: result[index].prod_description,
-			prod_created_date: result[index].prod_created_date,
-			prod_updated_date: result[index].prod_updated_date,
+			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
+			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
 			prod_price: result[index].prod_price
 		}
+		
 		let imageLink = []
 		for (let i = index; i < result.length; i++) {
 			index = i + 1
