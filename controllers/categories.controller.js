@@ -255,20 +255,24 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 
 	const fatherInfo = await categoriesModel.findById(cateFather)
 	
-	if (!fatherInfo) {
+	
+	if (fatherInfo.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'Category Father Does Not Exist',
 			statusCode: errorCode
 		})
 	}
 
+	const fatherCreateDate = moment(new Date(fatherInfo[0].cate_created_date)).format("DD-MM-YYYY")
+
 	if (result.length !== 0) {
 		let listCategoriesChild = []
 		result.forEach((element) => {
+			const childCreateDate = moment(new Date(element.cate_created_date)).format("DD-MM-YYYY")
 			const categoriesInfo = {
 				cateId: element.cate_id,
 				cateName: element.cate_name,
-				createDate: element.cate_created_date
+				createDate: childCreateDate
 			}
 			listCategoriesChild.push(categoriesInfo)
 		});
@@ -289,7 +293,7 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 			return res.status(200).json({
 				cateId: fatherInfo[0].cate_id,
 				cateName: fatherInfo[0].cate_name,
-				createDate: fatherInfo[0].cate_created_date,
+				createDate: fatherCreateDate,
 				totalPage,
 				subCategories: paginationResult,
 				statusCode: successCode
@@ -299,7 +303,7 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 		return res.status(200).json({
 			cateId: fatherInfo[0].cate_id,
 			cateName: fatherInfo[0].cate_name,
-			createDate: fatherInfo[0].cate_created_date,
+			createDate: fatherCreateDate,
 			subCategories: listCategoriesChild,
 			statusCode: successCode
 		})
