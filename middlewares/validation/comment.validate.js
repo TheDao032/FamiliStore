@@ -1,5 +1,7 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 //comment validation
 const listComment = (req, res, next) => {
 	const shema = {
@@ -9,7 +11,7 @@ const listComment = (req, res, next) => {
 			page: { type: 'integer' },
 			limit : {type:'integer'}
 		},
-		required: ["productID", "page", "limit"],
+		required: ['productID', 'page', 'limit'],
 		additionalProperties: true
 	}
 
@@ -21,7 +23,10 @@ const listComment = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors)
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -32,10 +37,10 @@ const newComment = (req, res, next) => {
 		properties: {
 			productID: { type: 'integer' },
 			accountID: { type: 'integer' },
-			content: { type: 'string', pattern: '' },
+			content: { type: 'string', pattern: '' ,  maxLength: 200},
 			vote: { type: 'integer' }
 		},
-		required: ["productID", "accountID", "content", "vote"],
+		required: ['productID', 'accountID', 'content', 'vote'],
 		additionalProperties: true
 	}
 
@@ -47,7 +52,10 @@ const newComment = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -58,10 +66,10 @@ const updateComment  = (req, res, next) => {
 		properties: {
 			commentID: { type: 'integer' },
 			accountID: { type: 'integer' },
-			content: { type: 'string', pattern: '' },
+			content: { type: 'string', pattern: '',  maxLength: 200},
 			vote: { type: 'integer' }
 		},
-		required: ["commentID", "accountID"],
+		required: ['commentID', 'accountID'],
 		additionalProperties: true
 	}
 
@@ -73,7 +81,10 @@ const updateComment  = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors)
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -86,7 +97,7 @@ const deleteComment  = (req, res, next) => {
 			commentID: { type: 'integer' },
 			accountID: { type: 'integer' }
 		},
-		required: ["commentID", "accountID"],
+		required: ['commentID', 'accountID'],
 		additionalProperties: true
 	}
 
@@ -98,7 +109,10 @@ const deleteComment  = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors)
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

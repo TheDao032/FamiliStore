@@ -21,24 +21,17 @@ const validateImage = (images) => {
     return isValidImage
 }
 
-const  validateNumberOfFiles = (files) => {
+const validateNumberOfFiles = (files) => {
     if (files.length !== undefined) {
         if (files.length > 5)
             return false;
-        return true;
     }
-    else if (typeof files === 'object') {
-        return true;
-    }
-    return false;
+    return true;
 }
 
 const validateValidImage = (images) => {
     var errorMessage = ''
-
-    if (images === null) {
-        errorMessage = errorMessage + ' Product needs to contain image!'
-    } else {
+    if (images != null) {
         var images = images.image
 
         var isValidImage = validateImage(images)
@@ -48,7 +41,7 @@ const validateValidImage = (images) => {
         if (!isValidImage)
             errorMessage = errorMessage + " Invalid image!"
         if (!isValidNumberOfFile)
-            errorMessage = errorMessage + " Invalid number of files!"
+            errorMessage = errorMessage + " Invalid number of files, user can upload maximum 5 images for each product!"
     }
     return errorMessage
 }

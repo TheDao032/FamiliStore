@@ -510,7 +510,7 @@ SELECT pg_catalog.setval('public.tbl_bill_id_seq', 2, true);
 -- Name: tbl_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_categories_id_seq', 1, true);
+SELECT pg_catalog.setval('public.tbl_categories_id_seq', 10, true);
 
 
 --
@@ -679,14 +679,6 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 ALTER TABLE ONLY public.tbl_account
     ADD CONSTRAINT tbl_account_roles_fkey FOREIGN KEY (acc_role) REFERENCES public.tbl_roles(rol_id);
-
-
---
--- Name: tbl_bill_detail tbl_bill_detail_product_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.tbl_bill_detail
-    ADD CONSTRAINT tbl_bill_detail_product_fkey FOREIGN KEY (bdetail_product_id) REFERENCES public.tbl_product(prod_id);
 
 
 --

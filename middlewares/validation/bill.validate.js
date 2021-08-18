@@ -1,27 +1,29 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 const newBill = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string', pattern: '' },
-    		totalPrice: { type: 'string', pattern: '' },
-    		totalQuantity: { type: 'integer'},
+			accId: { type: 'integer' },
+    		totalPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
+    		totalQuantity: { type: 'integer' },
     		listProduct: { 
 				type: 'array', 
 				items: {
 					type: 'object',
 					properties: {
-						prodId: { type: 'string'},
-						prodQuantity: {type:'integer'}
+						prodId: { type: 'integer' },
+						prodQuantity: {type: 'integer' }
 					},
-					required: ["prodId", "prodQuantity"],
+					required: ['prodId', 'prodQuantity'],
 					additionalProperties: true
 				},
 			}
   		},
 
-		required: ["accId", "totalPrice", "totalQuantity", "listProduct"],
+		required: ['accId', 'totalPrice', 'totalQuantity', 'listProduct'],
 		additionalProperties: true
 	}
 
@@ -33,7 +35,10 @@ const newBill = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -43,10 +48,10 @@ const updateStatusBill = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			billId: { type: 'string', pattern: '' },
+			billId: { type: 'integer' },
     		status: { type: 'string', pattern: '' }
   		},
-		required: ["billId", "status"],
+		required: ['billId', 'status'],
 		additionalProperties: true
 	}
 
@@ -58,7 +63,10 @@ const updateStatusBill = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -71,7 +79,7 @@ const listBillDetail = (req, res, next) => {
 			accId: { type: 'integer' },
     		billId: { type: 'string', pattern: '' }
   		},
-		required: ["accId", "billId"],
+		required: ['accId', 'billId'],
 		additionalProperties: true
 	}
 
@@ -83,7 +91,10 @@ const listBillDetail = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

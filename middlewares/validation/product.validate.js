@@ -1,5 +1,5 @@
 const ajvLib = require('ajv')
-
+const errorCode = 1
 //comment validation
 const listProduct = (req, res, next) => {
 	const shema = {
@@ -20,7 +20,10 @@ const listProduct = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -46,7 +49,10 @@ const listSuggestion = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -56,7 +62,7 @@ const listByCategory = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			catID: {type : 'string', pattern : ''},
+			catID: {type : 'integer', pattern : ''},
 			page: { type: 'integer'},
 			limit: { type: 'integer'}
 		},
@@ -72,16 +78,21 @@ const listByCategory = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
 }
+
+
 const updateProduct = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			prodName: { type: 'string' },
+			prodName: { type: 'string' , maxLength: 60},
 			prodCategoryID: { type: 'integer' },
 			prodAmount: { type: 'integer'},
 			prodPrice: { type: 'integer' }
@@ -96,9 +107,12 @@ const updateProduct = (req, res, next) => {
 
 	const validator = ajv.compile(shema)
 	const valid = validator(req.body)
-
+	
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: "Value " + validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -124,7 +138,10 @@ const listBestSale = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: "Value " + validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

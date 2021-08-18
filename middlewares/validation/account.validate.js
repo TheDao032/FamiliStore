@@ -1,10 +1,12 @@
 const ajvLib = require('ajv')
 
+const errorCode = 1
+
 const updateAccountPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-		  accId: { type: ['integer', 'string'] },
+		  accId: { type: 'integer' },
 		  accOldPassword: { type: 'string', pattern: '' },
 		  accNewPassword: { type: 'string', pattern: '', minLength: 1 },
 		  accConfirmPassword: { type: 'string', pattern: '', minLength: 1 },
@@ -21,7 +23,10 @@ const updateAccountPassword = (req, res, next) => {
   	const valid = validator(req.body)
 
   	if (!valid) {
-	  	return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
   	}
 
  	next()
@@ -31,7 +36,7 @@ const updateRoleAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: ['integer', 'string'] },
+			accId: { type: 'integer' },
 			accRole: { type: 'string', pattern: '' , maxLength: 5 },
   		},
 		required: ['accId' , 'accRole'],
@@ -46,7 +51,10 @@ const updateRoleAccount = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -57,9 +65,9 @@ const updateAccount = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer' },
-    		email: { type: 'string', pattern: '' },
-    		phoneNumber: { type: 'string', pattern: '' },
-    		role: { type: 'string', pattern: '' }
+    		email: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
+    		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
+    		role: { type: 'string', pattern: '', maxLength: 5 }
   		},
 		required: ['accId'],
 		additionalProperties: true
@@ -73,7 +81,10 @@ const updateAccount = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()
@@ -97,7 +108,10 @@ const avatar = (req, res, next) => {
 	const valid = validator(req.body)
 
 	if (!valid) {
-		return res.status(500).json(validator.errors[0])
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
 	}
 
 	next()

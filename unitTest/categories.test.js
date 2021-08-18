@@ -59,6 +59,10 @@ describe("GET /list", () => {
 
         const categoryListRespone = await request(server).get('/api/categories/list')
                                             .set('Authorization', data.accessToken)
+                                            .send({
+                                                page: 1,
+                                                limit: 2
+                                            })
 
         expect(categoryListRespone.statusCode).toBe(200)
     })
@@ -77,6 +81,10 @@ describe("GET /list-father", () => {
 
         const categoryListRespone = await request(server).get('/api/categories/list-father')
                                             .set('Authorization', data.accessToken)
+                                            .send({
+                                                page: 1,
+                                                limit: 2
+                                            })
 
         expect(categoryListRespone.statusCode).toBe(200)
     })
@@ -96,7 +104,9 @@ describe("POST /list-child", () => {
         const categoryListRespone = await request(server).post('/api/categories/list-child')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                cateFather: 1
+                                                cateFather: 1,
+                                                page: 1,
+                                                limit: 2
                                             })
 
         expect(categoryListRespone.statusCode).toBe(200)
@@ -145,6 +155,8 @@ describe("POST /delete", () => {
                                             .send({
                                                 cateId: result[0].cate_id
                                             })
+        
+        await knex('tbl_categories').where({ cate_name: "category100" }).del()
 
         await knex('tbl_categories').where({ cate_name: "cate1001" }).del()
 
