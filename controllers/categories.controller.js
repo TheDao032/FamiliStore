@@ -4,6 +4,7 @@ const router = express.Router()
 const knex = require('../utils/dbConnection')
 const categoriesValidation = require('../middlewares/validation/categories.validate')
 const categoriesModel = require('../models/categories.model')
+const productModel = require('../models/product.model')
 
 const errorCode = 1
 const successCode = 0
@@ -132,6 +133,8 @@ router.get('/list', async (req, res) => {
 			result[0].push(item)
 		})
 
+		result[0].sort((a, b) => a - b)
+
 		if (page || limit) {
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
@@ -205,6 +208,8 @@ router.get('/list-father', async (req, res) => {
 			result[0].push(item)
 		})
 
+		result[0].sort((a, b) => a - b)
+
 		if (page || limit) {
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
@@ -269,6 +274,8 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 			if (listCategoriesChild.length % parseInt(limit) !== 0) {
 				totalPage = totalPage + 1
 			}
+
+			listCategoriesChild.sort((a, b) => a -b)
 	
 			const paginationResult = listCategoriesChild.slice(startIndex, endIndex)
 	
@@ -364,9 +371,11 @@ router.post('/delete', categoriesValidation.deleteCategory, async (req, res) => 
 		})
 	}
 
-	await knex('tbl_product')
-		.where({ prod_category_id: cateId })
-		.del()
+	const productsByCate = await productModel(cateId)
+	productsByCate.forEach(async (item) => {
+		await productModel.deleteProduct(item.prod_id)
+	})
+	
 
 	await knex('tbl_ware_house')
 		.where({ sto_category_id: cateId })
