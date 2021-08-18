@@ -88,7 +88,6 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id order by pr.quantity desc`)
 
 	result = result.rows
-
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
@@ -164,10 +163,6 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	)
 	select pr.*,img.prod_img_data from product pr left join tbl_product_images img
 	on img.prod_img_product_id = pr.prod_id order by avgStar desc`)
-
-	result = result.rows
-
-
 
 	//process return list
 	var prodList = []
