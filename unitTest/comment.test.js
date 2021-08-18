@@ -94,6 +94,8 @@ describe("POST /delete", () => {
                                                 accountID: 26
                                             })
 
+        await knex('tbl_comment').where({cmt_content: '1999-'}).del()
+
         expect(categoryListRespone.statusCode).toBe(200)
     })
 })

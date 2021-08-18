@@ -12,6 +12,16 @@ const successCode = 0
 router.post('/add', billValidation.newBill, async (req, res) => {
 	const { accId, totalPrice, totalQuantity, listProduct } = req.body
 
+	let regexPattern = /^\d+$/
+	let resultInteger = regexPattern.test(totalPrice);
+
+	if (!resultInteger) {
+		return res.status(400).json({
+			errorMessage: 'Total price must be integer !',
+			statusCode: errorCode
+		})
+	}
+
 	if(isNaN(Number(accId))){
 		return res.status(400).json({
 			errorMessage: 'Account id must be of integer type',

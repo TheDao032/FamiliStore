@@ -128,13 +128,11 @@ describe("GET /details", () => {
 
 //         const productListRespone = await request(server).post('/api/product/add')
 //                                             .set('Authorization', data.accessToken)
-//                                             .field('content-type', 'multipart/form-data')
 //                                             .field('prodName', 'product100')
 //                                             .field('prodCategoryID', '4')
-//                                             .field('prodAmount', '10')
-//                                             .field('prodPrice', '1000')
+//                                             .field('prodAmount', 10)
+//                                             .field('prodPrice', 1000)
 //                                             .field('prodDescription', 'product100')
-//                                             .attach('images', fs.readFileSync(`test/product100.png`), 'test/product100.png')
 
 //         expect(productListRespone.statusCode).toBe(200) 
 //     })
