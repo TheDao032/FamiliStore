@@ -12,14 +12,14 @@ router.get('/list-cities', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			listcities: result,
-			statuscode: successcode
+			listcities: result[0],
+			statuscode: successCode
 		})
 	}
 
 	return res.status(200).json({
 		listcities: [],
-		statuscode: errorcode
+		statuscode: errorCode
 	})
 })
 
@@ -31,13 +31,13 @@ router.post('/list-ward', async (req, res) => {
 	if (result) {
 		return res.status(200).json({
 			listcities: result,
-			statuscode: successcode
+			statuscode: successCode
 		})
 	}
 
 	return res.status(200).json({
 		listcities: [],
-		statuscode: errorcode
+		statuscode: errorCode
 	})
 })
 
