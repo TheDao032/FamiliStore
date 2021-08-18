@@ -172,7 +172,7 @@ router.get('/history-bill/:id', async (req, res) => {
 		.where({bill_account_id: id}).orderBy('bill_created_date', 'desc')
 
 	if (resultProductBdetail.length === 0) {
-		return res.status(500).json({
+		return res.status(400).json({
 			errorMessage: 'account id not exists',
 			statusCode: errorCode
 		})

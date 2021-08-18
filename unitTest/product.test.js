@@ -90,75 +90,54 @@ describe("GET /details", () => {
     })
 })
 
-// describe("POST /add", () => {
-//     test("Respone With A 200 Status Code", async () => {
-//         const loginRespone = await request(server).post('/api/authentication/login').send({
-//             email: 'nthedao2705@gmail.com',
-//             passWord: '2705'
-//         })
+describe("POST /add", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'nthedao2705@gmail.com',
+            passWord: '2705'
+        })
 
-//         expect(loginRespone.statusCode).toBe(200)
+        expect(loginRespone.statusCode).toBe(200)
 
-//         const { data } = loginRespone.body
+        const { data } = loginRespone.body
 
-//         const productListRespone = await request(server).post('/api/product/add')
-//                                             .set({'Authorization': data.accessToken})
-//                                             .send({
-//                                                 prodName: 'product1000',
-//                                                 prodCategoryID: '1',
-//                                                 prodAmount: '10',
-//                                                 prodPrice: '1000',
-//                                                 prodDescription: 'product'
-//                                             })
+        const productListRespone = await request(server).post('/api/product/add')
+                                            .set({'Authorization': data.accessToken})
+                                            .send({
+                                                prodName: 'product1000',
+                                                prodCategoryID: 1,
+                                                prodAmount: 10,
+                                                prodPrice: 1000,
+                                                prodDescription: 'product'
+                                            })
 
-//         expect(productListRespone.statusCode).toBe(200) 
-//     })
-// })
+        expect(productListRespone.statusCode).toBe(200) 
+    })
+})
 
-// describe("POST /add", () => {
-//     test("Respone With A 200 Status Code", async () => {
-//         const loginRespone = await request(server).post('/api/authentication/login').send({
-//             email: 'nthedao2705@gmail.com',
-//             passWord: '2705'
-//         })
 
-//         expect(loginRespone.statusCode).toBe(200)
+describe("POST /update", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'nthedao2705@gmail.com',
+            passWord: '2705'
+        })
 
-//         const { data } = loginRespone.body
+        expect(loginRespone.statusCode).toBe(200)
 
-//         const productListRespone = await request(server).post('/api/product/add')
-//                                             .set('Authorization', data.accessToken)
-//                                             .field('prodName', 'product100')
-//                                             .field('prodCategoryID', '4')
-//                                             .field('prodAmount', 10)
-//                                             .field('prodPrice', 1000)
-//                                             .field('prodDescription', 'product100')
+        const { data } = loginRespone.body
+        const result = await knex('tbl_product').where({ prod_name: 'product1000' })
 
-//         expect(productListRespone.statusCode).toBe(200) 
-//     })
-// })
+        const productListRespone = await request(server).post('/api/product/update/' + result[0].prod_id)
+                                            .set({'Authorization': data.accessToken})
+                                            .send({
+                                                prodName: 'product10001',
+                                                prodCategoryID: 4
+                                            })
 
-// describe("POST /update", () => {
-//     test("Respone With A 200 Status Code", async () => {
-//         const loginRespone = await request(server).post('/api/authentication/login').send({
-//             email: 'nthedao2705@gmail.com',
-//             passWord: '2705'
-//         })
-
-//         expect(loginRespone.statusCode).toBe(200)
-
-//         const { data } = loginRespone.body
-
-//         const productListRespone = await request(server).post('/api/product/update/' + 1)
-//                                             .set({'Authorization': data.accessToken})
-//                                             .send({
-//                                                 prodName: 'orion2',
-//                                                 prodCategoryID: 4
-//                                             })
-
-//         expect(productListRespone.statusCode).toBe(200) 
-//     })
-// })
+        expect(productListRespone.statusCode).toBe(200) 
+    })
+})
 
 // describe("POST /update-image", () => {
 //     test("Respone With A 200 Status Code", async () => {
@@ -180,20 +159,22 @@ describe("GET /details", () => {
 //     })
 // })
 
-// describe("POST /delete", () => {
-//     test("Respone With A 200 Status Code", async () => {
-//         const loginRespone = await request(server).post('/api/authentication/login').send({
-//             email: 'nthedao2705@gmail.com',
-//             passWord: '2705'
-//         })
+describe("POST /delete", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'nthedao2705@gmail.com',
+            passWord: '2705'
+        })
 
-//         expect(loginRespone.statusCode).toBe(200)
+        expect(loginRespone.statusCode).toBe(200)
 
-//         const { data } = loginRespone.body
+        const { data } = loginRespone.body
 
-//         const productListRespone = await request(server).post('/api/product/delete/' + 1)
-//                                             .set({'Authorization': data.accessToken})
+        const result = await knex('tbl_product').where({ prod_name: 'product10001' })
 
-//         expect(productListRespone.statusCode).toBe(200) 
-//     })
-// })
+        const productListRespone = await request(server).post('/api/product/delete/' + result[0].prod_id)
+                                            .set({'Authorization': data.accessToken})
+
+        expect(productListRespone.statusCode).toBe(200) 
+    })
+})
