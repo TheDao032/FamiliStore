@@ -22,6 +22,20 @@ const deleteProduct = async function (id) {
 	return true
 }
 
+const findById = async (prodId) => {
+	const info = await knex('tbl_product').where({ prod_id: prodId })
+
+	return info
+}
+
+const findByCateId = async (cateId) => {
+	const info = await knex('tbl_product').where({ prod_category_id: cateId })
+
+	return info
+}
+
 module.exports = {
-    deleteProduct
+    deleteProduct,
+	findById,
+	findByCateId
 }
