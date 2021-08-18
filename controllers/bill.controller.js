@@ -89,8 +89,8 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-	return res.status(200).json({
-		message: result.rows[0].message,
+	return res.status(400).json({
+		errorMessage: result.rows[0].message,
 		statusCode: successCode
 	})
 })
