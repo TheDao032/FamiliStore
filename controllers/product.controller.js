@@ -14,7 +14,7 @@ const errorCode = 1
 router.post('/list', validator.listProduct, async (req, res) => {
 	const { page, limit } = req.body
 	const offset = limit * (page - 1)
-	
+
 
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
@@ -22,7 +22,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	
+
 	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
 	from tbl_product`)
 
@@ -62,7 +62,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
 			prod_price: result[index].prod_price
 		}
-		
+
 		let imageLink = []
 		for (let i = index; i < result.length; i++) {
 			index = i + 1
@@ -130,8 +130,8 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 			prod_category_id: result[index].prod_category_id,
 			prod_amount: result[index].prod_amount,
 			prod_description: result[index].prod_description,
-			prod_created_date: result[index].prod_created_date,
-			prod_updated_date: result[index].prod_updated_date,
+			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
+			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
 			prod_price: result[index].prod_price,
 			quantity: result[index].quantity
 		}
@@ -215,8 +215,8 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 			prod_category_id: result[index].prod_category_id,
 			prod_amount: result[index].prod_amount,
 			prod_description: result[index].prod_description,
-			prod_created_date: result[index].prod_created_date,
-			prod_updated_date: result[index].prod_updated_date,
+			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
+			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
 			prod_price: result[index].prod_price,
 			avgStar: result[index].avgstar
 		}
@@ -282,8 +282,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 	on img.prod_img_product_id = pr.prod_id`)
 
 	result = result.rows
-	console.log(result)
-
+	
 	//process return list
 	var prodList = []
 
@@ -295,8 +294,8 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 			prod_category_id: result[index].prod_category_id,
 			prod_amount: result[index].prod_amount,
 			prod_description: result[index].prod_description,
-			prod_created_date: result[index].prod_created_date,
-			prod_updated_date: result[index].prod_updated_date,
+			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
+			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
 			prod_price: result[index].prod_price,
 		}
 		let imageLink = result[index].prod_img_data
@@ -318,7 +317,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 	if (result) {
 		return res.status(200).json({
 			numberOfPage: numberPage,
-			numberProduct: numberOfProduct.rows[0],
+			numberProduct: numberOfProduct.rows[0].count,
 			listProduct: prodList,
 			statusCode: successCode
 		})
@@ -368,6 +367,81 @@ router.get('/details/:id', async (req, res) => {
 		listProductDetail: [],
 		statusCode: errorCode
 	})
+})
+
+router.post('/search', validator.productSearching, async (req, res) => {
+	const { prodName, limit, page } = req.body
+	var offset = limit * (page - 1)
+	
+	var numberPage = await knex.raw(`SELECT count(prod_id)
+	FROM tbl_product
+	WHERE ts @@ to_tsquery('english', '${prodName}')`)
+
+	numberPage = Number(numberPage.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
+
+	//FULL TEXT SEARCH
+	var result = await knex.raw(`with product as (
+		SELECT *
+		FROM tbl_product
+		WHERE ts @@ to_tsquery('english', 'giảm')
+		order by prod_created_date desc
+		limit ${limit}
+		offset ${offset}
+	)
+	select pr.*,img.prod_img_data from product pr left join tbl_product_images img
+	on img.prod_img_product_id = pr.prod_id`)
+	result = result.rows
+
+
+	var prodList = []
+	var index = 0
+	while (index < result.length) {
+		let prodObj = {
+			prod_id: result[index].prod_id,
+			prod_name: result[index].prod_name,
+			prod_category_id: result[index].prod_category_id,
+			prod_amount: result[index].prod_amount,
+			prod_description: result[index].prod_description,
+			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
+			prod_updated_date: moment(result[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(result[index].prod_created_date).format('DD/MM/YYYY') : moment(result[index].prod_updated_date).format('DD/MM/YYYY'),
+			prod_price: result[index].prod_price,
+		}
+		let imageLink = result[index].prod_img_data
+		
+		if (index === 0) {
+			prodObj['images'] = imageLink
+			prodList.push(prodObj)
+		}
+		if (result[index].prod_id !== prodList[prodList.length - 1].prod_id) {
+			prodObj['images'] = imageLink
+			prodList.push(prodObj)
+		}
+		
+		index += 1
+	}
+	
+	var numberOfProduct = await knex.raw(`SELECT count(prod_id) FROM tbl_product WHERE ts @@ to_tsquery('english', '${prodName}')`)
+
+	if (result) {
+		return res.status(200).json({
+			numberOfPage: numberPage,
+			numberProduct: numberOfProduct.rows[0].count,
+			listProduct: prodList,
+			statusCode: successCode
+		})
+	}
+	else {
+		return res.status(200).json({
+			listProduct: [],
+			statusCode: errorCode
+		})
+	}
 })
 
 module.exports = router

@@ -29,8 +29,10 @@ router.post('/list', validator.listComment, async (req, res) => {
 	var numberThreeStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 3`)
 	var numberFourStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 4`)
 	var numberFiveStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 5`)
-
+	var numberOfComment = await knex.raw(`select count(cmt_id) from tbl_comment where cmt_product_id = ${productID}`)
+	console.log(numberOfComment)
 	var returnedObject = {
+		numberOfComment: numberOfComment.rows[0].count,
 		avgStar: avgStar.rows[0].round,
 		numberOneStar: numberOneStar.rows[0].count,
 		numberTwoStars: numberTwoStars.rows[0].count,

@@ -146,10 +146,38 @@ const listBestSale = (req, res, next) => {
 
 	next()
 }
+
+const productSearching = (req, res, next) => {
+	const shema = {
+		type: 'object',
+		properties: {
+			prodName: { type: 'string'}
+		},
+		required: [],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json({
+			errorMessage: "Value " + validator.errors[0].message,
+			statusCode: errorCode
+		})
+	}
+
+	next()
+}
 module.exports = {
 	listProduct,
 	updateProduct,
 	listByCategory,
 	listSuggestion,
-	listBestSale
+	listBestSale,
+	productSearching
 }
