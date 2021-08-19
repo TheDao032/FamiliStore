@@ -1,7 +1,9 @@
+require('dotenv').config({ path: '../envConfig/.env'})
+
 const env = {
 	portServer: process.env.PORT || 3000,
 	configDatabase: {
-		connectionString: 'postgres://postgres:Batman.02@localhost:5432/FamilyStore_db'
+		connectionString: process.env.LOCAL_CONNECTION
 	},
 	secret: process.env.SECRET || 'family_store_secret',
 	APP_ID: process.env.APP_ID || 'test_id',
