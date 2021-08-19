@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../envConfig/.env'})
+require('dotenv').config()
 
 const env = {
 	portServer: process.env.PORT || 3000,

@@ -28,7 +28,7 @@ uploads/*
 tmp/*
 
 # env
-envConfig
+*.env
 
 # things
 yarn.lock
