@@ -1,4 +1,5 @@
 const environment = require('./environments/environment')
+require('dotenv').config({ path: '/envConfig/.env'})
 
 module.exports = {
   development: {
@@ -13,7 +14,7 @@ module.exports = {
     },
   test: {
     client: 'pg',
-    connection: process.env.DATABASE_URL || environment.configDatabase.connectionString,
+    connection: process.env.TEST_CONNECTION,
     // migrations: {
     //     directory: __dirname + '/db/migrations',
     //   },
