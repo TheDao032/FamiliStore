@@ -457,8 +457,40 @@ CREATE TABLE public.tbl_ware_house (
     sto_created_date date,
     sto_updated_date date,
     sto_product_id integer,
-    cost character varying(100),
+    sto_cost character varying(100),
     sto_status integer DEFAULT 0
+);
+
+
+ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
+
+--
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+CREATE SEQUENCE public.tbl_cart_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_cart_id_seq OWNER TO pnnyoamvocwgoi;
+
+--
+-- Name: tbl_cart; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+CREATE TABLE public.tbl_cart (
+    cart_id integer DEFAULT nextval('public.tbl_cart_id_seq'::regclass) NOT NULL,
+    cart_acc_id integer,
+    cart_prod_id integer,
+    cart_amount integer,
+    cart_total_price character varying(100),
+    card_status integer DEFAULT 0,
+    cart_created_date date,
+    cart_updated_date date
 );
 
 
@@ -748,6 +780,13 @@ SELECT pg_catalog.setval('public.tbl_ware_house_id_seq', 1, false);
 
 
 --
+-- Name: tbl_cart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+SELECT pg_catalog.setval('public.tbl_cart_id_seq', 1, false);
+
+
+--
 -- Name: tbl_account tbl_account_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
@@ -852,6 +891,14 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 
 --
+-- Name: tbl_cart tbl_cart_pkey; Type: CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+ALTER TABLE ONLY public.tbl_cart
+    ADD CONSTRAINT tbl_cart_pkey PRIMARY KEY (cart_id);
+
+
+--
 -- Name: tbl_account tbl_account_roles_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
 --
 
@@ -953,6 +1000,14 @@ ALTER TABLE ONLY public.tbl_ware_house
 
 ALTER TABLE ONLY public.tbl_ware_house
     ADD CONSTRAINT tbl_ware_house_product_fkey FOREIGN KEY (sto_product_id) REFERENCES public.tbl_product(prod_id);
+
+
+--
+-- Name: tbl_cart tbl_cart_product_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+ALTER TABLE ONLY public.tbl_cart
+    ADD CONSTRAINT tbl_cart_product_fkey FOREIGN KEY (cart_prod_id) REFERENCES public.tbl_product(prod_id);
 
 
 --
