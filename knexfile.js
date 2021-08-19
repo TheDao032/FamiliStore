@@ -1,5 +1,5 @@
 const environment = require('./environments/environment')
-require('dotenv').config({ path: '/envConfig/.env'})
+require('dotenv').config()
 
 module.exports = {
   development: {
