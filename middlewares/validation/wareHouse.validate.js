@@ -9,7 +9,7 @@ const newWareHouse = (req, res, next) => {
 			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
 			stoAmount: { type: 'integer' },
 			stoCategoryId: { type: 'integer' },
-			stoOriginPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
+			stoOriginPrice: { type: 'string', pattern: '^\\d+$', maxLength: 100 },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
@@ -42,7 +42,7 @@ const updateWareHouse = (req, res, next) => {
 			stoProductName: { type: 'string', pattern: '', maxLength: 100 },
 			stoAmount: { type: 'integer',},
 			stoCategoryId: { type: 'integer' },
-			stoOriginPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 },
+			stoOriginPrice: { type: 'string', pattern: '^\\d+$', maxLength: 100 },
 			stoProductId: { type: 'integer' },
 			cost: { type: 'string', pattern: '', maxLength: 100 }
   		},
