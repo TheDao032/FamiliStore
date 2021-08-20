@@ -14,32 +14,60 @@ const successCode = 0
 const errorCode = 1
 
 router.get('/list', async (req, res) => {
-	const result = await knex.from('tbl_account')
+	const { page, limit } = req.query
+
+	const allAccount = await accountModel.findAll()
+
+	const result = await Promise.all([
+		allAccount.map((element) => {
+			return {
+				accId: element.acc_id,
+				accEmail: element.acc_email,
+				accPhoneNumber: element.acc_phone_number,
+				accFullName: element.acc_full_name,
+				accAvatar: element.acc_avatar,
+				accStatus: element.acc_status
+			}
+		})
+	])
 
 	if (result) {
+		result.sort((a, b) => a - b)
+
+		if (page || limit) {
+			let startIndex = (parseInt(page) - 1) * parseInt(limit)
+			let endIndex = (parseInt(page) * parseInt(limit))
+			let totalPage = Math.floor(result[0].length / parseInt(limit))
+
+			if (result[0].length % parseInt(limit) !== 0) {
+				totalPage = totalPage + 1
+			}
+	
+			const paginationResult = result[0].slice(startIndex, endIndex)
+	
+			return res.status(200).json({
+				totalPage,
+				listAccouts: paginationResult,
+				statusCode: successCode
+			})
+		}
+
 		return res.status(200).json({
-			listAccouts: result,
+			listAccouts: result[0],
 			statusCode: successCode
 		})
 	}
 
-	return res.status(400).json({
+	return res.status(200).json({
 		listAccounts: [],
 		statusCode: errorCode
 	})
 })
 
-router.get('/details/:id', async (req, res) => {
+router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 	const { id } = req.params
-	
-	if(isNaN(Number(id))){
-		return res.status(400).json({
-			errorMessage: 'id must be of integer type',
-			statusCode: errorCode
-		})
-	}
 
-	const result = await accountModel.findById(id)
+	const accInfo = await accountModel.findById(id)
 
 	if (result.length === 0) {
 		return res.status(200).json({
@@ -51,10 +79,10 @@ router.get('/details/:id', async (req, res) => {
 	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
 
 	const responseResult = {
-		email: result[0].acc_email,
-		fullName: result[0].acc_full_name,
-		phoneNumber: result[0].acc_phone_number,
-		avatar: result[0].acc_avatar,
+		accEmail: result[0].acc_email,
+		accFullName: result[0].acc_full_name,
+		accPhoneNumber: result[0].acc_phone_number,
+		accAvatar: result[0].acc_avatar,
 		deliveryAddress: deliveryAddress[0]
 	}
 
@@ -165,12 +193,21 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 	})
 })
 
-router.post('/delete/:id',async (req, res) => {
+router.post('/delete/:id', accountValidation.paramsInfo, async (req, res) => {
 	const { id } = req.params
+	const { role } = req.account
 
-	if(isNaN(Number(id))){
+	if (!roleModel.checkAdminRole(role)) {
 		return res.status(400).json({
-			errorMessage: 'id must be of integer type',
+			errorMessage: 'permission access denied'
+		})
+	}
+
+	const checkExist = await accountModel.findById(id)
+
+	if (checkExist.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'AccountID is invalid',
 			statusCode: errorCode
 		})
 	}
@@ -227,9 +264,24 @@ router.post('/add-avatar', accountValidation.avatar, async (req, res) => {
 
 	const result = await accountModel.findById(accId)
 
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'AccountId Is Invalid'
+		})
+	}
+
 	if (checkAvatar) {
 		await imageService.avatarUploader(avatar.image, accId, 'insert')
+
+		return res.status(200).json({
+			statusCode: 0
+		})
 	}
+
+	return res.status(400).json({
+		errorMessage: 'Request Missing Image',
+		statusCode: 0
+	})
 })
 
 router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
@@ -241,14 +293,18 @@ router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
 	const result = await accountModel.findById(accId)
 
 	if (checkAvatar) {
-		let promiseToUploadImage = new Promise(async function (resolve) {
+		let promiseToUploadImage = new Promise(async (resolve) => {
 			await imageService.avatarUploader(avatar.image, accId, 'update', result[0].acc_avatar)
 			resolve();
 		})
-		promiseToUploadImage.then(function () {
+		promiseToUploadImage.then(() => {
 			imageService.deleteImage(result[0].acc_avatar)
 		})
 	}
+
+	return res.status(200).json({
+		statusCode: 0
+	})
 })
 
 router.post('/delete-avatar', accountValidation.avatar, async (req, res) => {
@@ -256,8 +312,22 @@ router.post('/delete-avatar', accountValidation.avatar, async (req, res) => {
 
 	const result = await accountModel.findById(accId)
 
-	promiseToUploadImage.then(function () {
-		imageService.deleteImage(result[0].acc_avatar)
+	if (result.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'AccountId Is Invalid'
+		})
+	}
+
+	const deleteImage = {
+		acc_avatar: null
+	}
+
+	await knex('tbl_account').where({ acc_id: accId}).update(deleteImage)
+
+	imageService.deleteImage(result[0].acc_avatar)
+
+	return res.status(200).json({
+		statusCode: 0
 	})
 })
 
