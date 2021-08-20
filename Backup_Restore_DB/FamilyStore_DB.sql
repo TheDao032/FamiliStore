@@ -20,7 +20,7 @@ SET row_security = off;
 -- Name: proc_update_product_insert_bill_detail(json, integer, character varying, integer, timestamp without time zone, integer, text); Type: PROCEDURE; Schema: public; Owner: pnnyoamvocwgoi
 --
 
-CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, totalprice character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
+CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accAddress character varying, totalprice character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -31,9 +31,10 @@ DECLARE
 				bill_account_id,
 				bill_total_price,
 				bill_total_quantity,
+				bill_address,
 				bill_created_date
 			)
-			values(accId, totalPrice, totalQuantity, timeCurrent);
+			values(accId, totalPrice, totalQuantity, accAddress, timeCurrent);
 			select max(bill_id) as maxId into temp from tbl_bill where bill_account_id = accId;
 			
 			update tbl_product
@@ -131,6 +132,7 @@ CREATE TABLE public.tbl_bill (
     bill_id integer DEFAULT nextval('public.tbl_bill_id_seq'::regclass) NOT NULL,
     bill_account_id integer,
     bill_total_price character varying(100),
+	bill_address character varying(100),
     bill_total_quantity integer,
     bill_status integer DEFAULT 0,
     bill_created_date date,

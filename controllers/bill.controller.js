@@ -4,17 +4,20 @@ const knex = require('../utils/dbConnection')
 const router = express.Router()
 const billValidation = require('../middlewares/validation/bill.validate')
 const moment = require('moment')
+const mailService = require('../services/mailService')
+const mailOptions = require('../template/mailOptions')
+const modelBill = require('../models/bill.model')
 
 const errorCode = 1
 const successCode = 0
 
 
 router.post('/add', billValidation.newBill, async (req, res) => {
-	const { accId, totalPrice, totalQuantity, listProduct } = req.body
-
+	const { accId, accAddress, priceShip, listProduct } = req.body
+	
 	let regexPattern = /^\d+$/
-	let resultInteger = regexPattern.test(totalPrice);
-
+	let resultInteger = regexPattern.test(priceShip);
+	
 	if (!resultInteger) {
 		return res.status(400).json({
 			errorMessage: 'Total price must be integer !',
@@ -29,9 +32,6 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-	var countId = 0
-	var countAmount = 0
-
 	const listProductDB = await knex('tbl_product')
 	const accountDB = await knex('tbl_account').where("acc_id", accId)
 
@@ -41,36 +41,12 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-
-	listProduct.forEach((prod) => {
-		var exists = Object.keys(listProductDB).some(function(key) {
-			if(listProductDB[key]['prod_id'] === Number(prod.prodId)){
-				countId++
-
-				if((listProductDB[key]['prod_amount'] - prod.prodQuantity) >= 0){
-					return true
-				}
-
-				return false
-			}
-		})
-		
-		if(exists === true){
-			countAmount++;
-		}
-	})
 	
-	if(countId !== listProduct.length){
-		return res.status(400).json({
-			errorMessage: 'product id not exists',
-			statusCode: errorCode
-		})
-	}
+	const resultCheck = await modelBill.checkAmountProduct(listProduct, listProductDB, priceShip)
 
-
-	if(countAmount !== listProduct.length){
+	if(resultCheck['message'] !== ''){
 		return res.status(400).json({
-			errorMessage: 'quantity exceeds the number that exists',
+			errorMessage: resultCheck.message,
 			statusCode: errorCode
 		})
 	}
@@ -79,8 +55,8 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	var listObjectToJson = JSON.stringify(listProduct)
 
 	//const dd = '[{"prodId": 1, "prod": "a"}, {"prodId": 2, "prod": "b"}]'
-	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?)',
-									[listObjectToJson, accId, totalPrice, totalQuantity,present,0, ''])
+	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?,?)',
+									[listObjectToJson, accId, accAddress, resultCheck['totalPrice'].toString(), resultCheck['totalQuantity'],present,0, ''])
 
 	if(result.rows[0].resultcode === 1){
 		return res.status(400).json({
@@ -89,8 +65,15 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-	return res.status(400).json({
-		errorMessage: result.rows[0].message,
+	const resultBill = await knex.raw(`select max(bill_id) from tbl_bill where bill_account_id = ${accId}`)
+	const resultProductBdetail = await knex('tbl_bill')
+		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
+		.join('tbl_product', 'prod_id', 'bdetail_product_id')
+		.where({bill_id: resultBill.rows[0].max}).orderBy('bill_created_date', 'desc')
+
+	await mailService.sendMail(mailOptions.verifyBillOptions(accountDB[0], resultProductBdetail, '123 nguyen van cu'), req, res)
+
+	return res.status(200).json({
 		statusCode: successCode
 	})
 })

@@ -7,8 +7,8 @@ const newBill = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer' },
-    		totalPrice: { type: 'string', pattern: '', maxLength: 100 },
-    		totalQuantity: { type: 'integer' },
+    		accAddress: { type: 'string', pattern: '', maxLength: 100 },
+			priceShip: {type: 'string', pattern: '', maxLength: 100 },
     		listProduct: { 
 				type: 'array', 
 				items: {
@@ -23,7 +23,7 @@ const newBill = (req, res, next) => {
 			}
   		},
 
-		required: ['accId', 'totalPrice', 'totalQuantity', 'listProduct'],
+		required: ['accId', 'accAddress', 'priceShip', 'listProduct'],
 		additionalProperties: true
 	}
 
