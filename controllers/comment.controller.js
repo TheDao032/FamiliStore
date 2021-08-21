@@ -59,16 +59,10 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 
 router.post('/add', validator.newComment, async (req, res) => {
-	const { productID, accountID, content, vote } = req.body
-	var acc = await knex('tbl_account').where('acc_id', accountID)
-	var prod = await knex('tbl_product').where('prod_id', productID)
+	const { productID, content, vote } = req.body
 
-	if (acc.length === 0) {
-		return res.status(400).json({
-			errorMessage: "account doesn't exist",
-			statusCode: errorCode
-		})
-	}
+	var acc = await knex('tbl_account').where('acc_id', req.account.acc_id)
+	var prod = await knex('tbl_product').where('prod_id', productID)
 
 	if (prod.length === 0) {
 		return res.status(400).json({
@@ -77,7 +71,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 		})
 	}
 
-	
+
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
 		return res.status(400).json({
@@ -100,15 +94,18 @@ router.post('/add', validator.newComment, async (req, res) => {
 })
 
 router.post('/update', validator.updateComment, async (req, res) => {
-	const { commentID, accountID, content, vote } = req.body
-	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
-
-	if (comment.length === 0) {
-		return res.status(400).json({
-			errorMessage: "user cannot edit comment of another user or comment doesn't exist",
-			statusCode: errorCode
-		})
+	const { commentID, content, vote } = req.body
+	
+	if (req.account.accRole !== 'ADM') {
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.acc_id)
+		if (comment.length === 0) {
+			return res.status(400).json({
+				errorMessage: "User cannot edit comment of another user",
+				statusCode: errorCode
+			})
+		}
 	}
+
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
 		return res.status(400).json({
@@ -139,14 +136,16 @@ router.post('/update', validator.updateComment, async (req, res) => {
 })
 
 router.post('/delete', validator.deleteComment, async (req, res) => {
-	const { commentID, accountID } = req.body
+	const { commentID } = req.body
 
-	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
-	if (comment.length === 0) {
-		return res.status(400).json({
-			errorMessage: "user cannot delete comment of another user",
-			statusCode: errorCode
-		})
+	if (req.account.accRole !== 'ADM') {
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.acc_id)
+		if (comment.length === 0) {
+			return res.status(400).json({
+				errorMessage: "User cannot delete comment of another user",
+				statusCode: errorCode
+			})
+		}
 	}
 	await knex('tbl_comment').where('cmt_id', commentID).del()
 

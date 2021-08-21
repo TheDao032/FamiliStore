@@ -117,9 +117,37 @@ const avatar = (req, res, next) => {
 	next()
 }
 
+const paramsInfo = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+    		id: { type: 'string', pattern: "^\\d+$" }
+  		},
+		required: ['id'],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.params)
+
+	if (!valid) {
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
+	}
+
+	next()
+}
+
 module.exports = {
 	updateAccountPassword,
 	updateRoleAccount,
 	updateAccount,
-	avatar
+	avatar,
+	paramsInfo,
 }

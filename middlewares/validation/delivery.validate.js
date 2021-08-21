@@ -146,7 +146,7 @@ const newWard = (req, res, next) => {
 			cityId: { type: 'integer' },
 			distId: { type: 'integer' },
 			wardName: { type: 'string', pattern: '' },
-			wardShipPrice: { type: 'string', pattern: '^\d+$', maxLength: 100 }
+			wardShipPrice: { type: 'string', pattern: '^\\d+$', maxLength: 100 }
   		},
 		required: ['cityId', 'distId', 'wardName', 'wardShipPrice'],
 		additionalProperties: true
