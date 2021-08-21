@@ -15,7 +15,7 @@ router.post('/add', async (req, res) => {
 	const { prodName, prodCategoryID, prodAmount, prodPrice, prodDescription, prodStatus } = req.body
 	
 	var images = req.files //need to get image from input type file, name is 'image'
-
+	
 	var errorMessage = "";
 	//validate field
 	if (prodName === undefined || prodCategoryID === undefined || prodAmount === undefined || prodPrice === undefined) {
@@ -31,20 +31,22 @@ router.post('/add', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-
+	
 	if (prodName.length > 60) {
 		return res.status(400).json({
 			errorMessage: 'Product name accept only the length smaller than 60',
 			statusCode: errorCode
 		})
 	}
-
-	if (prodDescription.length > 1000) {
+	
+	if (prodDescription != undefined && prodDescription.length > 1000) {
+		console.log('x')
 		return res.status(400).json({
 			errorMessage: 'Product description accept only the length smaller than 1000',
 			statusCode: errorCode
 		})
 	}
+	
 	let regexPattern = /^\d+$/
 	let resultInteger = regexPattern.test(prodPrice);
 
@@ -54,6 +56,8 @@ router.post('/add', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
+
+	
 	resultInteger = regexPattern.test(prodAmount);
 
 	if (!resultInteger) {
@@ -63,14 +67,14 @@ router.post('/add', async (req, res) => {
 		})
 	}
 
-	if (prodAmount > 10000 || prodAmount < 0) {
+	if (prodAmount > 10000 || prodAmount < 1) {
 		return res.status(400).json({
 			errorMessage: 'Ammount is not valid, must be smaller than 10000 and greater than 0!',
 			statusCode: errorCode
 		})
 	}
 
-	if (prodPrice > 1000000000 || prodPrice < 0) {
+	if (prodPrice > 1000000000 || prodPrice < 1000) {
 		return res.status(400).json({
 			errorMessage: 'Product price is not valid, must be smaller than 1000000000 or greater than 0 !',
 			statusCode: errorCode
@@ -115,8 +119,7 @@ router.post('/add', async (req, res) => {
 		prod_category_id: prodCategoryID,
 		prod_amount: prodAmount,
 		prod_price: prodPrice,
-		prod_description: prodDescription,
-		prod_status: 1,
+		prod_description: typeof prodDescription !== 'undefined' ? prodDescription : '',
 		prod_created_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	})
 		.returning('*')
@@ -202,7 +205,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	}
 
 	if (prodAmount != undefined) {
-		if (prodAmount > 10000 || prodAmount < 0) {
+		if (prodAmount > 10000 || prodAmount < 1) {
 			return res.status(400).json({
 				errorMessage: 'Ammount cannot greater than 10000 or smaller than 0 !',
 				statusCode: errorCode
@@ -211,7 +214,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	}
 
 	if (prodPrice != undefined) {
-		if (prodPrice > 1000000000 || prodPrice < 0) {
+		if (prodPrice > 1000000000 || prodPrice < 1000) {
 			return res.status(400).json({
 				errorMessage: 'Product price is not valid, cannot greater than 1000000000 or smaller than 0 !',
 				statusCode: errorCode
@@ -225,7 +228,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 			prod_category_id: typeof prodCategoryID !== 'undefined' ? prodCategoryID : updateProduct[0].prod_category_id,
 			prod_amount: typeof prodAmount !== 'undefined' ? prodAmount : updateProduct[0].prod_amount,
 			prod_price: typeof prodPrice !== 'undefined' ? prodPrice : updateProduct[0].prod_price,
-			prod_description: typeof prodDescription !== 'undefined' ? prodDescription : updateProduct[0].prod_price,
+			prod_description: typeof prodDescription !== 'undefined' ? prodDescription : updateProduct[0].prod_description,
 			prod_status: 1,
 			prod_updated_date: moment().format('YYYY-MM-DD HH:mm:ss')
 		})

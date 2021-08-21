@@ -30,9 +30,16 @@ router.post('/list', validator.listComment, async (req, res) => {
 	var numberFourStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 4`)
 	var numberFiveStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 5`)
 	var numberOfComment = await knex.raw(`select count(cmt_id) from tbl_comment where cmt_product_id = ${productID}`)
-	console.log(numberOfComment)
+	var numberPage = Number(numberOfComment.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
 	var returnedObject = {
 		numberOfComment: numberOfComment.rows[0].count,
+		numberOfPage : numberPage,
 		avgStar: avgStar.rows[0].round,
 		numberOneStar: numberOneStar.rows[0].count,
 		numberTwoStars: numberTwoStars.rows[0].count,
@@ -60,8 +67,6 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 router.post('/add', validator.newComment, async (req, res) => {
 	const { productID, content, vote } = req.body
-
-	var acc = await knex('tbl_account').where('acc_id', req.account.acc_id)
 	var prod = await knex('tbl_product').where('prod_id', productID)
 
 	if (prod.length === 0) {
@@ -82,10 +87,11 @@ router.post('/add', validator.newComment, async (req, res) => {
 
 	await knex('tbl_comment').insert({
 		cmt_product_id: productID,
-		cmt_acc_id: accountID,
+		cmt_acc_id: req.account.accId,
 		cmt_content: content,
 		cmt_vote: vote,
-		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss')
+		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+		cmt_update_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	})
 
 	return res.status(200).json({
@@ -95,9 +101,17 @@ router.post('/add', validator.newComment, async (req, res) => {
 
 router.post('/update', validator.updateComment, async (req, res) => {
 	const { commentID, content, vote } = req.body
-	
+	var comment = await knex('tbl_comment').where('cmt_id', commentID)
+
+	if (comment.length === 0) {
+		return res.status(400).json({
+			errorMessage: "Comment does not exists",
+			statusCode: errorCode
+		})
+	}
+	console.log(req.account)
 	if (req.account.accRole !== 'ADM') {
-		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.acc_id)
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.accId)
 		if (comment.length === 0) {
 			return res.status(400).json({
 				errorMessage: "User cannot edit comment of another user",
@@ -137,9 +151,17 @@ router.post('/update', validator.updateComment, async (req, res) => {
 
 router.post('/delete', validator.deleteComment, async (req, res) => {
 	const { commentID } = req.body
+	var comment = await knex('tbl_comment').where('cmt_id', commentID)
+
+	if (comment.length === 0) {
+		return res.status(400).json({
+			errorMessage: "Comment does not exists",
+			statusCode: errorCode
+		})
+	}
 
 	if (req.account.accRole !== 'ADM') {
-		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.acc_id)
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.accId)
 		if (comment.length === 0) {
 			return res.status(400).json({
 				errorMessage: "User cannot delete comment of another user",
