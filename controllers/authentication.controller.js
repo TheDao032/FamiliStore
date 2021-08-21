@@ -93,9 +93,7 @@ router.post('/register', authenticationValidate.register, async (req, res) => {
 		acc_full_name: fullName || null,
 		acc_role: role || 'USER',
 		acc_token: hashToken,
-		acc_avatar: req.files ? req.files.picture.data : null,
-		acc_created_date: dateOb,
-		acc_updated_date: null
+		acc_created_date: dateOb
 	}
 
 	const newAccId = await knex('tbl_account')
