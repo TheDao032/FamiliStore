@@ -71,7 +71,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
 		.where({bill_id: resultBill.rows[0].max}).orderBy('bill_created_date', 'desc')
 
-	await mailService.sendMail(mailOptions.verifyBillOptions(accountDB[0], resultProductBdetail, '123 nguyen van cu'), req, res)
+	await mailService.sendMail(mailOptions.verifyBillOptions(accountDB[0], resultProductBdetail, accAddress), req, res)
 
 	return res.status(200).json({
 		statusCode: successCode
