@@ -98,11 +98,12 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 	}
 
 	var result = await knex.raw(`with productSale as(
-		select sum(bde.bdetail_quantity) as quantity,pro.* from (tbl_product pro join
-		tbl_bill_detail bde on pro.prod_id = bde.bdetail_product_id)
+		select sum(bde.bdetail_quantity) as quantity,pro.* from (tbl_product pro 
+		join tbl_bill_detail bde on pro.prod_id = bde.bdetail_product_id)
 		group by pro.prod_id
 		order by quantity desc
-		limit ${limit} offset ${offset}
+		limit ${limit}
+		offset ${offset}
 	)
 	select distinct pr.*,img.prod_img_data from productSale pr left join tbl_product_images img
 	on img.prod_img_product_id = pr.prod_id order by pr.quantity desc`)

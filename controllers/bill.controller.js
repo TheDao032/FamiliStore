@@ -22,7 +22,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-	if(isNaN(Number(accId))){
+	if (isNaN(Number(accId))) {
 		return res.status(400).json({
 			errorMessage: 'Account id must be of integer type',
 			statusCode: errorCode
@@ -35,7 +35,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	const listProductDB = await knex('tbl_product')
 	const accountDB = await knex('tbl_account').where("acc_id", accId)
 
-	if(accountDB.length === 0){
+	if (accountDB.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'account id not exists',
 			statusCode: errorCode
@@ -43,24 +43,24 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	}
 
 	listProduct.forEach((prod) => {
-		var exists = Object.keys(listProductDB).some(function(key) {
-			if(listProductDB[key]['prod_id'] === Number(prod.prodId)){
+		var exists = Object.keys(listProductDB).some(function (key) {
+			if (listProductDB[key]['prod_id'] === Number(prod.prodId)) {
 				countId++
 
-				if((listProductDB[key]['prod_amount'] - prod.prodQuantity) >= 0){
+				if ((listProductDB[key]['prod_amount'] - prod.prodQuantity) >= 0) {
 					return true
 				}
 
 				return false
 			}
 		})
-		
-		if(exists === true){
+
+		if (exists === true) {
 			countAmount++;
 		}
 	})
-	
-	if(countId !== listProduct.length){
+
+	if (countId !== listProduct.length) {
 		return res.status(400).json({
 			errorMessage: 'product id not exists',
 			statusCode: errorCode
@@ -68,21 +68,21 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	}
 
 
-	if(countAmount !== listProduct.length){
+	if (countAmount !== listProduct.length) {
 		return res.status(400).json({
 			errorMessage: 'quantity exceeds the number that exists',
 			statusCode: errorCode
 		})
 	}
-	
+
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 	var listObjectToJson = JSON.stringify(listProduct)
 
 	//const dd = '[{"prodId": 1, "prod": "a"}, {"prodId": 2, "prod": "b"}]'
 	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?)',
-									[listObjectToJson, accId, totalPrice, totalQuantity,present,0, ''])
+		[listObjectToJson, accId, totalPrice, totalQuantity, present, 0, ''])
 
-	if(result.rows[0].resultcode === 1){
+	if (result.rows[0].resultcode === 1) {
 		return res.status(400).json({
 			errorMessage: result.rows[0].message,
 			statusCode: errorCode
@@ -99,7 +99,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 router.get('/details/:id', async (req, res) => {
 	const { id } = req.params
 
-	if(isNaN(Number(id))){
+	if (isNaN(Number(id))) {
 		return res.status(400).json({
 			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
@@ -108,10 +108,10 @@ router.get('/details/:id', async (req, res) => {
 
 	const resultProductBdetail = await knex('tbl_bill_detail')
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
-		.where({bdetail_bill_id: id})
+		.where({ bdetail_bill_id: id })
 
 	const imageProduct = await knex('tbl_product_images')
-	const bill = await knex('tbl_bill').where({bill_id: id})
+	const bill = await knex('tbl_bill').where({ bill_id: id })
 
 
 	if (bill.length === 0 || resultProductBdetail.length === 0) {
@@ -120,14 +120,14 @@ router.get('/details/:id', async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	
+
 	var listItem = []
 	var index = 0
 
-	resultProductBdetail.forEach((proBdetail) =>{
+	resultProductBdetail.forEach((proBdetail) => {
 		var image = ''
-		var exists = Object.keys(imageProduct).some(function(key) {
-			if(imageProduct[key]['prod_img_product_id'] === proBdetail.prod_id){
+		var exists = Object.keys(imageProduct).some(function (key) {
+			if (imageProduct[key]['prod_img_product_id'] === proBdetail.prod_id) {
 				image = imageProduct[key]['prod_img_data']
 			}
 		})
@@ -143,7 +143,7 @@ router.get('/details/:id', async (req, res) => {
 			quantity: proBdetail.bdetail_quantity,
 			TotalPrice: proBdetail.bdetail_quantity * Number(proBdetail.bdetail_product_price)
 		}
-		
+
 		listItem[index] = item
 		index++
 	})
@@ -156,63 +156,137 @@ router.get('/details/:id', async (req, res) => {
 
 })
 
-router.get('/history-bill/:id', async (req, res) => {
-	const { id } = req.params
-
+router.post('/list', async (req, res) => {
+	const { id, limit, page, billType } = req.body
+	const offset = limit * (page - 1)
+	/*
 	if(isNaN(Number(id))){
 		return res.status(400).json({
 			errorMessage: 'id must be of integer type',
 			statusCode: errorCode
 		})
 	}
+	*/
+	if (page < 1 || limit < 1 || limit > 10) {
+		return res.status(400).json({
+			errorMessage: "limit and page parameter is not valid",
+			statusCode: errorCode
+		})
+	}
 
-	const resultProductBdetail = await knex('tbl_bill')
-		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
-		.join('tbl_product', 'prod_id', 'bdetail_product_id')
-		.where({bill_account_id: id}).orderBy('bill_created_date', 'desc')
+	var resultProductBdetail = await knex.raw(`with billList as (	
+		with bill as (select * from tbl_bill
+			limit ${limit}
+			offset ${offset}
+		)
+		select * from bill 
+		join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+		join tbl_product product on product.prod_id = detail.bdetail_product_id
+		join tbl_categories cat on cat.cate_id = product.prod_category_id
+	)
+	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id`)
 
+	resultProductBdetail = resultProductBdetail.rows
+
+	/*
 	if (resultProductBdetail.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'account id not exists',
 			statusCode: errorCode
 		})
 	}
-	
-	var listItem = []
-	var index = 0
+	*/
 
-	resultProductBdetail.forEach((proBdetail) =>{
-		var expectedDate = new Date(proBdetail.bill_created_date)
+	var moveToNextBill = false
+	var billList = []
+	var index = 0
+	while (index < resultProductBdetail.length) {
+
+		var expectedDate = new Date(resultProductBdetail[index].bill_created_date)
 		expectedDate.setDate(expectedDate.getDate() + 2)
 
-		var createdDate = moment(proBdetail.bill_created_date).format('DD/MM/YYYY HH:mm:ss')
+		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'packing'
+		var status = 'packaging'
 
-		if(proBdetail.bill_status === 1){
+		if (resultProductBdetail[index].bill_status === 1) {
 			status = 'transported'
 		}
 
-		else if(proBdetail.bill_status === 2){
-			status = 'recieve'
+		else if (resultProductBdetail[index].bill_status === 2) {
+			status = 'aborted'
 		}
 
-		var item = {
-			id: proBdetail.bdetail_id,
-			title: proBdetail.prod_name,
-			price: Number(proBdetail.bdetail_product_price),
-			description: proBdetail.prod_description,
-			status: status,
+		//return bill object
+		var billItem = {
+			billId: resultProductBdetail[index].bill_id,
+			accountID: resultProductBdetail[index].bill_account_id,
+			totalPrice: resultProductBdetail[index].bill_total_price,
+			billQuantity: resultProductBdetail[index].bill_total_quantity,
+			billStatus: status,
 			createDate: createdDate,
-			expectedDate: expectedDate
+			expectedDate: expectedDate,
 		}
 
-		listItem[index] = item
-		index++
-	})
+		let prodList = []
+		for (let i = index; i < resultProductBdetail.length; i++) {
+			if (i === 0) {
+				let prodObj = {
+					productID: resultProductBdetail[index].prod_id,
+					prodName: resultProductBdetail[index].prod_name,
+					prodCategory: resultProductBdetail[index].cate_name,
+					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodDescription: resultProductBdetail[index].prod_description,
+					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+					prodPrice: resultProductBdetail[index].prod_price
+				}
+				let imageLink = resultProductBdetail[i].prod_img_data
+				prodObj['images'] = imageLink
+				prodList.push(prodObj)
+			}
 
+
+			if ((i >= resultProductBdetail.length - 1) || (resultProductBdetail[i + 1].bill_id != resultProductBdetail[i].bill_id)) {
+				index = i + 1
+				moveToNextBill = true
+				break
+			}
+			else {
+				if (moveToNextBill == true) {
+					moveToNextBill = false
+				}
+				else {
+					index = i + 1
+				}
+			}
+			if (i != 0 && index < resultProductBdetail.length && (resultProductBdetail[index].prod_id != resultProductBdetail[index - 1].prod_id)) {
+				let prodObj = {
+					productID: resultProductBdetail[index].prod_id,
+					prodName: resultProductBdetail[index].prod_name,
+					prodCategory: resultProductBdetail[index].cate_name,
+					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodDescription: resultProductBdetail[index].prod_description,
+					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+					prodPrice: resultProductBdetail[index].prod_price
+				}
+				let imageLink = resultProductBdetail[index].prod_img_data
+				prodObj['images'] = imageLink
+				prodList.push(prodObj)
+			}
+
+
+
+
+		}
+
+		billItem['billDetailList'] = prodList
+		billList.push(billItem)
+		console.log(billList)
+	}
 	return res.status(200).json({
-		listItemOfAccount: listItem,
+		listItemOfAccount: billList,
 		statusCode: successCode
 	})
 })
@@ -222,7 +296,7 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	const { billId, status } = req.body
 	var upStatus = 0
 
-	if(isNaN(Number(billId))){
+	if (isNaN(Number(billId))) {
 		return res.status(400).json({
 			errorMessage: 'Bill id must be of integer type',
 			statusCode: errorCode
@@ -230,7 +304,7 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	}
 	const resultBill = await knex('tbl_bill').where("bill_id", billId)
 
-	if(resultBill.length === 0){
+	if (resultBill.length === 0) {
 		return res.status(400).json({
 			errorMessage: 'bill id not exists',
 			statusCode: errorCode
@@ -238,17 +312,17 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	}
 
 	//packing
-	if(status === 'transported'){
+	if (status === 'transported') {
 		upStatus = 1
 	}
 
-	else if(status === 'recieve'){
+	else if (status === 'recieve') {
 		upStatus = 2
 	}
 
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
-	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
+	await knex('tbl_bill').where("bill_id", billId).update({ bill_status: upStatus, bill_updated_date: present })
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -326,4 +400,8 @@ router.get('/test', async (req, res) => {
 		})
 	}
 })
+
+
+
+
 module.exports = router
