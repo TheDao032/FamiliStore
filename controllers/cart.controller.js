@@ -13,9 +13,9 @@ const cartValidation = require('../middlewares/validation/cart.validate')
 const successCode = 0
 const errorCode = 1
 
-router.post('/list', async (req, res) => {
+router.get('/list', async (req, res) => {
 	const { page, limit } = req.query
-	const { accId } = req.body
+	const { accId } = req.account
 
 	const listCart = await cartModel.findByAcc(accId)
 
@@ -29,17 +29,17 @@ router.post('/list', async (req, res) => {
 	let totalPrice = 0
 	let totalAmount = 0
 
-	const result = Promise.all([
+	const result = await Promise.all([
 		listCart.map((item) => {
 			const productInfo = listProduct.find((info) => info.prod_id === item.cart_prod_id)
 
 			if (productInfo) {
-				totalPrice = totalPrice + item.cart_amount * parseInt(productInfo[0].prod_price)
+				totalPrice = totalPrice + item.cart_amount * parseInt(productInfo.prod_price)
 				totalAmount = totalAmount + item.cart_amount
 				return {
-					prodId: productInfo[0].prod_id,
+					prodId: productInfo.prod_id,
 					cartAmount: item.cart_amount,
-					cartPrice: productInfo[0].prod_price
+					cartPrice: productInfo.prod_price
 				}
 			}
 
@@ -90,7 +90,8 @@ router.post('/list', async (req, res) => {
 })
 
 router.post('/add', cartValidation.addCart, async (req, res) => {
-    const { accId, prodId } = req.body
+    const { prodId } = req.body
+	const { accId } = req.account
 
 	const productInfo = await productModel.findById(prodId)
 
@@ -115,21 +116,23 @@ router.post('/add', cartValidation.addCart, async (req, res) => {
 			cart_updated_date: presentDate
 		}
 
-		await cartModel.addcart(newCart)
+		const returnInfo = await cartModel.addcart(newCart)
 
 		return res.status(200).json({
+			cartId: returnInfo,
 			statusCode: successCode
 		})
 	}
 
 	const updateCart = {
 		cart_amount: checkExist[0].cart_amount + 1,
-		cart_updated_date: presendDate
+		cart_updated_date: presentDate
 	}
 
-	await cartModel.updateCart(checkExist[0].cart_id, updateCart)
+	const returnInfo = await cartModel.updateCart(checkExist[0].cart_id, updateCart)
 
 	return res.status(200).json({
+		cartId: returnInfo,
 		statusCode: successCode
 	})
 })
@@ -149,9 +152,10 @@ router.post('/update-amount', cartValidation.updateCartAmount, async (req, res) 
 		cart_amount: cartAmount
 	}
 
-	await cartModel.updateCart(cartId, newAmount)
+	const returnInfo = await cartModel.updateCart(cartId, newAmount)
 
 	return res.status(200).json({
+		cartId: returnInfo,
 		statusCode: successCode
 	})
 })
@@ -159,20 +163,27 @@ router.post('/update-amount', cartValidation.updateCartAmount, async (req, res) 
 router.post('/check-price', cartValidation.checkPrice, async (req, res) => {
 	const { listProduct } = req.body
 
-	const allProduct = await productModel.findAl()
+	const allProduct = await productModel.findAll()
 
 	let totalPrice = 0
 
-	listProduct.forEach((item) => {
-		const productInfo = allProduct.find((info) => info.prod_id === item.prodId)
+	const result = await Promise.all([
+		listProduct.map((item) => {
+			let price = 0
+			const productInfo = allProduct.find((info) => info.prod_id === item.prodId)
 
-		if (productInfo) {
-			totalPrice = totalPrice + (item.cartAmount * parseInt(productInfo[0].prod_price))
-		}
+			if (productInfo) {
+				price = price + (item.cartAmount * parseInt(productInfo.prod_price))
+			}
 
-		return res.status(400).json({
-			errorMessage: 'This Product In Your Cart Is Invalid'
+			return {
+				price
+			}
 		})
+	])
+
+	result[0].forEach((item) => {
+		totalPrice = totalPrice + item.price
 	})
 
 	return res.status(200).json({
@@ -192,7 +203,7 @@ router.post('/delete', cartValidation.deleteCart, async (req, res) => {
 		})
 	}
 
-	await knex('tbl_cart').where({ cart_id: cartdId }).del()
+	await knex('tbl_cart').where({ cart_id: cartId }).del()
 	
 	return res.status(200).json({
 		statusCode: successCode

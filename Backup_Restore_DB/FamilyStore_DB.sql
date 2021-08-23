@@ -487,7 +487,7 @@ CREATE TABLE public.tbl_cart (
     cart_acc_id integer,
     cart_prod_id integer,
     cart_amount integer,
-    card_status integer DEFAULT 0,
+    cart_status integer DEFAULT 0,
     cart_created_date date,
     cart_updated_date date
 );

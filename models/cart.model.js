@@ -2,7 +2,7 @@ const knex = require('../utils/dbConnection')
 
 const findByAccAndProduct = async (accId, prodId) => {
 	const info = await knex('tbl_cart')
-					.where({ cart_acc_id: accId, cart_prod_id })
+					.where({ cart_acc_id: accId, cart_prod_id: prodId })
 
     return info
 }
@@ -22,15 +22,19 @@ const findById = async (cartId) => {
 }
 
 const updateCart = async (cartId, cartObject) => {
-	await knex('tbl_cart')
+	const returnInfo = await knex('tbl_cart')
 			.update(cartObject)
-			.where({ cart_id: cartId })
+			.where({ cart_id: cartId }).returning('cart_id')
+
+	return returnInfo[0]
 }
 
 
 const addcart = async (cartObject) => {
-	await knex('tbl_cart')
-			.insert(cartObject)
+	const returnInfo = await knex('tbl_cart')
+			.insert(cartObject).returning('cart_id')
+
+	return returnInfo[0]
 }
 
 module.exports = {
