@@ -26,15 +26,18 @@ jobs:
           name: Install Dependencies 
           command: |
             npm test
-    requires:
-      - build
             
 
 # Orchestrate our job run sequence
 workflows:
   build_and_test:
     jobs:
-      - build
-      - test
-      - heroku/deploy-via-git
+      - build:
+          branches:
+            only:
+              - master
+      # - test
+      #     requires:
+      #       - build
+      # - heroku/deploy-via-git
       
