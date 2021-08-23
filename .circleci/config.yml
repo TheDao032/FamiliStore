@@ -40,4 +40,10 @@ workflows:
       - test:
           requires:
             - build
-      - heroku/deploy-via-git
+      - heroku/deploy-via-git:
+          filters:
+              branches:
+                only:
+                  - master
+          requires:
+            - test
