@@ -45,5 +45,3 @@ workflows:
               branches:
                 only:
                   - master
-          requires:
-            - test
