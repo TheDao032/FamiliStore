@@ -3,7 +3,8 @@ require('dotenv').config()
 const env = {
 	portServer: process.env.PORT || 3000,
 	configDatabase: {
-		connectionString: process.env.LOCAL_CONNECTION
+		connectionString: process.env.LOCAL_CONNECTION,
+		testConnectionString: process.env.LOCAL_CONNECTION || 'postgres://umfgnebaptuuyr:a43513312374ba2d047de4277ffdef990071b8ecee4b0a1bdc3898dffdae81e9@ec2-3-233-100-43.compute-1.amazonaws.com:5432/d7fnh591nk8i1u'
 	},
 	secret: process.env.SECRET || 'family_store_secret',
 	APP_ID: process.env.APP_ID || 'test_id',
