@@ -95,10 +95,9 @@ router.post('/add', validator.newComment, async (req, res) => {
 		cmt_vote: vote,
 		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss'),
 		cmt_update_date: moment().format('YYYY-MM-DD HH:mm:ss')
-	})
-
+	}).returning('*')
 	return res.status(200).json({
-		cmtId: returnInfo[0],
+		cmtId: returnInfo[0].cmt_id,
 		statusCode: successCode
 	})
 })
