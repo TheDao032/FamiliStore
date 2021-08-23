@@ -34,11 +34,14 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - build
-      - test
-          requires:
-            - build
-      - heroku/deploy-via-git
-          requires:
-            - test
+      build:
+        branches:
+          only:
+            master
+      test
+        requires:
+          build
+      heroku/deploy-via-git
+        requires:
+          test
       
