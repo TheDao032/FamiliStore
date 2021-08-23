@@ -690,7 +690,7 @@ COPY public.tbl_wards (ward_id, ward_name, ward_city_id, ward_dis_id, ward_creat
 -- Data for Name: tbl_ware_house; Type: TABLE DATA; Schema: public; Owner: pnnyoamvocwgoi
 --
 
-COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount, sto_category_id, sto_origin_price, sto_created_date, sto_updated_date, sto_product_id, cost, sto_status) FROM stdin;
+COPY public.tbl_ware_house (sto_id, sto_account_id, sto_product_name, sto_amount, sto_category_id, sto_origin_price, sto_created_date, sto_updated_date, sto_product_id, sto_cost, sto_status) FROM stdin;
 \.
 
 
