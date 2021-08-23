@@ -195,9 +195,9 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 
 router.post('/delete/:id', accountValidation.paramsInfo, async (req, res) => {
 	const { id } = req.params
-	const { role } = req.account
+	const { accRole } = req.account
 
-	if (!roleModel.checkAdminRole(role)) {
+	if (!roleModel.checkAdminRole(accRole)) {
 		return res.status(400).json({
 			errorMessage: 'permission access denied'
 		})
@@ -224,9 +224,9 @@ router.post('/delete/:id', accountValidation.paramsInfo, async (req, res) => {
 // đặt tài khoản làm nhân viên, xóa vai trò nhân viên
 router.post('/update-role', accountValidation.updateRoleAccount, async (req, res) => {
 	const { accId, accRole } = req.body
-	const { role } = req.account
+	const presentRole = req.account.accRole
 
-	if (!roleModel.checkAdminRole(role)) {
+	if (!roleModel.checkAdminRole(presentRole)) {
 		return res.status(400).json({
 			errorMessage: 'permission access denied'
 		})

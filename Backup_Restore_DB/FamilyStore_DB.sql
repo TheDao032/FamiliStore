@@ -499,7 +499,38 @@ CREATE TABLE public.tbl_ware_house (
 );
 
 
-ALTER TABLE public.tbl_ware_house OWNER TO postgres;
+ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
+
+--
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+CREATE SEQUENCE public.tbl_cart_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tbl_cart_id_seq OWNER TO pnnyoamvocwgoi;
+
+--
+-- Name: tbl_cart; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
+--
+
+CREATE TABLE public.tbl_cart (
+    cart_id integer DEFAULT nextval('public.tbl_cart_id_seq'::regclass) NOT NULL,
+    cart_acc_id integer,
+    cart_prod_id integer,
+    cart_amount integer,
+    cart_status integer DEFAULT 0,
+    cart_created_date date,
+    cart_updated_date date
+);
+
+
+ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
 
 --
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: postgres

@@ -6,10 +6,9 @@ const addCart = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'integer' },
     		prodId: { type: 'integer' }
   		},
-		required: ['accId', 'prodId'],
+		required: ['prodId'],
 		additionalProperties: true
 	}
 
@@ -34,13 +33,13 @@ const updateCartAmount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cartid: { type: 'integer' }
+			cartId: { type: 'integer' }
   		},
-		required: ['cartid'],
-		additionalproperties: true
+		required: ['cartId'],
+		additionalProperties: true
 	}
 
-	const ajv = new ajvlib({
+	const ajv = new ajvLib({
 		allerrors: true
 	})
 
@@ -50,7 +49,7 @@ const updateCartAmount = (req, res, next) => {
 	if (!valid) {
 		return res.status(400).json({
 			errormessage: validator.errors[0].message,
-			statuscode: errorcode
+			statuscode: errorCode
 		})
 	}
 
@@ -99,13 +98,13 @@ const deleteCart = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			cartid: { type: 'integer' }
+			cartId: { type: 'integer' }
   		},
-		required: ['cartid'],
-		additionalproperties: true
+		required: ['cartId'],
+		additionalProperties: true
 	}
 
-	const ajv = new ajvlib({
+	const ajv = new ajvLib({
 		allerrors: true
 	})
 
@@ -115,7 +114,7 @@ const deleteCart = (req, res, next) => {
 	if (!valid) {
 		return res.status(400).json({
 			errormessage: validator.errors[0].message,
-			statuscode: errorcode
+			statuscode: errorCode
 		})
 	}
 
