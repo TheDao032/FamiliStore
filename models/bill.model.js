@@ -1,3 +1,17 @@
+const knex = require('../utils/dbConnection')
+
+const findAll = async () => {
+	const info = await knex('tbl_bill')
+
+	return info
+}
+
+const findByAccId = async (accId) => {
+	const info = await knex('tbl_bill').where({ bill_account_id: accId })
+
+	return info
+}
+
 const checkAmountProduct = (listProduct, listProductDB, priceShip)=>{
     var countId = 0
 	var countAmount = 0
@@ -40,6 +54,9 @@ const checkAmountProduct = (listProduct, listProductDB, priceShip)=>{
 	}
     return result
 }
+
 module.exports = {
-    checkAmountProduct
+	findAll,
+	findByAccId,
+	checkAmountProduct
 }

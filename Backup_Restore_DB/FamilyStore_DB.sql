@@ -17,10 +17,10 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: proc_update_product_insert_bill_detail(json, integer, character varying, character varying, integer, timestamp without time zone, integer, text); Type: PROCEDURE; Schema: public; Owner: postgres
+-- Name: proc_update_product_insert_bill_detail(json, integer, character varying, character varying, character varying, integer, timestamp without time zone, integer, text); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
-CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, priceShip character varying,totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
+CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, priceship character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -68,7 +68,7 @@ DECLARE
 $$;
 
 
-ALTER PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text) OWNER TO postgres;
+ALTER PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, priceship character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text) OWNER TO postgres;
 
 --
 -- Name: tbl_account_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -136,7 +136,7 @@ CREATE TABLE public.tbl_bill (
     bill_address character varying(100),
     bill_total_quantity integer,
     bill_status integer DEFAULT 0,
-	bill_price_ship character varying(100),
+    bill_price_ship character varying(100),
     bill_created_date date,
     bill_updated_date date
 );
@@ -290,8 +290,8 @@ CREATE TABLE public.tbl_comment (
     cmt_product_id integer NOT NULL,
     cmt_vote integer,
     cmt_status integer DEFAULT 0,
-    cmt_create_date date,
-    cmt_update_date date,
+    cmt_create_date character varying(100),
+    cmt_update_date character varying(100),
     cmt_acc_id integer NOT NULL
 );
 
@@ -385,7 +385,8 @@ CREATE TABLE public.tbl_product (
     prod_updated_date date,
     prod_price character varying(100),
     prod_description character varying(1000),
-    prod_status integer DEFAULT 0
+    prod_status integer DEFAULT 0,
+    ts tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, (COALESCE(prod_name, ''::character varying))::text), 'A'::"char")) STORED
 );
 
 
@@ -543,7 +544,7 @@ COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_n
 39	$2b$04$y/ZDuuf6KrgpVkYcBgwSWONshyV7IqtbmuG2dxZnKe6L3sEMupksq	\N	vho23272@cuoly.com	8412346589	vho23272@cuoly.com	USER	\N	0	2021-08-08	2021-08-08	$2b$04$pnUHeOe2g6zxexvkNgPztupjTqDHy4dl9JL9Y2PvZYqvKFdeDyGdS	UetOJB709OPeVhGEvxVniXFLLdw8wXnUlteIsaab5ARZjPE67TnUTxureJIsnd6J4GjzCSm6hbfVLuSmr9nyYVZVJyGzBPw6HcHz
 2	$2b$04$BAaV2SDvid3kCWxYwnRSwuRdzV5aANU3wMCo4O2dsUiS5gHNgiB5i	\N	nthedao2705@gmail.com	\N	\N	ADM	\N	0	2021-08-03	2021-08-09	\N	FT08eU2s4wvqSizhWzR1WNamWdZEJNHapEFBi0ITJJV3OTxwj0FZjHrWddl0ula1AO3w0FoWBO18NgPhl5pLcn7cInCdyg2gUMvT
 40	$2b$04$LgpnKpIeNbSZq06mG.p9deLPN9/fyHQ1oMy68ihYSsVqhSO.K0PKW	\N	yiyiw94212@cfcjy.com	84586072996	Test 18/8/20218	USER	\N	0	2021-08-18	2021-08-18	\N	xLNnnWMfaHL7pI5t8avZCCQm2KVgdF3bq9FzEIRjf4GLOKMlTgw9HUMgYupqNwPKeSzUyPwpd2nyT8yDLN88gsx7UJ2dXytm7R8Q
-18	$2b$04$fAkkyELf9a./G2jjbKqO.e9u8p9G5hvtpBaSRymPvuT1Mnp9nLbVK	\N	vosithien1234@gmail.com	\N	\N	ADM	\N	0	2021-08-05	2021-08-05	\N	tkBgc6FizvJIOwprMdL6CAX54FSBJYOqg5yQCzMwnTszXVrXBTiQ9MariEo5njkwPm18l5t3SUNSpGEgnhnmt164b68ygNyAR3dX
+18	$2b$04$fAkkyELf9a./G2jjbKqO.e9u8p9G5hvtpBaSRymPvuT1Mnp9nLbVK	\N	vosithien1234@gmail.com	\N	\N	ADM	\N	0	2021-08-05	2021-08-05	\N	IFzAJdaYVOHca6UBdbss5zEQmXJG9UfwDS6F5tYtzxbU5ZgEtvIeQnEIFvl4Dewk7vdZ9cXm5tNx1yWETis2qwptefhJVZAqM8QV
 \.
 
 
@@ -551,12 +552,15 @@ COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_n
 -- Data for Name: tbl_bill; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tbl_bill (bill_id, bill_account_id, bill_total_price, bill_address, bill_total_quantity, bill_status, bill_created_date, bill_updated_date) FROM stdin;
-1000	4	\N	\N	\N	0	\N	\N
-3	4	1000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	4	0	2021-01-01	\N
-9	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	2021-08-21	\N
-11	18	46000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	2021-08-21	\N
-10	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	3	2021-08-21	2021-08-21
+COPY public.tbl_bill (bill_id, bill_account_id, bill_total_price, bill_address, bill_total_quantity, bill_status, bill_price_ship, bill_created_date, bill_updated_date) FROM stdin;
+9	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	\N	2021-08-21	\N
+11	18	46000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	\N	2021-08-21	\N
+12	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-08-21	\N
+13	18	1008	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	1000	2021-08-21	\N
+14	18	1014	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	1000	2021-08-21	\N
+10	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	2	\N	2021-08-21	2021-08-22
+15	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-08-22	\N
+16	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	2	1000	2021-08-23	2021-08-23
 \.
 
 
@@ -569,8 +573,16 @@ COPY public.tbl_bill_detail (bdetail_id, bdetail_bill_id, bdetail_product_id, bd
 8	9	4	2	15000	0	2021-08-21	\N
 11	11	2	1	15000	0	2021-08-21	\N
 12	11	4	2	15000	0	2021-08-21	\N
-9	10	2	3	15000	3	2021-08-21	2021-08-21
-10	10	4	2	15000	3	2021-08-21	2021-08-21
+13	12	40	1	4	0	2021-08-21	\N
+14	13	40	1	4	0	2021-08-21	\N
+15	13	38	2	2	0	2021-08-21	\N
+16	14	40	1	4	0	2021-08-21	\N
+17	14	38	2	2	0	2021-08-21	\N
+18	14	39	2	3	0	2021-08-21	\N
+9	10	2	3	15000	2	2021-08-21	2021-08-22
+10	10	4	2	15000	2	2021-08-21	2021-08-22
+19	15	40	1	4	0	2021-08-22	\N
+20	16	40	1	4	2	2021-08-23	2021-08-23
 \.
 
 
@@ -671,13 +683,13 @@ COPY public.tbl_districts (dis_id, dis_name, dis_city_id, dis_created_date, dis_
 COPY public.tbl_product (prod_id, prod_name, prod_category_id, prod_amount, prod_created_date, prod_updated_date, prod_price, prod_description, prod_status) FROM stdin;
 28	test	4	100	2021-08-17	2021-08-17	123	test test	1
 33	demohihi	49	100	2021-08-17	\N	123	12312	1
-38	2	58	100	2021-08-18	\N	2	2	1
-39	3	61	100	2021-08-18	\N	3	3	1
-40	44	8	100	2021-08-18	2021-08-18	4	4	1
 1000	orion	1	100	\N	\N	10000	ngon hơn	0
 5	Bánh bắp	1	100	\N	\N	11000	ngon gắp đôi	0
-2	Bánh quế	1	78	\N	2021-08-21	15000	ngon	0
-4	Bánh gạo	1	86	\N	2021-08-21	15000	ngon, giòn	0
+38	2	58	96	2021-08-18	2021-08-21	2	2	1
+39	3	61	98	2021-08-18	2021-08-21	3	3	1
+2	Bánh quế	1	81	\N	2021-08-22	15000	ngon	0
+4	Bánh gạo	1	88	\N	2021-08-22	15000	ngon, giòn	0
+40	44	8	96	2021-08-18	2021-08-23	4	4	1
 \.
 
 
@@ -733,14 +745,14 @@ SELECT pg_catalog.setval('public.tbl_account_id_seq', 40, true);
 -- Name: tbl_bill_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_bill_detail_id_seq', 12, true);
+SELECT pg_catalog.setval('public.tbl_bill_detail_id_seq', 20, true);
 
 
 --
 -- Name: tbl_bill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tbl_bill_id_seq', 11, true);
+SELECT pg_catalog.setval('public.tbl_bill_id_seq', 16, true);
 
 
 --

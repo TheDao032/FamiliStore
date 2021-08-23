@@ -1,6 +1,7 @@
 const knex = require('../utils/dbConnection')
 const imageService = require('../services/imageService')
 const imageValidator = require('../middlewares/validation/image.validate')
+
 const deleteProduct = async function (id) {
     //delete comment
 	await Promise.all([
@@ -34,8 +35,15 @@ const findByCateId = async (cateId) => {
 	return info
 }
 
+const findAll = async () => {
+	const info = await knex('tbl_product')
+
+	return info
+}
+
 module.exports = {
     deleteProduct,
 	findById,
-	findByCateId
+	findByCateId,
+	findAll
 }

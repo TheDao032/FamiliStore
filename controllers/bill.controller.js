@@ -74,7 +74,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 })
 
 
-router.get('/details',billValidation.billDetail, async (req, res) => {
+router.post('/details',billValidation.billDetail, async (req, res) => {
 	const { billId } = req.body
 
 	var resultProductBdetail = await knex.raw(`with billList as (	
@@ -564,7 +564,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			left join tbl_product product on product.prod_id = detail.bdetail_product_id
 			left join tbl_categories cat on cat.cate_id = product.prod_category_id
 		)
-		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id`)
+		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_id`)
 
 		var resultOne = await knex.raw(`with bill as (select * from tbl_bill
 			limit ${limit}
