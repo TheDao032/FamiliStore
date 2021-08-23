@@ -38,10 +38,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		numberPage = 1
 	}
 
-	for(let i = 0; i < result.length; i++){
-		result[i]['createAt'] = moment(result['createAt']).format('DD/MM/YYYY hh:mm:ss')
-		result[i]['updateAt'] = moment(result['updateAt']).format('DD/MM/YYYY hh:mm:ss')
-	}
+
 	
 	var returnedObject = {
 		numberOfComment: numberOfComment.rows[0].count,
