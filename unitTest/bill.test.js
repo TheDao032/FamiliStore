@@ -20,9 +20,8 @@ describe("POST /add", () => {
         const billListRespone = await request(server).post('/api/bill/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                accId: data.user.accId,
-                                                totalPrice: "50000",
-                                                totalQuantity: 4,
+                                                accAddress: '123 Nguyễn Văn Cừ, Phường 10, Quận 5, TPHCM',
+                                                priceShip: "1000",
                                                 listProduct: [
                                                     {
                                                         prodId: allProducts[0].prod_id,
@@ -35,7 +34,7 @@ describe("POST /add", () => {
     })
 })
 
-describe("GET /details", () => {
+describe("POST /details", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
             email: 'nthedao2705@gmail.com',
@@ -48,14 +47,17 @@ describe("GET /details", () => {
 
         const result = await billModel.findByAccId(data.user.accId)
         
-        const billListRespone = await request(server).get('/api/bill/details/' + result[0].bill_id)
+        const billListRespone = await request(server).post('/api/bill/details')
                                             .set('Authorization', data.accessToken)
+                                            .send({
+                                                billId: result[0].bill_id
+                                            })
 
         expect(billListRespone.statusCode).toBe(200)
     })
 })
 
-describe("GET /history-bill", () => {
+describe("POST /list", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
             email: 'nthedao2705@gmail.com',
@@ -66,8 +68,57 @@ describe("GET /history-bill", () => {
 
         const { data } = loginRespone.body
 
-        const billListRespone = await request(server).get('/api/bill/history-bill/' + data.user.accId)
-                                            .set('Authorization', data.accessToken) 
+        const billListRespone = await request(server).post('/api/bill/list')
+                                            .set('Authorization', data.accessToken)
+                                            .send({
+                                                page: 1,
+                                                limit: 2
+                                            })
+
+        expect(billListRespone.statusCode).toBe(200)
+    })
+})
+
+describe("POST /list/filter", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'nthedao2705@gmail.com',
+            passWord: '2705'
+        })
+
+        expect(loginRespone.statusCode).toBe(200)
+
+        const { data } = loginRespone.body
+
+        const billListRespone = await request(server).post('/api/bill/list/shipping')
+                                            .set('Authorization', data.accessToken)
+                                            .send({
+                                                page: 1,
+                                                limit: 2
+                                            })
+
+        expect(billListRespone.statusCode).toBe(200)
+    })
+})
+
+describe("POST /cancel-bill", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'nthedao2705@gmail.com',
+            passWord: '2705'
+        })
+
+        expect(loginRespone.statusCode).toBe(200)
+
+        const { data } = loginRespone.body
+
+		const allBills = await billModel.findAll()
+
+        const billListRespone = await request(server).post('/api/bill/cancel-bill')
+                                            .set('Authorization', data.accessToken)
+                                            .send({
+                                                billId: allBills[0].bill_id
+                                            })
 
         expect(billListRespone.statusCode).toBe(200)
     })
@@ -90,7 +141,7 @@ describe("POST /update-status", () => {
                                             .set('Authorization', data.accessToken)
                                             .send({
                                                 billId: allBills[0].bill_id,
-                                                status: "transported"
+                                                status: "shipping"
                                             })
 
         expect(billListRespone.statusCode).toBe(200)
