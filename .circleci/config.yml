@@ -16,6 +16,9 @@ jobs:
           name: Install Dependencies 
           command: |
             npm install -save
+    branches:
+      only:
+        - master
   test:
     docker:
       - image: circleci/node:16
@@ -26,18 +29,17 @@ jobs:
           name: Install Dependencies 
           command: |
             npm test
+    requires:
+      - build
             
 
 # Orchestrate our job run sequence
 workflows:
   build_and_test:
     jobs:
-      - build:
-          branches:
-            only:
-              - master
+      - build
       - test
+      - heroku/deploy-via-git:
           requires:
-            - build
-      - heroku/deploy-via-git
+            - test
       
