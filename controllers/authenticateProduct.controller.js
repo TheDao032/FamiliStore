@@ -76,7 +76,7 @@ router.post('/add', async (req, res) => {
 
 	if (prodPrice > 1000000000 || prodPrice < 1000) {
 		return res.status(400).json({
-			errorMessage: 'Product price is not valid, must be smaller than 1000000000 or greater than 0 !',
+			errorMessage: 'Product price is not valid, must be smaller than 1000000000 or greater than 1000 !',
 			statusCode: errorCode
 		})
 	}
@@ -207,7 +207,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	if (prodAmount != undefined) {
 		if (prodAmount > 10000 || prodAmount < 1) {
 			return res.status(400).json({
-				errorMessage: 'Ammount cannot greater than 10000 or smaller than 0 !',
+				errorMessage: 'Ammount cannot greater than 10000 or smaller than 1 !',
 				statusCode: errorCode
 			})
 		}
@@ -216,7 +216,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 	if (prodPrice != undefined) {
 		if (prodPrice > 1000000000 || prodPrice < 1000) {
 			return res.status(400).json({
-				errorMessage: 'Product price is not valid, cannot greater than 1000000000 or smaller than 0 !',
+				errorMessage: 'Product price is not valid, cannot greater than 1000000000 or smaller than 1000 !',
 				statusCode: errorCode
 			})
 		}
