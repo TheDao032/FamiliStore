@@ -9,12 +9,14 @@ const deliveriesController = require('../controllers/deliveryAddress.controller'
 const commentController = require('../controllers/comment.controller')
 const authenticateCategoriesController = require('../controllers/authenticateCategories.controller')
 const authenticateProductController = require('../controllers/authenticateProduct.controller')
+const cartController = require('../controllers/cart.controller')
 
 API.use('/account', accountController)
 API.use('/bill', billController)
 API.use('/ware-house', wareHouseController)
 API.use('/delivery', deliveriesController)
 API.use('/comment', commentController)
+API.use('/cart', cartController)
 API.use('/auth-categories', authenticateCategoriesController)
 API.use('/auth-product', authenticateProductController)
 

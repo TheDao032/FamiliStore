@@ -84,15 +84,16 @@ router.post('/add', validator.newComment, async (req, res) => {
 		})
 	}
 
-	await knex('tbl_comment').insert({
+	const returnInfo = await knex('tbl_comment').insert({
 		cmt_product_id: productID,
 		cmt_acc_id: accountID,
 		cmt_content: content,
 		cmt_vote: vote,
 		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss')
-	})
+	}).returning('cmt_id')
 
 	return res.status(200).json({
+		cmtId: returnInfo[0],
 		statusCode: successCode
 	})
 })

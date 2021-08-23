@@ -69,7 +69,7 @@ router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 
 	const accInfo = await accountModel.findById(id)
 
-	if (result.length === 0) {
+	if (accInfo.length === 0) {
 		return res.status(200).json({
 			account: [],
 			statusCode: errorCode
@@ -79,10 +79,10 @@ router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
 
 	const responseResult = {
-		accEmail: result[0].acc_email,
-		accFullName: result[0].acc_full_name,
-		accPhoneNumber: result[0].acc_phone_number,
-		accAvatar: result[0].acc_avatar,
+		accEmail: accInfo[0].acc_email,
+		accFullName: accInfo[0].acc_full_name,
+		accPhoneNumber: accInfo[0].acc_phone_number,
+		accAvatar: accInfo[0].acc_avatar,
 		deliveryAddress: deliveryAddress[0]
 	}
 

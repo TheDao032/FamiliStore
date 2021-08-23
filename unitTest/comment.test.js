@@ -3,6 +3,11 @@ const request = require('supertest');
 const server = require('../server')
 const knex = require('../utils/dbConnection')
 
+const productModel = require('../models/product.model')
+const commentModel = require('../models/comment.model')
+
+let staticComment
+
 describe("POST /list", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
@@ -13,11 +18,12 @@ describe("POST /list", () => {
         expect(loginRespone.statusCode).toBe(200)
 
         const { data } = loginRespone.body
+		const allProducts = await productModel.findAll()
 
         const categoryListRespone = await request(server).post('/api/comment/list')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                productID: 1000,
+                                                productID: allProducts[0].prod_id,
                                                 page: 1,
                                                 limit: 2
                                             })
@@ -36,16 +42,20 @@ describe("POST /add", () => {
         expect(loginRespone.statusCode).toBe(200)
 
         const { data } = loginRespone.body
+		const allProducts = await productModel.findAll()
+
+        const randomNumber = Math.floor(Math.random() * (0 + allProducts.length))
 
         const categoryListRespone = await request(server).post('/api/comment/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                productID: 1000,
-                                                accountID: 26,
-                                                content: '1999-',
+                                                productID: allProducts[randomNumber].prod_id,
+                                                accountID: data.user.accId,
+                                                content: 'test_content',
                                                 vote: 2
                                             })
-
+        const { cmtId } = categoryListRespone.body
+        staticComment = cmtId
         expect(categoryListRespone.statusCode).toBe(200)
     })
 })
@@ -61,13 +71,12 @@ describe("POST /update", () => {
 
         const { data } = loginRespone.body
 
-        const result = await knex('tbl_comment').where({cmt_content: '1999-'})
         const categoryListRespone = await request(server).post('/api/comment/update')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                commentID: result[0].cmt_id,
-                                                accountID: 26,
-                                                content: '1999-',
+                                                commentID: staticComment,
+                                                accountID: data.user.accId,
+                                                content: 'test_content',
                                                 vote: 3
                                             })
 
@@ -86,15 +95,12 @@ describe("POST /delete", () => {
 
         const { data } = loginRespone.body
 
-        const result = await knex('tbl_comment').where({cmt_content: '1999-'})
         const categoryListRespone = await request(server).post('/api/comment/delete')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                commentID: result[0].cmt_id,
-                                                accountID: 26
+                                                commentID: staticComment,
+                                                accountID: data.user.accId
                                             })
-
-        await knex('tbl_comment').where({cmt_content: '1999-'}).del()
 
         expect(categoryListRespone.statusCode).toBe(200)
     })

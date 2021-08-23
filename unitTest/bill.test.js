@@ -1,7 +1,9 @@
-const request = require('supertest');
+const request = require('supertest')
 
 const server = require('../server')
 const knex = require('../utils/dbConnection')
+const productModel = require('../models/product.model')
+const billModel = require('../models/bill.model')
 
 describe("POST /add", () => {
     test("Respone With A 200 Status Code", async () => {
@@ -13,16 +15,17 @@ describe("POST /add", () => {
         expect(loginRespone.statusCode).toBe(200)
 
         const { data } = loginRespone.body
+		const allProducts = await productModel.findAll()
 
         const billListRespone = await request(server).post('/api/bill/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                accId: 26,
+                                                accId: data.user.accId,
                                                 totalPrice: "50000",
                                                 totalQuantity: 4,
                                                 listProduct: [
                                                     {
-                                                        prodId: 1000,
+                                                        prodId: allProducts[0].prod_id,
                                                         prodQuantity: 2
                                                     }
                                                 ]
@@ -43,7 +46,7 @@ describe("GET /details", () => {
 
         const { data } = loginRespone.body
 
-        const result = await knex('tbl_bill').where({ bill_account_id: 26 })
+        const result = await billModel.findByAccId(data.user.accId)
         
         const billListRespone = await request(server).get('/api/bill/details/' + result[0].bill_id)
                                             .set('Authorization', data.accessToken)
@@ -63,12 +66,8 @@ describe("GET /history-bill", () => {
 
         const { data } = loginRespone.body
 
-        const result = await knex('tbl_bill').where({ bill_account_id: 26 })
-        const billListRespone = await request(server).get('/api/bill/history-bill/' + 26)
+        const billListRespone = await request(server).get('/api/bill/history-bill/' + data.user.accId)
                                             .set('Authorization', data.accessToken) 
-
-        await knex('tbl_bill_detail').where({ bdetail_bill_id: result[0].bill_id }).del()
-        await knex('tbl_bill').where({ bill_id: result[0].bill_id }).del()
 
         expect(billListRespone.statusCode).toBe(200)
     })
@@ -85,10 +84,12 @@ describe("POST /update-status", () => {
 
         const { data } = loginRespone.body
 
+		const allBills = await billModel.findAll()
+
         const billListRespone = await request(server).post('/api/bill/update-status')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                billId: 1000,
+                                                billId: allBills[0].bill_id,
                                                 status: "transported"
                                             })
 
