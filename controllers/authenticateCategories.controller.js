@@ -10,6 +10,72 @@ const productModel = require('../models/product.model')
 const errorCode = 1
 const successCode = 0
 
+router.post('/add-father', categoriesValidation.newCategoryFather, async (req, res) => {
+	const { cateName } = req.body
+
+	const allCategories = await categoriesModel.findAll()
+
+	const checkExist = allCategories.find((item) => item.cate_name.toLowerCase() === cateName.toLowerCase())
+
+	if (checkExist) {
+		return res.status(400).json({
+			errorMessage: 'Category Name Has Already Existed',
+			statusCode: errorCode
+		})
+	}
+
+	const presentDate = new Date()
+	const newFatherCate = {
+		cate_name: cateName,
+		cate_created_date: presentDate,
+		cate_updated_date: presentDate
+	}
+
+	await knex('tbl_categories').insert(newFatherCate)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res) => {
+	const { cateName, cateFather } = req.body
+
+	const allCategories = await categoriesModel.findAll()
+
+	const checkExist = allCategories.find((item) => item.cate_name.toLowerCase() === cateName.toLowerCase())
+
+	if (checkExist) {
+		return res.status(400).json({
+			errorMessage: 'Category Name Has Already Existed',
+			statusCode: errorCode
+		})
+	}
+
+	const categoriyFatherInfo = categoriesModel.findById(cateFather)
+
+	if (categoriyFatherInfo.length === 0) {
+		return res.status(400).json({
+			errorMessage: 'category Is Not Existed',
+			statusCode: errorCode
+		})
+	}
+
+	const presentDate = new Date()
+	const newFatherCate = {
+		cate_name: cateName,
+		cate_father: cateFather,
+		cate_created_date: presentDate,
+		cate_updated_date: presentDate
+	}
+
+	await knex('tbl_categories').insert(newFatherCate)
+	
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
 router.post('/update', categoriesValidation.updateCategory, async (req, res) => {
 	const { cateId, cateName, cateFather } = req.body
 

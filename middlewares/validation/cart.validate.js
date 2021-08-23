@@ -30,7 +30,7 @@ const addCart = (req, res, next) => {
 	next()
 }
 
-const updatecartamount = (req, res, next) => {
+const updateCartAmount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
@@ -125,7 +125,6 @@ const deleteCart = (req, res, next) => {
 module.exports = {
     addCart,
 	updateCartAmount,
-	checkAmount,
 	checkPrice,
 	deleteCart
 }

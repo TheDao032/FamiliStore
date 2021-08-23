@@ -17,7 +17,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		})
 	}
 
-	result = await knex.select('tbl_comment.cmt_id as review_id', 'tbl_comment.cmt_content as content', 'tbl_comment.cmt_vote as star', 'tbl_comment.cmt_acc_id as user_id', 'tbl_account.acc_email as user_name', 'tbl_account.acc_avatar as user_avatar', 'tbl_comment.cmt_create_date as createdAt').from('tbl_comment')
+	var result = await knex.select('tbl_comment.cmt_id as review_id', 'tbl_comment.cmt_content as content', 'tbl_comment.cmt_vote as star', 'tbl_comment.cmt_acc_id as user_id', 'tbl_account.acc_email as user_name', 'tbl_account.acc_avatar as user_avatar', 'tbl_comment.cmt_create_date as createdAt', 'tbl_comment.cmt_update_date as updatedAt').from('tbl_comment')
 		.join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
 		.where('tbl_comment.cmt_product_id', productID)
 		.limit(limit)
@@ -37,6 +37,12 @@ router.post('/list', validator.listComment, async (req, res) => {
 	else {
 		numberPage = 1
 	}
+
+	for(let i = 0; i < result.length; i++){
+		result[i]['createAt'] = moment(result['createAt']).format('DD/MM/YYYY hh:mm:ss')
+		result[i]['updateAt'] = moment(result['updateAt']).format('DD/MM/YYYY hh:mm:ss')
+	}
+	
 	var returnedObject = {
 		numberOfComment: numberOfComment.rows[0].count,
 		numberOfPage : numberPage,
@@ -49,7 +55,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		commentList: result
 	}
 
-
+ 
 
 	if (result) {
 		return res.status(200).json({
@@ -85,7 +91,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 		})
 	}
 
-	await knex('tbl_comment').insert({
+	const returnInfo = await knex('tbl_comment').insert({
 		cmt_product_id: productID,
 		cmt_acc_id: req.account.accId,
 		cmt_content: content,
@@ -95,6 +101,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 	})
 
 	return res.status(200).json({
+		cmtId: returnInfo[0],
 		statusCode: successCode
 	})
 })
