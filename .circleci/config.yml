@@ -3,7 +3,7 @@ version: 2.1
 
 orbs:
   heroku: circleci/heroku@0.0.10
-
+  node: circleci/node@4.7.0
 # Define the jobs we want to run for this project
 jobs:
   build:
@@ -22,6 +22,9 @@ jobs:
  
     steps:
       - checkout
+      - node/install-packages:
+         cache-path: ~/project/node_modules
+         override-ci-command: npm i
       - run:
           name: Install Dependencies 
           command: |
