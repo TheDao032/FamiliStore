@@ -50,12 +50,12 @@ describe("POST /add", () => {
                                             .set('Authorization', data.accessToken)
                                             .send({
                                                 productID: allProducts[randomNumber].prod_id,
-                                                accountID: data.user.accId,
                                                 content: 'test_content',
                                                 vote: 2
                                             })
         const { cmtId } = categoryListRespone.body
         staticComment = cmtId
+
         expect(categoryListRespone.statusCode).toBe(200)
     })
 })
@@ -75,7 +75,6 @@ describe("POST /update", () => {
                                             .set('Authorization', data.accessToken)
                                             .send({
                                                 commentID: staticComment,
-                                                accountID: data.user.accId,
                                                 content: 'test_content',
                                                 vote: 3
                                             })
@@ -94,12 +93,11 @@ describe("POST /delete", () => {
         expect(loginRespone.statusCode).toBe(200)
 
         const { data } = loginRespone.body
-
+        
         const categoryListRespone = await request(server).post('/api/comment/delete')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                commentID: staticComment,
-                                                accountID: data.user.accId
+                                                commentID: staticComment
                                             })
 
         expect(categoryListRespone.statusCode).toBe(200)

@@ -17,7 +17,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		})
 	}
 
-	result = await knex.select('tbl_comment.cmt_id as review_id', 'tbl_comment.cmt_content as content', 'tbl_comment.cmt_vote as star', 'tbl_comment.cmt_acc_id as user_id', 'tbl_account.acc_email as user_name', 'tbl_account.acc_avatar as user_avatar', 'tbl_comment.cmt_create_date as createdAt').from('tbl_comment')
+	var result = await knex.select('tbl_comment.cmt_id as review_id', 'tbl_comment.cmt_content as content', 'tbl_comment.cmt_vote as star', 'tbl_comment.cmt_acc_id as user_id', 'tbl_account.acc_email as user_name', 'tbl_account.acc_avatar as user_avatar', 'tbl_comment.cmt_create_date as createdAt', 'tbl_comment.cmt_update_date as updatedAt').from('tbl_comment')
 		.join('tbl_account', 'tbl_account.acc_id', '=', 'tbl_comment.cmt_acc_id')
 		.where('tbl_comment.cmt_product_id', productID)
 		.limit(limit)
@@ -29,8 +29,20 @@ router.post('/list', validator.listComment, async (req, res) => {
 	var numberThreeStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 3`)
 	var numberFourStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 4`)
 	var numberFiveStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 5`)
+	var numberOfComment = await knex.raw(`select count(cmt_id) from tbl_comment where cmt_product_id = ${productID}`)
+	var numberPage = Number(numberOfComment.rows[0].count)
+	if (numberPage > limit) {
+		numberPage = Math.ceil(numberPage / limit)
+	}
+	else {
+		numberPage = 1
+	}
 
+
+	
 	var returnedObject = {
+		numberOfComment: numberOfComment.rows[0].count,
+		numberOfPage : numberPage,
 		avgStar: avgStar.rows[0].round,
 		numberOneStar: numberOneStar.rows[0].count,
 		numberTwoStars: numberTwoStars.rows[0].count,
@@ -40,7 +52,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		commentList: result
 	}
 
-
+ 
 
 	if (result) {
 		return res.status(200).json({
@@ -57,16 +69,8 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 
 router.post('/add', validator.newComment, async (req, res) => {
-	const { productID, accountID, content, vote } = req.body
-	var acc = await knex('tbl_account').where('acc_id', accountID)
+	const { productID, content, vote } = req.body
 	var prod = await knex('tbl_product').where('prod_id', productID)
-
-	if (acc.length === 0) {
-		return res.status(400).json({
-			errorMessage: "account doesn't exist",
-			statusCode: errorCode
-		})
-	}
 
 	if (prod.length === 0) {
 		return res.status(400).json({
@@ -75,7 +79,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 		})
 	}
 
-	
+
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
 		return res.status(400).json({
@@ -86,28 +90,39 @@ router.post('/add', validator.newComment, async (req, res) => {
 
 	const returnInfo = await knex('tbl_comment').insert({
 		cmt_product_id: productID,
-		cmt_acc_id: accountID,
+		cmt_acc_id: req.account.accId,
 		cmt_content: content,
 		cmt_vote: vote,
-		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss')
-	}).returning('cmt_id')
-
+		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+		cmt_update_date: moment().format('YYYY-MM-DD HH:mm:ss')
+	}).returning('*')
 	return res.status(200).json({
-		cmtId: returnInfo[0],
+		cmtId: returnInfo[0].cmt_id,
 		statusCode: successCode
 	})
 })
 
 router.post('/update', validator.updateComment, async (req, res) => {
-	const { commentID, accountID, content, vote } = req.body
-	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
+	const { commentID, content, vote } = req.body
+	var comment = await knex('tbl_comment').where('cmt_id', commentID)
 
 	if (comment.length === 0) {
 		return res.status(400).json({
-			errorMessage: "user cannot edit comment of another user or comment doesn't exist",
+			errorMessage: "Comment does not exists",
 			statusCode: errorCode
 		})
 	}
+	console.log(req.account)
+	if (req.account.accRole !== 'ADM') {
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.accId)
+		if (comment.length === 0) {
+			return res.status(400).json({
+				errorMessage: "User cannot edit comment of another user",
+				statusCode: errorCode
+			})
+		}
+	}
+
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
 		return res.status(400).json({
@@ -138,14 +153,24 @@ router.post('/update', validator.updateComment, async (req, res) => {
 })
 
 router.post('/delete', validator.deleteComment, async (req, res) => {
-	const { commentID, accountID } = req.body
+	const { commentID } = req.body
+	var comment = await knex('tbl_comment').where('cmt_id', commentID)
 
-	var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', accountID)
 	if (comment.length === 0) {
 		return res.status(400).json({
-			errorMessage: "user cannot delete comment of another user",
+			errorMessage: "Comment does not exists",
 			statusCode: errorCode
 		})
+	}
+
+	if (req.account.accRole !== 'ADM') {
+		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.accId)
+		if (comment.length === 0) {
+			return res.status(400).json({
+				errorMessage: "User cannot delete comment of another user",
+				statusCode: errorCode
+			})
+		}
 	}
 	await knex('tbl_comment').where('cmt_id', commentID).del()
 

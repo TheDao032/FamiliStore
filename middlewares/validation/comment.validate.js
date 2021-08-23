@@ -36,11 +36,10 @@ const newComment = (req, res, next) => {
 		type: 'object',
 		properties: {
 			productID: { type: 'integer' },
-			accountID: { type: 'integer' },
 			content: { type: 'string', pattern: '' ,  maxLength: 200},
 			vote: { type: 'integer' }
 		},
-		required: ['productID', 'accountID', 'content', 'vote'],
+		required: ['productID', 'content', 'vote'],
 		additionalProperties: true
 	}
 
@@ -65,11 +64,10 @@ const updateComment  = (req, res, next) => {
 		type: 'object',
 		properties: {
 			commentID: { type: 'integer' },
-			accountID: { type: 'integer' },
 			content: { type: 'string', pattern: '',  maxLength: 200},
 			vote: { type: 'integer' }
 		},
-		required: ['commentID', 'accountID'],
+		required: ['commentID'],
 		additionalProperties: true
 	}
 
@@ -94,10 +92,9 @@ const deleteComment  = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			commentID: { type: 'integer' },
-			accountID: { type: 'integer' }
+			commentID: { type: 'integer' }
 		},
-		required: ['commentID', 'accountID'],
+		required: ['commentID'],
 		additionalProperties: true
 	}
 
