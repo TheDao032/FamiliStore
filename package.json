@@ -24,7 +24,7 @@
     "randomstring": "^1.2.1",
     "simple-oauth2": "^4.2.0",
     "streamifier": "^0.1.1",
-    "supertest": "^6.1.5"
+    "supertest": "^6.1.6"
   },
   "name": "20424010",
   "description": "path: ./environments/environment.js # Start Server \tcommand line: node app.js",
@@ -38,5 +38,6 @@
     "transform": {}
   },
   "author": "Nguyen The Dao 20424010",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {}
 }
