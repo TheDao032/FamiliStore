@@ -6,7 +6,7 @@ orbs:
 
 # Define the jobs we want to run for this project
 jobs:
-  build:
+  build_test:
     docker:
       - image: circleci/node:16
  
@@ -15,35 +15,21 @@ jobs:
       - run:
           name: Install Dependencies 
           command: |
-            npm install -save
-  test:
-    docker:
-      - image: circleci/node:16
- 
-    steps:
-      - checkout
-      - run:
-          name: Install Dependencies 
-          command: |
-            npm test
+            npm install --save && npm test
             
-
 # Orchestrate our job run sequence
 workflows:
   build_and_test:
     jobs:
-      - build:
+      - build_test:
           filters:
             branches:
               only:
                 - master
-      - test:
-          requires:
-            - build
       - heroku/deploy-via-git:
           filters:
               branches:
                 only:
                   - master
           requires:
-            - test
+            - build_test

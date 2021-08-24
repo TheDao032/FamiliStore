@@ -5,6 +5,7 @@ const server = require('../server')
 const knex = require('../utils/dbConnection')
 
 const categoriesModel = require('../models/categories.model')
+const productModel = require('../models/product.model')
 
 describe("GET /list", () => {
     test("Respone With A 200 Status Code", async () => {
@@ -159,6 +160,12 @@ describe("POST /delete", () => {
                                             .send({
                                                 cateId: allCategories[0].cate_id
                                             })
+
+        const productWithCate = await productModel.findByCateId(allCategories[0].cate_id)
+
+        if (productWithCate.length !== 0) {
+            expect(categoryListRespone.statusCode).toBe(400)
+        }
         
         expect(categoryListRespone.statusCode).toBe(200)
     })
