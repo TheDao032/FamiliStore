@@ -133,7 +133,7 @@ CREATE TABLE public.tbl_bill (
     bill_id integer DEFAULT nextval('public.tbl_bill_id_seq'::regclass) NOT NULL,
     bill_account_id integer,
     bill_total_price character varying(100),
-    bill_address character varying(100),
+    bill_address character varying(150),
     bill_total_quantity integer,
     bill_status integer DEFAULT 0,
     bill_price_ship character varying(100),
