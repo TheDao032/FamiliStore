@@ -499,10 +499,10 @@ CREATE TABLE public.tbl_ware_house (
 );
 
 
-ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
+ALTER TABLE public.tbl_ware_house OWNER TO ugzmwzwyynriwv;
 
 --
--- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: pnnyoamvocwgoi
+-- Name: tbl_ware_house_id_seq; Type: SEQUENCE; Schema: public; Owner: ugzmwzwyynriwv
 --
 
 CREATE SEQUENCE public.tbl_cart_id_seq
@@ -513,10 +513,10 @@ CREATE SEQUENCE public.tbl_cart_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.tbl_cart_id_seq OWNER TO pnnyoamvocwgoi;
+ALTER TABLE public.tbl_cart_id_seq OWNER TO ugzmwzwyynriwv;
 
 --
--- Name: tbl_cart; Type: TABLE; Schema: public; Owner: pnnyoamvocwgoi
+-- Name: tbl_cart; Type: TABLE; Schema: public; Owner: ugzmwzwyynriwv
 --
 
 CREATE TABLE public.tbl_cart (
@@ -530,7 +530,7 @@ CREATE TABLE public.tbl_cart (
 );
 
 
-ALTER TABLE public.tbl_ware_house OWNER TO pnnyoamvocwgoi;
+ALTER TABLE public.tbl_ware_house OWNER TO ugzmwzwyynriwv;
 
 --
 -- Data for Name: tbl_account; Type: TABLE DATA; Schema: public; Owner: ugzmwzwyynriwv
@@ -621,7 +621,7 @@ COPY public.tbl_bill_detail (bdetail_id, bdetail_bill_id, bdetail_product_id, bd
 -- Data for Name: tbl_cart; Type: TABLE DATA; Schema: public; Owner: ugzmwzwyynriwv
 --
 
-COPY public.tbl_cart (cart_id, cart_acc_id, cart_prod_id, cart_amount, cart_total_price, card_status, cart_created_date, cart_updated_date) FROM stdin;
+COPY public.tbl_cart (cart_id, cart_acc_id, cart_prod_id, cart_amount, cart_total_price, cart_status, cart_created_date, cart_updated_date) FROM stdin;
 \.
 
 
