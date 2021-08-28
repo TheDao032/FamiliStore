@@ -164,7 +164,7 @@ router.post('/check-price', cartValidation.checkPrice, async (req, res) => {
 	const { listProduct } = req.body
 
 	const allProduct = await productModel.findAll()
-
+	
 	let totalPrice = 0
 
 	const result = await Promise.all([
@@ -185,7 +185,7 @@ router.post('/check-price', cartValidation.checkPrice, async (req, res) => {
 	result[0].forEach((item) => {
 		totalPrice = totalPrice + item.price
 	})
-
+	
 	return res.status(200).json({
 		totalPrice,
 		statusCode: successCode

@@ -31,6 +31,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 	var numberFiveStars = await knex.raw(`select count(cmt_vote) from tbl_comment where cmt_product_id = ${productID} and cmt_vote = 5`)
 	var numberOfComment = await knex.raw(`select count(cmt_id) from tbl_comment where cmt_product_id = ${productID}`)
 	var numberPage = Number(numberOfComment.rows[0].count)
+	var numberOfUserComment = await knex.raw(`select count(distinct cmt_acc_id) from tbl_comment where cmt_product_id = ${productID} `)
 	if (numberPage > limit) {
 		numberPage = Math.ceil(numberPage / limit)
 	}
@@ -39,10 +40,11 @@ router.post('/list', validator.listComment, async (req, res) => {
 	}
 
 
-	
+
 	var returnedObject = {
+		numberOfUserComment : numberOfUserComment.rows[0].count,
 		numberOfComment: numberOfComment.rows[0].count,
-		numberOfPage : numberPage,
+		numberOfPage: numberPage,
 		avgStar: avgStar.rows[0].round,
 		numberOneStar: numberOneStar.rows[0].count,
 		numberTwoStars: numberTwoStars.rows[0].count,
@@ -52,7 +54,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 		commentList: result
 	}
 
- 
+
 
 	if (result) {
 		return res.status(200).json({
