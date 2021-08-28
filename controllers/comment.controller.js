@@ -9,7 +9,6 @@ const errorCode = 1
 router.post('/list', validator.listComment, async (req, res) => {
 	const { productID, page, limit } = req.body;
 
-
 	if (page < 1 || limit < 1 || limit > 10) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
