@@ -5,6 +5,7 @@ const knex = require('../utils/dbConnection')
 const accountValidation = require('../middlewares/validation/account.validate')
 
 const accountModel = require('../models/account.model')
+const productImageModel = require('../models/productImage.model')
 const productModel = require('../models/product.model')
 const cartModel = require('../models/cart.model')
 
@@ -25,6 +26,7 @@ router.get('/list', async (req, res) => {
 		})
 	}
 	const listProduct = await productModel.findAll()
+	const listProductImages = await productImageModel.findAll()
 
 	let totalPrice = 0
 	let totalAmount = 0
@@ -32,14 +34,18 @@ router.get('/list', async (req, res) => {
 	const result = await Promise.all([
 		listCart.map((item) => {
 			const productInfo = listProduct.find((info) => info.prod_id === item.cart_prod_id)
+			const productImage = listProductImages.find((info) => info.prod_img_product_id === item.cart_prod_id)
 
 			if (productInfo) {
 				totalPrice = totalPrice + item.cart_amount * parseInt(productInfo.prod_price)
 				totalAmount = totalAmount + item.cart_amount
 				return {
 					prodId: productInfo.prod_id,
-					cartAmount: item.cart_amount,
-					cartPrice: productInfo.prod_price
+					prodName: productInfo.prod_name,
+					prodPrice: productInfo.prod_price,
+					prodImage: productImage.prod_img_data,
+					totalPrice: item.cart_amount * parseInt(productInfo.prod_price),
+					cartAmount: item.cart_amount
 				}
 			}
 
