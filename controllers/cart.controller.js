@@ -96,8 +96,20 @@ router.get('/list', async (req, res) => {
 })
 
 router.post('/add', cartValidation.addCart, async (req, res) => {
-    const { prodId } = req.body
+    const { prodId, cartAmount } = req.body
 	const { accId } = req.account
+
+	let checkCartAmount = false
+	if (cartAmount) {
+		if (cartAmount > 0) {
+			checkCartAmount = true
+		} else {
+			return res.status(400).json({
+				errorMessage: `Product's Amount Must Be Bigger Than 0`,
+				statusCode: errorCode
+			})
+		}
+	}
 
 	const productInfo = await productModel.findById(prodId)
 
@@ -117,7 +129,7 @@ router.post('/add', cartValidation.addCart, async (req, res) => {
 		const newCart = {
 			cart_acc_id: accId,
 			cart_prod_id: prodId,
-			cart_amount: 1,
+			cart_amount: checkCartAmount ? cartAmount : 1,
 			cart_status: 1,
 			cart_updated_date: presentDate
 		}

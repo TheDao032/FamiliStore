@@ -6,7 +6,8 @@ const addCart = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		prodId: { type: 'integer' }
+    		prodId: { type: 'integer' },
+			cartAmount: { type: 'integer' }
   		},
 		required: ['prodId'],
 		additionalProperties: true
@@ -66,7 +67,7 @@ const checkPrice = (req, res, next) => {
 					type: 'object',
   					properties: {
 						prodId: { type: 'integer' },
-						cardAmount: { type: 'integer' }
+						cartAmount: { type: 'integer' }
   					},
 					required: ['prodId'],
 					additionalProperties: true
