@@ -50,7 +50,8 @@ describe("POST /add", () => {
         const cartRespone = await request(server).post('/api/cart/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                prodId: allProducts[randomNumber].prod_id
+                                                prodId: allProducts[randomNumber].prod_id,
+                                                cartAmount: 1
                                             })
 
 
