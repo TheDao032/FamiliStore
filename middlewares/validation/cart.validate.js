@@ -9,7 +9,7 @@ const addCart = (req, res, next) => {
     		prodId: { type: 'integer' },
 			cartAmount: { type: 'integer' }
   		},
-		required: ['prodId'],
+		required: ['prodId', 'cartAmount'],
 		additionalProperties: true
 	}
 

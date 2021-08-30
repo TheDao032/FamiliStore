@@ -40,10 +40,11 @@ router.get('/list', async (req, res) => {
 				totalPrice = totalPrice + item.cart_amount * parseInt(productInfo.prod_price)
 				totalAmount = totalAmount + item.cart_amount
 				return {
+					cartId: item.cart_id,
 					prodId: productInfo.prod_id,
 					prodName: productInfo.prod_name,
 					prodPrice: productInfo.prod_price,
-					prodImage: productImage.prod_img_data,
+					prodImage: productImage ? productImage.prod_img_data : '',
 					totalPrice: item.cart_amount * parseInt(productInfo.prod_price),
 					cartAmount: item.cart_amount
 				}
@@ -99,16 +100,11 @@ router.post('/add', cartValidation.addCart, async (req, res) => {
     const { prodId, cartAmount } = req.body
 	const { accId } = req.account
 
-	let checkCartAmount = false
-	if (cartAmount) {
-		if (cartAmount > 0) {
-			checkCartAmount = true
-		} else {
-			return res.status(400).json({
-				errorMessage: `Product's Amount Must Be Bigger Than 0`,
-				statusCode: errorCode
-			})
-		}
+	if (cartAmount < 1) {
+		return res.status(400).json({
+			errorMessage: `Product's Amount Must Be Bigger Than 0`,
+			statusCode: errorCode
+		})
 	}
 
 	const productInfo = await productModel.findById(prodId)
@@ -124,12 +120,10 @@ router.post('/add', cartValidation.addCart, async (req, res) => {
 	const presentDate = new Date()
 
 	if (checkExist.length === 0) {
-
-
 		const newCart = {
 			cart_acc_id: accId,
 			cart_prod_id: prodId,
-			cart_amount: checkCartAmount ? cartAmount : 1,
+			cart_amount: cartAmount,
 			cart_status: 1,
 			cart_updated_date: presentDate
 		}
@@ -143,7 +137,7 @@ router.post('/add', cartValidation.addCart, async (req, res) => {
 	}
 
 	const updateCart = {
-		cart_amount: checkExist[0].cart_amount + 1,
+		cart_amount: checkExist[0].cart_amount + cartAmount,
 		cart_updated_date: presentDate
 	}
 
