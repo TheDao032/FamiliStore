@@ -156,7 +156,23 @@ router.post('/update-amount', cartValidation.updateCartAmount, async (req, res) 
 
 	if (checkExist.length === 0) {
 		return res.status(400).json({
-			errorMessage: 'This Product In Your Cart Is Invalid'
+			errorMessage: 'This Product In Your Cart Is Invalid',
+			statusCode: errorCode
+		})
+	}
+
+	if (cartAmount < 0) {
+		return res.status(400).json({
+			errorMessage: `Product's Amount Can't Be Negative`,
+			statusCode: errorCode
+		})
+	}
+
+	if (cartAmount === 0) {
+		await knex('tbl_cart').where({ cart_id: cartId }).del()
+
+		return res.status(200).json({
+			statusCode: successCode
 		})
 	}
 
