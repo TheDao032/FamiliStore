@@ -59,7 +59,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
-	const resultBill = await knex.raw(`select max(bill_id) from tbl_bill where bill_account_id = ${req.account['accId']} and bill_created_date = current_date`)
+	const resultBill = await knex.raw(`select max(bill_id) from tbl_bill where bill_account_id = ${req.account['accId']} and bill_created_date like '${present.toString()}'`)
 	
 	const resultProductBdetail = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')

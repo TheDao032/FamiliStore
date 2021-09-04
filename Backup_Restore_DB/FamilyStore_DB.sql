@@ -137,8 +137,8 @@ CREATE TABLE public.tbl_bill (
     bill_total_quantity integer,
     bill_status integer DEFAULT 0,
     bill_price_ship character varying(100),
-    bill_created_date date,
-    bill_updated_date date
+    bill_created_date character varying(100),
+    bill_updated_date character varying(100)
 );
 
 
