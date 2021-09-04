@@ -30,7 +30,7 @@ router.post('/login', authenticationValidate.login, (req, res) => {
 		}
 
 		const accessToken = jsonWebToken.sign(auth, environment.secret, {
-			expiresIn: '1h',
+			expiresIn: '24h',
 			algorithm: 'HS256'
 		})
 
