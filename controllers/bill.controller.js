@@ -45,6 +45,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 	
+	//time current
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 	var listObjectToJson = JSON.stringify(listProduct)
 
