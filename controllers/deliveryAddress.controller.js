@@ -13,7 +13,7 @@ router.get('/list-cities', async (req, res) => {
 
 	if (result) {
 		return res.status(200).json({
-			listcities: result[0],
+			listcities: result,
 			statuscode: successCode
 		})
 	}
