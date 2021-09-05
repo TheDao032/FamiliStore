@@ -153,7 +153,7 @@ describe("POST /delete", () => {
             email: 'nthedao2705@gmail.com',
             passWord: '2705'
         })
-
+       
         expect(loginRespone.statusCode).toBe(200)
 
         const { data } = loginRespone.body
@@ -166,3 +166,4 @@ describe("POST /delete", () => {
         expect(productListRespone.statusCode).toBe(200) 
     })
 })
+
