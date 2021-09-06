@@ -22,6 +22,8 @@ describe("POST /add", () => {
                                             .send({
                                                 accAddress: '123 Nguyễn Văn Cừ, Phường 10, Quận 5, TPHCM',
                                                 priceShip: "1000",
+                                                receiverName: "Lê Thanh Tí",
+                                                receiverPhone: "0142563454",
                                                 listProduct: [
                                                     {
                                                         prodId: allProducts[0].prod_id,

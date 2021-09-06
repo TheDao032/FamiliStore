@@ -20,7 +20,7 @@ SET row_security = off;
 -- Name: proc_update_product_insert_bill_detail(json, integer, character varying, character varying, character varying, integer, timestamp without time zone, integer, text); Type: PROCEDURE; Schema: public; Owner: ugzmwzwyynriwv
 --
 
-CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, priceship character varying, totalquantity integer, timecurrent timestamp without time zone, INOUT resultcode integer, INOUT message text)
+CREATE PROCEDURE public.proc_update_product_insert_bill_detail(listproduct json, accid integer, accaddress character varying, totalprice character varying, priceship character varying, totalquantity integer, timecurrent timestamp without time zone, receiverName character varying, receiverPhone character varying, receiverNote character varying, INOUT resultcode integer, INOUT message text)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -33,9 +33,12 @@ DECLARE
 				bill_total_quantity,
 				bill_address,
 				bill_price_ship,
+				bill_name_receiver,
+				bill_phone_receiver,
+				bill_note_receiver,
 				bill_created_date
 			)
-			values(accId, totalPrice, totalQuantity, accAddress, priceShip,timeCurrent);
+			values(accId, totalPrice, totalQuantity, accAddress, priceShip, receiverName, receiverPhone, receiverNote,timeCurrent);
 			select max(bill_id) as maxId into temp from tbl_bill where bill_account_id = accId;
 			
 			update tbl_product
@@ -138,7 +141,10 @@ CREATE TABLE public.tbl_bill (
     bill_status integer DEFAULT 0,
     bill_price_ship character varying(100),
     bill_created_date character varying(100),
-    bill_updated_date character varying(100)
+    bill_updated_date character varying(100),
+    bill_name_receiver character varying(100),
+    bill_phone_receiver character varying(15),
+    bill_note_receiver character varying(1500)
 );
 
 
@@ -583,15 +589,15 @@ COPY public.tbl_account (acc_id, acc_password, acc_token, acc_email, acc_phone_n
 -- Data for Name: tbl_bill; Type: TABLE DATA; Schema: public; Owner: ugzmwzwyynriwv
 --
 
-COPY public.tbl_bill (bill_id, bill_account_id, bill_total_price, bill_address, bill_total_quantity, bill_status, bill_price_ship, bill_created_date, bill_updated_date) FROM stdin;
-9	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	\N	2021-08-21	\N
-11	18	46000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	\N	2021-08-21	\N
-12	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-08-21	\N
-13	18	1008	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	1000	2021-08-21	\N
-14	18	1014	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	1000	2021-08-21	\N
-10	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	2	\N	2021-08-21	2021-08-22
-15	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-08-22	\N
-16	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	2	1000	2021-08-23	2021-08-23
+COPY public.tbl_bill (bill_id, bill_account_id, bill_total_price, bill_address, bill_total_quantity, bill_status, bill_price_ship, bill_created_date, bill_updated_date, bill_name_receiver, bill_phone_receiver,bill_note_receiver) FROM stdin;
+9	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	\N	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+11	18	46000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	\N	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+12	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+13	18	1008	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	3	0	1000	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+14	18	1014	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	1000	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+10	18	76000	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	5	0	\N	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+15	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
+16	18	1004	123 Nguyên Văn Cừ, Phường 10, Quận 5, TP.HCM	1	0	1000	2021-09-06 11:22:00	\N	Lê Thanh Tí	01425634563	
 \.
 
 

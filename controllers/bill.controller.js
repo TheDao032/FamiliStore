@@ -14,14 +14,25 @@ const successCode = 0
 
 
 router.post('/add', billValidation.newBill, async (req, res) => {
-	const { accAddress, priceShip, listProduct } = req.body	
+	const { accAddress, priceShip, receiverName, receiverPhone, receiverNote, listProduct } = req.body
+	let receiverNoteCheck = receiverNote !== undefined? receiverNote: ''
 
 	let regexPattern = /^\d+$/
 	let resultInteger = regexPattern.test(priceShip);
 	
 	if (!resultInteger) {
 		return res.status(400).json({
-			errorMessage: 'Total price must be integer !',
+			errorMessage: 'Price ship must be integer !',
+			statusCode: errorCode
+		})
+	}
+
+	regexPattern = /^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/
+	let resultPhone = regexPattern.test(receiverPhone);
+
+	if (!resultPhone) {
+		return res.status(400).json({
+			errorMessage: 'ReceiverPhone must be a phone number !',
 			statusCode: errorCode
 		})
 	}
@@ -49,9 +60,9 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 	var listObjectToJson = JSON.stringify(listProduct)
 
-	//const dd = '[{"prodId": 1, "prod": "a"}, {"prodId": 2, "prod": "b"}]'
-	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?,?,?)',
-									[listObjectToJson, req.account['accId'], accAddress, resultCheck['totalPrice'].toString(), priceShip,resultCheck['totalQuantity'],present,0, ''])
+	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?,?,?,?,?,?)',
+									[listObjectToJson, req.account['accId'], accAddress, resultCheck['totalPrice'].toString(), priceShip, 
+									resultCheck['totalQuantity'],present, receiverName, receiverPhone, receiverNoteCheck, 0, ''])
 
 	if(result.rows[0].resultcode === 1){
 		return res.status(400).json({
@@ -67,7 +78,9 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
 		.where({bill_id: resultBill.rows[0].max}).orderBy('bill_created_date', 'desc')
 
-	await mailService.sendMail(mailOptions.verifyBillOptions(accountDB[0], resultProductBdetail, accAddress), req, res)
+	await mailService.sendMail(mailOptions.verifyBillOptions(accountDB[0], resultProductBdetail, accAddress, receiverName, receiverPhone), req, res)
+
+	await knex('tbl_cart').where("cart_acc_id", req.account['accId']).del()
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -125,8 +138,9 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 			billStatus: status,
 			priceShip: resultProductBdetail[index].bill_price_ship,
 			billAddress: resultProductBdetail[index].bill_address,
-			fullName: resultProductBdetail[index].acc_full_name,
-			phoneNumber: resultProductBdetail[index].acc_phone_number,
+			fullNameReceiver: resultProductBdetail[index].bill_name_receiver,
+			phoneNumberReceiver: resultProductBdetail[index].bill_phone_receiver,
+			noteReceiver: resultProductBdetail[index].bill_note_receiver,
 			createDate: createdDate,
 			expectedDate: expectedDate,
 		}
