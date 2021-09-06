@@ -37,7 +37,7 @@ describe("GET /details", () => {
         expect(accountListRespone.statusCode).toBe(200)
     })
 })
-
+/*
 describe("POST /update", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
@@ -58,7 +58,7 @@ describe("POST /update", () => {
         expect(accountListRespone.statusCode).toBe(200)
     })
 })
-
+*/
 describe("POST /update-password", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
