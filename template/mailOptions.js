@@ -32,7 +32,7 @@ const forgotPasswordOptions = (to, cusName, token) => {
     }
 }
 
-const verifyBillOptions = (account, listProduct, address) => {
+const verifyBillOptions = (account, listProduct, address, receiverName, receiverPhone) => {
     
     var htmlOption = ` <h1>Chào quý khách thân mến! </h1><br>
     <h3>FamilyStore gửi quý khách hóa đơn điện tử. Quý khách vui lòng xem chi tiết hóa đợn bên dưới.</h3>
@@ -40,7 +40,8 @@ const verifyBillOptions = (account, listProduct, address) => {
     <h3>Địa chỉ giao hàng: ${address}</h3>
     <h3>Thông tin khách hàng:</h3>
     <h4>        - ${account.acc_email}</h4>
-    <h4>        - ${account.acc_phone_number}</h4><br>
+    <h4>        - ${receiverName}</h4>
+    <h4>        - ${receiverPhone}</h4><br>
     <h3>Danh sách sản phẩm:</h3>
     <div id="infoList">
         <table class="table table-hover" id="tableCategory">
