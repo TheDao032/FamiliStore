@@ -27,6 +27,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
+	//check phone number
 	regexPattern = /^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/
 	let resultPhone = regexPattern.test(receiverPhone);
 
@@ -60,6 +61,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 	var listObjectToJson = JSON.stringify(listProduct)
 
+	//store procedure add bill, bill detail, update amount of product
 	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?,?,?,?,?,?)',
 									[listObjectToJson, req.account['accId'], accAddress, resultCheck['totalPrice'].toString(), priceShip, 
 									resultCheck['totalQuantity'],present, receiverName, receiverPhone, receiverNoteCheck, 0, ''])
