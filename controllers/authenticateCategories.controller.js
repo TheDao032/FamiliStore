@@ -104,7 +104,7 @@ router.post('/update', categoriesValidation.updateCategory, async (req, res) => 
 	if (checkCateFather) {
 		const fatherInfo = await categoriesModel.findById(cateFather)
 
-		if (!fatherInfo) {
+		if (fatherInfo.length === 0) {
 			return res.status(400).json({
 				errorMessage: 'Category Father Id Not Found',
 				statusCode: errorCode

@@ -166,6 +166,12 @@ describe("POST /delete", () => {
         if (productWithCate.length !== 0) {
             expect(categoryListRespone.statusCode).toBe(400)
         }
+
+        const categoriesChild = await categoriesModel.findChild(allCategories[0].cate_id)
+
+        if (categoriesChild.length !== 0) {
+            expect(categoryListRespone.statusCode).toBe(400)
+        }
         
         expect(categoryListRespone.statusCode).toBe(200)
     })
