@@ -52,7 +52,7 @@ router.post('/add-child', categoriesValidation.newCategoryChild, async (req, res
 		})
 	}
 
-	const categoriyFatherInfo = categoriesModel.findById(cateFather)
+	const categoriyFatherInfo = await categoriesModel.findById(cateFather)
 
 	if (categoriyFatherInfo.length === 0) {
 		return res.status(400).json({

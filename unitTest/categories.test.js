@@ -165,14 +165,14 @@ describe("POST /delete", () => {
 
         if (productWithCate.length !== 0) {
             expect(categoryListRespone.statusCode).toBe(400)
-        }
+        } else {
+            const categoriesChild = await categoriesModel.findChild(allCategories[0].cate_id)
 
-        const categoriesChild = await categoriesModel.findChild(allCategories[0].cate_id)
-
-        if (categoriesChild.length !== 0) {
-            expect(categoryListRespone.statusCode).toBe(400)
+            if (categoriesChild.length !== 0) {
+                expect(categoryListRespone.statusCode).toBe(400)
+            } else {
+                expect(categoryListRespone.statusCode).toBe(200)
+            }
         }
-        
-        expect(categoryListRespone.statusCode).toBe(200)
     })
 })
