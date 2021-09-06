@@ -8,8 +8,8 @@ const billModel = require('../models/bill.model')
 describe("POST /add", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
@@ -39,8 +39,8 @@ describe("POST /add", () => {
 describe("POST /details", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
@@ -62,8 +62,8 @@ describe("POST /details", () => {
 describe("POST /list", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
@@ -84,8 +84,8 @@ describe("POST /list", () => {
 describe("POST /list/filter", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
@@ -106,8 +106,8 @@ describe("POST /list/filter", () => {
 describe("POST /cancel-bill", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
@@ -129,8 +129,8 @@ describe("POST /cancel-bill", () => {
 describe("POST /update-status", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
         })
 
         expect(loginRespone.statusCode).toBe(200)
