@@ -95,9 +95,11 @@ router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 router.post('/update', accountValidation.updateAccount, async (req, res) => {
 	const avatar = req.files
 	let checkAvatar = false
+	
 	if (avatar) {
 		checkAvatar = avatar.image ? true : false
 	}
+
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
 	if (checkAvatar) {
 		var validImage = imageValidator.validateValidAvatar(avatar)
