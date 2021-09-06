@@ -29,6 +29,14 @@ const validateNumberOfFiles = (files) => {
     return true;
 }
 
+const validateNumberOfImageForAvatar = (files) => {
+    if (files.length !== undefined) {
+        if (files.length > 1)
+            return false;
+    }
+    return true;
+}
+
 const validateValidImage = (images) => {
     var errorMessage = ''
     if (images != null) {
@@ -46,6 +54,23 @@ const validateValidImage = (images) => {
     return errorMessage
 }
 
+const validateValidAvatar = (images) => {
+    var errorMessage = ''
+    if (images != null) {
+        var images = images.image
+
+        var isValidImage = validateImage(images)
+
+        var isValidNumberOfFile = validateNumberOfImageForAvatar(images)
+
+        if (!isValidImage)
+            errorMessage = errorMessage + " Invalid image!"
+        if (!isValidNumberOfFile)
+            errorMessage = errorMessage + " Invalid number of files, user can upload only one image for each account"
+    }
+    return errorMessage
+}
 module.exports = {
-    validateValidImage
+    validateValidImage,
+    validateValidAvatar
 }
