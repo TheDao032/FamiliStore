@@ -64,10 +64,10 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'integer' },
-    		email: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
-    		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
-    		role: { type: 'string', pattern: '', maxLength: 5 }
+			accId: { type: 'string' },
+			accFullName: {type: 'string'},
+    		accEmail: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
+    		accPhoneNumber: { type: 'string', pattern: '', maxLength: 15 }
   		},
 		required: ['accId'],
 		additionalProperties: true
@@ -94,7 +94,7 @@ const avatar = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		accId: { type: 'integer' },
+    		accId: { type: 'string' },
   		},
 		required: ['accId'],
 		additionalProperties: true

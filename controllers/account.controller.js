@@ -1,4 +1,4 @@
-const express = require('express') 
+const express = require('express')
 
 const router = express.Router()
 const knex = require('../utils/dbConnection')
@@ -9,7 +9,7 @@ const accountModel = require('../models/account.model')
 const roleModel = require('../models/role.model')
 const deliveryModel = require('../models/delivery.model')
 const imageService = require('../services/imageService')
-
+const imageValidator = require('../middlewares/validation/image.validate')
 const successCode = 0
 const errorCode = 1
 
@@ -26,7 +26,7 @@ router.get('/list', async (req, res) => {
 				accPhoneNumber: element.acc_phone_number,
 				accFullName: element.acc_full_name,
 				accAvatar: element.acc_avatar,
-				accStatus: element.acc_status
+				accRole: element.acc_role == 'ADM' ? 'Admin' : 'User'
 			}
 		})
 	])
@@ -38,22 +38,22 @@ router.get('/list', async (req, res) => {
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
 			let totalPage = Math.floor(result[0].length / parseInt(limit))
-
+			console.log(totalPage)
 			if (result[0].length % parseInt(limit) !== 0) {
 				totalPage = totalPage + 1
 			}
-	
+
 			const paginationResult = result[0].slice(startIndex, endIndex)
-	
+
 			return res.status(200).json({
-				totalPage,
-				listAccouts: paginationResult,
+				totalPage: totalPage,
+				listAccounts: paginationResult,
 				statusCode: successCode
 			})
 		}
 
 		return res.status(200).json({
-			listAccouts: result[0],
+			listAccounts: result[0],
 			statusCode: successCode
 		})
 	}
@@ -99,13 +99,22 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 		checkAvatar = avatar.image ? true : false
 	}
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
-	
+	if (checkAvatar) {
+		var validImage = imageValidator.validateValidAvatar(avatar)
+		console.log(validImage)
+		if (validImage !== '') {
+			return res.status(400).json({
+				errorMessage: validImage,
+				statusCode: errorCode
+			})
+		}
+	}
 	let date_ob = new Date()
 
 	if (accEmail && accEmail !== '') {
 		const emailInfo = await knex('tbl_account')
-		.where('acc_email', accEmail ? accEmail : '')
-		.whereNot('acc_id', accId)
+			.where('acc_email', accEmail ? accEmail : '')
+			.whereNot('acc_id', accId)
 
 		if (emailInfo.length != 0) {
 			return res.status(400).json({
@@ -139,7 +148,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 	}
 
 	const account = {
-		acc_email:  accEmail ? accEmail : result[0].acc_email,
+		acc_email: accEmail ? accEmail : result[0].acc_email,
 		acc_phone_number: accPhoneNumber ? accPhoneNumber : result[0].acc_phone_number,
 		acc_full_name: accFullName ? accFullName : result[0].acc_full_name,
 		acc_updated_date: date_ob
@@ -158,14 +167,14 @@ router.post('/update-password', accountValidation.updateAccountPassword, async (
 	const accInfo = await accountModel.findById(accId)
 
 	if (accInfo.length === 0) {
-		return res.status(400).json({ 
+		return res.status(400).json({
 			errorMessage: 'User Does Not Exist!',
 			statusCode: errorCode
 		})
 	}
 
 	if (!bcrypt.compareSync(accOldPassword, accInfo[0].acc_password)) {
-		return res.status(400).json({ 
+		return res.status(400).json({
 			errorMessage: 'Password Incorrect!',
 			statusCode: errorCode
 		})
@@ -211,7 +220,7 @@ router.post('/delete/:id', accountValidation.paramsInfo, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	
+
 	await knex('tbl_account')
 		.update({ acc_status: 1 })
 		.where('acc_id', id)
@@ -271,17 +280,20 @@ router.post('/add-avatar', accountValidation.avatar, async (req, res) => {
 	}
 
 	if (checkAvatar) {
+		var validImage = imageValidator.validateValidAvatar(avatar)
+		console.log(validImage)
+		if (validImage !== '') {
+			return res.status(400).json({
+				errorMessage: validImage,
+				statusCode: errorCode
+			})
+		}
 		await imageService.avatarUploader(avatar.image, accId, 'insert')
 
 		return res.status(200).json({
 			statusCode: 0
 		})
 	}
-
-	return res.status(400).json({
-		errorMessage: 'Request Missing Image',
-		statusCode: 0
-	})
 })
 
 router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
@@ -293,6 +305,14 @@ router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
 	const result = await accountModel.findById(accId)
 
 	if (checkAvatar) {
+		var validImage = imageValidator.validateValidAvatar(avatar)
+		console.log(validImage)
+		if (validImage !== '') {
+			return res.status(400).json({
+				errorMessage: validImage,
+				statusCode: errorCode
+			})
+		}
 		let promiseToUploadImage = new Promise(async (resolve) => {
 			await imageService.avatarUploader(avatar.image, accId, 'update', result[0].acc_avatar)
 			resolve();
@@ -322,7 +342,7 @@ router.post('/delete-avatar', accountValidation.avatar, async (req, res) => {
 		acc_avatar: null
 	}
 
-	await knex('tbl_account').where({ acc_id: accId}).update(deleteImage)
+	await knex('tbl_account').where({ acc_id: accId }).update(deleteImage)
 
 	imageService.deleteImage(result[0].acc_avatar)
 
