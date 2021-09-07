@@ -16,7 +16,7 @@ router.post('/list', validator.listProduct, async (req, res) => {
 	const offset = limit * (page - 1)
 
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -90,7 +90,7 @@ router.post('/list-best-sale', validator.listBestSale, async (req, res) => {
 
 	const offset = limit * (page - 1)
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -170,7 +170,7 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 	const offset = limit * (page - 1)
 
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -264,7 +264,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 		numberPage = 1
 	}
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -374,6 +374,13 @@ router.post('/search', validator.productSearching, async (req, res) => {
 	const { prodName, limit, page } = req.body
 	var offset = limit * (page - 1)
 	
+	if (page < 1 || limit < 1) {
+		return res.status(400).json({
+			errorMessage: "limit and page parameter is not valid",
+			statusCode: errorCode
+		})
+	}
+
 	var numberPage = await knex.raw(`SELECT count(prod_id)
 	FROM tbl_product
 	WHERE ts @@ to_tsquery('english', '${prodName}')`)
