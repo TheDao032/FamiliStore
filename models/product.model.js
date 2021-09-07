@@ -15,7 +15,8 @@ const deleteProduct = async function (id) {
 				}
 	
 			}),
-	
+		//delete cart
+		knex('tbl_cart').where('cart_prod_id', id).del(),
 		//delete product
 		knex('tbl_product').where('prod_id', id).del()
 	])
