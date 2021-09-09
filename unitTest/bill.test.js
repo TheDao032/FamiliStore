@@ -20,7 +20,7 @@ describe("POST /add", () => {
         const billListRespone = await request(server).post('/api/bill/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                accAddress: '123 Nguyễn Văn Cừ, phường 1, Quận 1, TPHCM',
+                                                accAddress: '123 Nguyễn Văn Cừ, phường 1, Quận 1, 8KUamddfZW8ktGds3GyDccJyrvBNWlppIEB9BYGzMbeqGK4CVj',
                                                 priceShip: "15000",
                                                 receiverName: "Lê Thanh Tí",
                                                 receiverPhone: "0142563454",
