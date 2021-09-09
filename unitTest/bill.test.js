@@ -20,8 +20,8 @@ describe("POST /add", () => {
         const billListRespone = await request(server).post('/api/bill/add')
                                             .set('Authorization', data.accessToken)
                                             .send({
-                                                accAddress: '123 Nguyễn Văn Cừ, Phường 10, Quận 5, TPHCM',
-                                                priceShip: "1000",
+                                                accAddress: '123 Nguyễn Văn Cừ, phường 1, Quận 1, TPHCM',
+                                                priceShip: "15000",
                                                 receiverName: "Lê Thanh Tí",
                                                 receiverPhone: "0142563454",
                                                 listProduct: [
@@ -121,6 +121,30 @@ describe("POST /cancel-bill", () => {
                                             .send({
                                                 billId: allBills[0].bill_id
                                             })
+
+        expect(billListRespone.statusCode).toBe(200)
+    })
+})
+
+describe("POST /confirm-bill", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
+        })
+
+        expect(loginRespone.statusCode).toBe(200)
+
+        const { data } = loginRespone.body
+
+		const allBills = await billModel.findByStatus()
+
+        const billListRespone = await request(server).post('/api/bill/confirm-bill')
+                                            .set('Authorization', data.accessToken)
+                                            .send({
+                                                billId: allBills[0].bill_id
+                                            })
+        await billModel.UpdateStatus(allBills[0].bill_id)
 
         expect(billListRespone.statusCode).toBe(200)
     })

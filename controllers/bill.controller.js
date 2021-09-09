@@ -38,6 +38,42 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 		})
 	}
 
+	const Address = accAddress.split(',');
+	
+	const wardsDB = await knex('tbl_wards').where("ward_name", Address[1].trim())
+	const cityDB = await knex('tbl_cities').where("ci_name", Address[3].trim())
+	const districtDB = await knex('tbl_districts').where("dis_name", Address[2].trim())
+
+	//check address
+	if(wardsDB.length === 0){
+		return res.status(400).json({
+			errorMessage: 'ward is not valid !',
+			statusCode: errorCode
+		})
+	}
+
+	else if(districtDB.length === 0){
+		return res.status(400).json({
+			errorMessage: 'district is not valid !',
+			statusCode: errorCode
+		})
+	}
+
+	else if(cityDB.length === 0){
+		return res.status(400).json({
+			errorMessage: 'City is not valid !',
+			statusCode: errorCode
+		})
+	}
+
+	//check priceShip
+	if(Number(priceShip) !== Number(wardsDB[0].ward_ship_price)){
+		return res.status(400).json({
+			errorMessage: 'Invalid shipping price !',
+			statusCode: errorCode
+		})
+	}
+
 	const listProductDB = await knex('tbl_product')
 	const accountDB = await knex('tbl_account').where("acc_id", req.account['accId'])
 
@@ -122,13 +158,16 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 
 		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'shipping'
+		var status = 'confirm'
 
 		if (resultProductBdetail[index].bill_status === 1) {
-			status = 'delivered'
+			status = 'shipping'
 		}
 
 		else if (resultProductBdetail[index].bill_status === 2) {
+			status = 'delivered'
+		}
+		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
 		}
 
@@ -214,9 +253,9 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 router.post('/update-status', billValidation.updateStatusBill, async (req, res) => {
 	const { billId, status } = req.body
 
-	if(!(status === 'shipping' || status === 'delivered' || status === 'cancel')){
+	if(!(status === 'shipping' || status === 'delivered' || status === 'cancel' || status === 'confirm')){
 		return res.status(400).json({
-			errorMessage: 'Status must be in 4 states(shipping, delivered, cancel)',
+			errorMessage: 'Status must be in 4 states(shipping, delivered, cancel, confirm)',
 			statusCode: errorCode
 		})
 	}
@@ -240,23 +279,26 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	}
 
 	//packing
-	if(status === 'shipping'){
+	if(status === 'confirm'){
 		upStatus = 0
 	}
 
-	if(status === 'delivered'){
+	else if(status === 'shipping'){
 		upStatus = 1
 	}
 
-	else if( status === 'cancel' && resultBill[0].bill_status === 2){
+	else if(status === 'delivered'){
+		upStatus = 2
+	}
+
+	if( status === 'cancel' && resultBill[0].bill_status === 3){
 		return res.status(200).json({
 			statusCode: successCode
 		})
 	}
 
 	else if(status === 'cancel'){
-		if(resultBill[0].bill_status !== 1){
-			await knex.raw(`update tbl_product
+		await knex.raw(`update tbl_product
 							set prod_amount = tbl_product.prod_amount + pro.bdetail_quantity,
 								prod_updated_date = current_date
 							from (
@@ -266,19 +308,21 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 							) pro
 							where tbl_product.prod_id = pro.prod_id`)
 
-			upStatus = 2
-		}
+		upStatus = 3
+		// if(resultBill[0].bill_status !== 2){
+			
+		// }
 
-		else{
-			return res.status(400).json({
-				errorMessage: 'The order has been delivered and cannot be canceled',
-				statusCode: errorCode
-			})
-		}
+		// else{
+		// 	return res.status(400).json({
+		// 		errorMessage: 'The order has been delivered and cannot be canceled',
+		// 		statusCode: errorCode
+		// 	})
+		// }
 	}
 	var check = false
 
-	if(resultBill[0].bill_status === 2){
+	if(resultBill[0].bill_status === 3){
 
 		var listTotalProduct = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
@@ -331,7 +375,7 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 		})
 	}
 
-	if( resultBill[0].bill_status === 2){
+	if( resultBill[0].bill_status === 3){
 		return res.status(200).json({
 			statusCode: successCode
 		})
@@ -347,12 +391,58 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 							) pro
 							where tbl_product.prod_id = pro.prod_id`)
 
-	var upStatus = 2
+	var upStatus = 3
 
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
 	await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
+
+	const resultProductBdetail = await knex('tbl_bill')
+		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
+		.join('tbl_product', 'prod_id', 'bdetail_product_id')
+		.join('tbl_account', 'acc_id', 'bill_account_id')
+		.where({bill_id: billId}).orderBy('bill_created_date', 'desc')
+
+	await mailService.sendMail(mailOptions.notifyCancelOrder(resultProductBdetail), req, res)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.post('/confirm-bill', billValidation.cancelBill, async (req, res) => {
+	const { billId } = req.body
+
+	const resultBill = await knex('tbl_bill').where("bill_id", billId)
+
+	if(resultBill.length === 0){
+		return res.status(400).json({
+			errorMessage: 'bill id not exists',
+			statusCode: errorCode
+		})
+	}
+
+	if( resultBill[0].bill_status !== 0){
+		return res.status(400).json({
+			errorMessage: 'status bill must be in status confirm',
+			statusCode: errorCode
+		})
+	}
+
+	var upStatus = 1
+	let present = moment().format('YYYY-MM-DD HH:mm:ss')
+
+	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
+	await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
+
+	const resultProductBdetail = await knex('tbl_bill')
+		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
+		.join('tbl_product', 'prod_id', 'bdetail_product_id')
+		.join('tbl_account', 'acc_id', 'bill_account_id')
+		.where({bill_id: billId}).orderBy('bill_created_date', 'desc')
+
+	await mailService.sendMail(mailOptions.notifyConfirmOrder(resultProductBdetail), req, res)
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -408,13 +498,16 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 
 		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'shipping'
+		var status = 'confirm'
 
 		if (resultProductBdetail[index].bill_status === 1) {
-			status = 'delivered'
+			status = 'shipping'
 		}
 
 		else if (resultProductBdetail[index].bill_status === 2) {
+			status = 'delivered'
+		}
+		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
 		}
 
@@ -506,15 +599,30 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 			let imageLink = resultProductBdetail[index].prod_img_data
 			prodObj['images'] = imageLink
 			
-			if (index < resultProductBdetail.length && (resultProductBdetail[index].prod_id != resultProductBdetail[index - 1].prod_id)) {
-				prodList.push(prodObj)
-			}
-			else if (index < resultProductBdetail.length && (resultProductBdetail[index].bill_id != resultProductBdetail[index - 1].bill_id) && (resultProductBdetail[index].prod_id == resultProductBdetail[index - 1].prod_id)){
-				prodList.push(prodObj)
+			if (index < resultProductBdetail.length) {
+				var checkUniqueProd = false
+
+				var exists = Object.keys(prodList).some(function (key) {
+					if (prodList[key].productID === prodObj.productID) {
+						checkUniqueProd = true
+					}
+				})
+				if(checkUniqueProd === false){
+					prodList.push(prodObj)
+				}
 			}
 		}
 		billItem['billDetailList'] = prodList
-		billList.push(billItem)
+		var checkUnique = false
+
+		var exists = Object.keys(billList).some(function(key) {
+			if(billList[key].billId === billItem.billId){
+				checkUnique = true
+			}
+		})
+		if(checkUnique === false){
+			billList.push(billItem)
+		}
 
 	}
 
@@ -529,9 +637,9 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 	const offset = limit * (page - 1)
 	const { filter } = req.params
 
-	if(!(filter === 'all' || filter === 'delivered' || filter === 'shipping')){
+	if(!(filter === 'all' || filter === 'delivered' || filter === 'shipping' || filter === 'confirm' || filter === 'cancel')){
 		return res.status(400).json({
-			errorMessage: 'filter must be in 3 states(all, delivered, shipping)',
+			errorMessage: 'filter must be in 5 states(all, delivered, shipping, confirm, cancel)',
 			statusCode: errorCode
 		})
 	}
@@ -542,10 +650,18 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	if(filter === 'delivered' || filter === 'shipping'){		
+	if(filter !== 'all'){		
 		var status = 0
-		if(filter === 'delivered'){
+		if(filter === 'shipping'){
 			status = 1
+		}
+
+		else if(filter === 'delivered'){
+			status = 2
+		}
+
+		else if(filter === 'cancel'){
+			status = 3
 		}
 		var resultProductBdetail = await knex.raw(`with billList as (	
 			with bill as (select * from tbl_bill where bill_status = ${status}
@@ -609,13 +725,16 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 
 		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'shipping'
+		var status = 'confirm'
 
 		if (resultProductBdetail[index].bill_status === 1) {
-			status = 'delivered'
+			status = 'shipping'
 		}
 
 		else if (resultProductBdetail[index].bill_status === 2) {
+			status = 'delivered'
+		}
+		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
 		}
 
@@ -707,15 +826,31 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			let imageLink = resultProductBdetail[index].prod_img_data
 			prodObj['images'] = imageLink
 			
-			if (index < resultProductBdetail.length && (resultProductBdetail[index].prod_id != resultProductBdetail[index - 1].prod_id)) {
-				prodList.push(prodObj)
-			}
-			else if (index < resultProductBdetail.length && (resultProductBdetail[index].bill_id != resultProductBdetail[index - 1].bill_id) && (resultProductBdetail[index].prod_id == resultProductBdetail[index - 1].prod_id)){
-				prodList.push(prodObj)
+			if (index < resultProductBdetail.length) {
+				var checkUniqueProd = false
+
+				var exists = Object.keys(prodList).some(function (key) {
+					if (prodList[key].productID === prodObj.productID) {
+						checkUniqueProd = true
+					}
+				})
+				if(checkUniqueProd === false){
+					prodList.push(prodObj)
+				}
 			}
 		}
 		billItem['billDetailList'] = prodList
-		billList.push(billItem)
+
+		var checkUnique = false
+
+		var exists = Object.keys(billList).some(function(key) {
+			if(billList[key].billId === billItem.billId){
+				checkUnique = true
+			}
+		})
+		if(checkUnique === false){
+			billList.push(billItem)
+		}
 
 	}
 
