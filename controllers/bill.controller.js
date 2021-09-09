@@ -396,7 +396,7 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
-	await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
+	//await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
 
 	const resultProductBdetail = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
