@@ -411,6 +411,7 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 	})
 })
 
+// confirm bill ......................................
 router.post('/confirm-bill', billValidation.cancelBill, async (req, res) => {
 	const { billId } = req.body
 

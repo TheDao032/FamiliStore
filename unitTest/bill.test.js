@@ -126,29 +126,29 @@ describe("POST /cancel-bill", () => {
     })
 })
 
-describe("POST /confirm-bill", () => {
-    test("Respone With A 200 Status Code", async () => {
-        const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'vosithien1234@gmail.com',
-            passWord: '1234567'
-        })
+// describe("POST /confirm-bill", () => {
+//     test("Respone With A 200 Status Code", async () => {
+//         const loginRespone = await request(server).post('/api/authentication/login').send({
+//             email: 'vosithien1234@gmail.com',
+//             passWord: '1234567'
+//         })
 
-        expect(loginRespone.statusCode).toBe(200)
+//         expect(loginRespone.statusCode).toBe(200)
 
-        const { data } = loginRespone.body
+//         const { data } = loginRespone.body
 
-		const allBills = await billModel.findByStatus()
+// 		const allBills = await billModel.findByStatus()
 
-        const billListRespone = await request(server).post('/api/bill/confirm-bill')
-                                            .set('Authorization', data.accessToken)
-                                            .send({
-                                                billId: allBills[0].bill_id
-                                            })
-        await billModel.UpdateStatus(allBills[0].bill_id)
+//         const billListRespone = await request(server).post('/api/bill/confirm-bill')
+//                                             .set('Authorization', data.accessToken)
+//                                             .send({
+//                                                 billId: allBills[0].bill_id
+//                                             })
+//         await billModel.UpdateStatus(allBills[0].bill_id)
 
-        expect(billListRespone.statusCode).toBe(200)
-    })
-})
+//         expect(billListRespone.statusCode).toBe(200)
+//     })
+// })
 
 describe("POST /update-status", () => {
     test("Respone With A 200 Status Code", async () => {
