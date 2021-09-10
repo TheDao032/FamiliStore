@@ -11,7 +11,7 @@ const updateAccountPassword = (req, res, next) => {
 		  accNewPassword: { type: 'string', pattern: '', minLength: 1 },
 		  accConfirmPassword: { type: 'string', pattern: '', minLength: 1 },
 		},
-	  	required: ['accId', 'accOldPassword', 'accNewPassword', 'accConfirmPassword'],
+	  	required: ['accOldPassword', 'accNewPassword', 'accConfirmPassword'],
 	  	additionalProperties: true
   	}
 
@@ -39,7 +39,35 @@ const updateRoleAccount = (req, res, next) => {
 			accId: { type: 'integer' },
 			accRole: { type: 'string', pattern: '' , maxLength: 5 },
   		},
-		required: ['accId' , 'accRole'],
+		required: ['accId', 'accRole'],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.body)
+
+	if (!valid) {
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
+	}
+
+	next()
+}
+
+const updateStatusAccount = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+			accId: { type: 'integer' },
+			accStatus: { type: 'integer' },
+  		},
+		required: ['accId', 'accRole'],
 		additionalProperties: true
 	}
 
@@ -64,7 +92,7 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string' },
+			accId: { type: 'integer' },
 			accFullName: {type: 'string'},
     		accEmail: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
     		accPhoneNumber: { type: 'string', pattern: '', maxLength: 15 }
@@ -94,9 +122,9 @@ const avatar = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		accId: { type: 'string' },
+    		accId: { type: 'integer' },
   		},
-		required: ['accId'],
+		required: [],
 		additionalProperties: true
 	}
 
@@ -121,7 +149,7 @@ const paramsInfo = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		id: { type: 'string', pattern: "^\\d+$" }
+    		id: { type: 'string', pattern: '^\\d+$' }
   		},
 		required: ['id'],
 		additionalProperties: true
@@ -147,6 +175,7 @@ const paramsInfo = (req, res, next) => {
 module.exports = {
 	updateAccountPassword,
 	updateRoleAccount,
+	updateStatusAccount,
 	updateAccount,
 	avatar,
 	paramsInfo,

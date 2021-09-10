@@ -26,7 +26,8 @@ router.get('/list', async (req, res) => {
 				accPhoneNumber: element.acc_phone_number,
 				accFullName: element.acc_full_name,
 				accAvatar: element.acc_avatar,
-				accRole: element.acc_role == 'ADM' ? 'Admin' : 'User'
+				accStatus: element.acc_status,
+				accRole: element.acc_role === 'ADM' ? 'Admin' : 'User'
 			}
 		})
 	])
@@ -38,7 +39,7 @@ router.get('/list', async (req, res) => {
 			let startIndex = (parseInt(page) - 1) * parseInt(limit)
 			let endIndex = (parseInt(page) * parseInt(limit))
 			let totalPage = Math.floor(result[0].length / parseInt(limit))
-			console.log(totalPage)
+
 			if (result[0].length % parseInt(limit) !== 0) {
 				totalPage = totalPage + 1
 			}
@@ -66,8 +67,15 @@ router.get('/list', async (req, res) => {
 
 router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 	const { id } = req.params
+	const { accRole } = req.account
+	
+	let accIdFlag = id
 
-	const accInfo = await accountModel.findById(id)
+	if (!roleModel.checkAdminRole(accRole)) {
+		accIdFlag = req.account.accId
+	}
+
+	const accInfo = await accountModel.findById(accIdFlag)
 
 	if (accInfo.length === 0) {
 		return res.status(200).json({
@@ -76,7 +84,7 @@ router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 		})
 	}
 
-	const deliveryAddress = await deliveryModel.findDeliveryByAccId(id)
+	const deliveryAddress = await deliveryModel.findDeliveryByAccId(accIdFlag)
 
 	const responseResult = {
 		accEmail: accInfo[0].acc_email,
@@ -101,9 +109,17 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 	}
 
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
+
+	const { accRole } = req.account
+	let accIdFlag = req.account.accId
+	if (accId) {
+		if (roleModel.checkAdminRole(accRole)) {
+			accIdFlag = accId
+		}
+	}
+
 	if (checkAvatar) {
 		var validImage = imageValidator.validateValidAvatar(avatar)
-		console.log(validImage)
 		if (validImage !== '') {
 			return res.status(400).json({
 				errorMessage: validImage,
@@ -116,7 +132,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 	if (accEmail && accEmail !== '') {
 		const emailInfo = await knex('tbl_account')
 			.where('acc_email', accEmail ? accEmail : '')
-			.whereNot('acc_id', accId)
+			.whereNot('acc_id', accIdFlag)
 
 		if (emailInfo.length != 0) {
 			return res.status(400).json({
@@ -126,7 +142,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 		}
 	}
 
-	const result = await accountModel.findById(accId)
+	const result = await accountModel.findById(accIdFlag)
 
 	if (result.length === 0) {
 		res.status(400).json({
@@ -137,10 +153,10 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 
 	if (checkAvatar) {
 		if (result[0].acc_avatar === null) {
-			await imageService.avatarUploader(avatar.image, accId, 'insert')
+			await imageService.avatarUploader(avatar.image, accIdFlag, 'insert')
 		} else {
 			let promiseToUploadImage = new Promise(async function (resolve) {
-				await imageService.avatarUploader(avatar.image, accId, 'update', result[0].acc_avatar)
+				await imageService.avatarUploader(avatar.image, accIdFlag, 'update', result[0].acc_avatar)
 				resolve();
 			})
 			promiseToUploadImage.then(function () {
@@ -156,7 +172,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 		acc_updated_date: date_ob
 	}
 
-	await knex('tbl_account').where('acc_id', accId).update(account)
+	await knex('tbl_account').where('acc_id', accIdFlag).update(account)
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -166,7 +182,15 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 router.post('/update-password', accountValidation.updateAccountPassword, async (req, res) => {
 	const { accId, accOldPassword, accNewPassword, accConfirmPassword } = req.body
 
-	const accInfo = await accountModel.findById(accId)
+	const { accRole } = req.account
+	let accIdFlag = req.account.accId
+	if (accId) {
+		if (roleModel.checkAdminRole(accRole)) {
+			accIdFlag = accId
+		}
+	}
+
+	const accInfo = await accountModel.findById(accIdFlag)
 
 	if (accInfo.length === 0) {
 		return res.status(400).json({
@@ -232,14 +256,13 @@ router.post('/delete/:id', accountValidation.paramsInfo, async (req, res) => {
 	})
 })
 
-// đặt tài khoản làm nhân viên, xóa vai trò nhân viên
 router.post('/update-role', accountValidation.updateRoleAccount, async (req, res) => {
 	const { accId, accRole } = req.body
 	const presentRole = req.account.accRole
 
 	if (!roleModel.checkAdminRole(presentRole)) {
 		return res.status(400).json({
-			errorMessage: 'permission access denied'
+			errorMessage: 'Permission Access Denied'
 		})
 	}
 
@@ -248,14 +271,14 @@ router.post('/update-role', accountValidation.updateRoleAccount, async (req, res
 
 	if (resultRole.length === 0) {
 		return res.status(400).json({
-			errorMessage: 'role not exists',
+			errorMessage: `Invalid Role`,
 			statusCode: errorCode
 		})
 	}
 
 	if (resultAcc.length === 0) {
 		return res.status(400).json({
-			errorMessage: 'account not exists',
+			errorMessage: `Account Doesn't Exist`,
 			statusCode: errorCode
 		})
 	}
@@ -267,13 +290,57 @@ router.post('/update-role', accountValidation.updateRoleAccount, async (req, res
 	})
 })
 
-router.post('/add-avatar', accountValidation.avatar, async (req, res) => {
+router.post('/update-status', accountValidation.updateStatusAccount, async (req, res) => {
+	const { accId, accStatus } = req.body
+	const presentRole = req.account.accRole
+
+	if (!roleModel.checkAdminRole(presentRole)) {
+		return res.status(400).json({
+			statusCode: errorCode,
+			errorMessage: `Permission Access Denied`
+		})
+	}
+
+	if (accStatus !== 0 || accStatus !== 1 && accStatus !== 2) {
+		return res.status(400).json({
+			statusCode: errorCode,
+			errorMessage: `Invalid Status`
+		})
+	}
+
+	
+
+	const resultAcc = await accountModel.findById(accId)
+
+	if (resultAcc.length === 0) {
+		return res.status(400).json({
+			errorMessage: `Account Doesn't Exist`,
+			statusCode: errorCode
+		})
+	}
+
+	await knex('tbl_account').where('acc_id', accId).update('acc_status', accStatus)
+
+	return res.status(200).json({
+		statusCode: successCode
+	})
+})
+
+router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
 	const { accId } = req.body
+
 	var avatar = req.files
 
 	const checkAvatar = avatar.image ? true : false
 
-	const result = await accountModel.findById(accId)
+	const { accRole } = req.account
+	let accIdFlag = accId
+
+	if (!roleModel.checkAdminRole(accRole)) {
+		accIdFlag = req.account.accId
+	}
+
+	const result = await accountModel.findById(accIdFlag)
 
 	if (result.length === 0) {
 		return res.status(400).json({
@@ -283,56 +350,48 @@ router.post('/add-avatar', accountValidation.avatar, async (req, res) => {
 
 	if (checkAvatar) {
 		var validImage = imageValidator.validateValidAvatar(avatar)
-		console.log(validImage)
+
 		if (validImage !== '') {
 			return res.status(400).json({
 				errorMessage: validImage,
 				statusCode: errorCode
 			})
 		}
-		await imageService.avatarUploader(avatar.image, accId, 'insert')
+
+		if (result[0].acc_avatar === null) {
+			await imageService.avatarUploader(avatar.image, accIdFlag, 'insert')
+		} else {
+			let promiseToUploadImage = new Promise(async function (resolve) {
+				await imageService.avatarUploader(avatar.image, accIdFlag, 'update', result[0].acc_avatar)
+				resolve();
+			})
+			promiseToUploadImage.then(function () {
+				imageService.deleteImage(result[0].acc_avatar)
+			})
+		}
 
 		return res.status(200).json({
+			statusCode: 0
+		})
+	} else {
+		return res.status(400).json({
+			errorMessage: 'Image File Is Require',
 			statusCode: 0
 		})
 	}
 })
 
-router.post('/update-avatar', accountValidation.avatar, async (req, res) => {
-	const { accId } = req.body
-	var avatar = req.files
-
-	const checkAvatar = avatar.image ? true : false
-
-	const result = await accountModel.findById(accId)
-
-	if (checkAvatar) {
-		var validImage = imageValidator.validateValidAvatar(avatar)
-		console.log(validImage)
-		if (validImage !== '') {
-			return res.status(400).json({
-				errorMessage: validImage,
-				statusCode: errorCode
-			})
-		}
-		let promiseToUploadImage = new Promise(async (resolve) => {
-			await imageService.avatarUploader(avatar.image, accId, 'update', result[0].acc_avatar)
-			resolve();
-		})
-		promiseToUploadImage.then(() => {
-			imageService.deleteImage(result[0].acc_avatar)
-		})
-	}
-
-	return res.status(200).json({
-		statusCode: 0
-	})
-})
-
 router.post('/delete-avatar', accountValidation.avatar, async (req, res) => {
 	const { accId } = req.body
 
-	const result = await accountModel.findById(accId)
+	const { accRole } = req.account
+	let accIdFlag = accId
+
+	if (!roleModel.checkAdminRole(accRole)) {
+		accIdFlag = req.account.accId
+	}
+
+	const result = await accountModel.findById(accIdFlag)
 
 	if (result.length === 0) {
 		return res.status(400).json({
@@ -344,7 +403,7 @@ router.post('/delete-avatar', accountValidation.avatar, async (req, res) => {
 		acc_avatar: null
 	}
 
-	await knex('tbl_account').where({ acc_id: accId }).update(deleteImage)
+	await knex('tbl_account').where({ acc_id: accIdFlag }).update(deleteImage)
 
 	imageService.deleteImage(result[0].acc_avatar)
 
