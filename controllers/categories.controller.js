@@ -254,7 +254,6 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 })
 
 router.get('/product-with-cate', categoriesValidation.listSubCategory, async (req, res) => {
-	const { page, limit } = req.query
 
 	const fatherInfo = await categoriesModel.findFatherWithLimit()
 	const listCategories = await categoriesModel.findAll()
@@ -308,48 +307,10 @@ router.get('/product-with-cate', categoriesValidation.listSubCategory, async (re
 			information: result
 		})
 	}
-		
 
-		// if (page || limit) {
-		// 	let startIndex = (parseInt(page) - 1) * parseInt(limit)
-		// 	let endIndex = (parseInt(page) * parseInt(limit))
-		// 	let totalPage = Math.floor(listCategoriesChild.length / parseInt(limit))
-
-		// 	if (listCategoriesChild.length % parseInt(limit) !== 0) {
-		// 		totalPage = totalPage + 1
-		// 	}
-
-		// 	listCategoriesChild.sort((a, b) => a -b)
-	
-		// 	const paginationResult = listCategoriesChild.slice(startIndex, endIndex)
-	
-		// 	return res.status(200).json({
-		// 		cateId: fatherInfo[0].cate_id,
-		// 		cateName: fatherInfo[0].cate_name,
-		// 		createDate: fatherCreateDate,
-		// 		totalPage,
-		// 		subCategories: paginationResult,
-		// 		statusCode: successCode
-		// 	})
-		// }
-
-		// return res.status(200).json({
-		// 	cateId: fatherInfo[0].cate_id,
-		// 	cateName: fatherInfo[0].cate_name,
-		// 	createDate: fatherCreateDate,
-		// 	subCategories: listCategoriesChild,
-		// 	statusCode: successCode
-		// })
-
-	// return res.status(200).json({
-	// 	cateId: fatherInfo[0].cate_id,
-	// 	cateName: fatherInfo[0].cate_name,
-	// 	createDate: fatherInfo[0].cate_created_date,
-	// 	subCategories: [],
-	// 	statusCode: errorCode
-	// })
-
-	
+	return res.status(400).json({
+		statusCode: errorCode
+	})
 })
 
 module.exports = router
