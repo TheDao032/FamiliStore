@@ -435,7 +435,7 @@ router.post('/confirm-bill', billValidation.cancelBill, async (req, res) => {
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
-	await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
+	//await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
 
 	const resultProductBdetail = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
@@ -564,7 +564,18 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 					}
 					let imageLink = resultProductBdetail[index].prod_img_data
 					prodObj['images'] = imageLink
-					prodList.push(prodObj)
+					
+					var checkUniqueProd = false
+
+					var exists = Object.keys(prodList).some(function (key) {
+						if (prodList[key].productID === prodObj.productID) {
+							checkUniqueProd = true
+						}
+					})
+					if(checkUniqueProd === false){
+						prodList.push(prodObj)
+					}
+
 				}
 				count++
 				index = i + 1
@@ -791,7 +802,17 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					}
 					let imageLink = resultProductBdetail[index].prod_img_data
 					prodObj['images'] = imageLink
-					prodList.push(prodObj)
+
+					var checkUniqueProd = false
+
+					var exists = Object.keys(prodList).some(function (key) {
+						if (prodList[key].productID === prodObj.productID) {
+							checkUniqueProd = true
+						}
+					})
+					if(checkUniqueProd === false){
+						prodList.push(prodObj)
+					}
 				}
 				count++
 				index = i + 1
