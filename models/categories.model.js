@@ -21,6 +21,15 @@ const findFather = async () => {
     return info
 }
 
+const findFatherWithLimit = async () => {
+    const info = await knex('tbl_categories')
+                    .distinctOn('cate_father')
+                    .whereNot({ cate_father: null })
+                    .limit(10)
+
+    return info
+}
+
 const findAllFather = async () => {
     const info = await knex('tbl_categories')
                     .where({ cate_father: null })
@@ -40,5 +49,6 @@ module.exports = {
     findFather,
     findAllFather,
     findChild,
-    findAll
+    findAll,
+    findFatherWithLimit
 }

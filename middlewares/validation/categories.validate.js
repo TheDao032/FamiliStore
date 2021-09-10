@@ -113,6 +113,34 @@ const listCategoryChild = (req, res, next) => {
 	next()
 }
 
+const listSubCategory = (req, res, next) => {
+	const shema = {
+  		type: 'object',
+  		properties: {
+			page: { type: 'string', pattern: '^\\d+$' },
+			limit: { type: 'string', pattern: '^\\d+$' }
+  		},
+		required: [],
+		additionalProperties: true
+	}
+
+	const ajv = new ajvLib({
+		allErrors: true
+	})
+
+	const validator = ajv.compile(shema)
+	const valid = validator(req.query)
+
+	if (!valid) {
+		return res.status(400).json({
+			errorMessage: validator.errors[0].message,
+			statusCode: errorCode
+		})
+	}
+
+	next()
+}
+
 const deleteCategory = (req, res, next) => {
 	const shema = {
   		type: 'object',
@@ -144,6 +172,7 @@ module.exports = {
     newCategoryFather,
     newCategoryChild,
     listCategoryChild,
+	listSubCategory,
 	deleteCategory,
 	updateCategory
 }
