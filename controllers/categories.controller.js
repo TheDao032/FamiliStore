@@ -255,26 +255,30 @@ router.post('/list-child', categoriesValidation.listCategoryChild, async (req, r
 
 router.get('/product-with-cate', categoriesValidation.listSubCategory, async (req, res) => {
 
-	const fatherInfo = await categoriesModel.findFatherWithLimit()
+	const fathersInfo = await categoriesModel.findFatherWithLimit()
 	const listCategories = await categoriesModel.findAll()
 	const listProducts = await productModel.findAll()
 	const listProductImages = await productImageModel.findAll()
 
-	if (fatherInfo.length !== 0) {
-		const childResult = fatherInfo.map((element) => {
+	if (fathersInfo.length !== 0) {
+		const childResult = fathersInfo.map((element) => {
 			const listChild = listCategories.filter((item) => element.cate_father === item.cate_father)
+			
+			const fatherInfo = listCategories.find((item) => element.cate_father === item.cate_id)
 
 			return {
-				cateId: element.cate_id,
-				cateName: element.cate_name,
+				cateId: fatherInfo.cate_id,
+				cateName: fatherInfo.cate_name,
 				listChild
 			}
 		})
 
+		
+
 		let result = []
 
-		let productsWithCate = []
 		childResult.forEach((element) => {
+			let productsWithCate = []
 			element.listChild.forEach((item) => {
 				const productsInfo = listProducts.filter((prodInfo) => prodInfo.prod_category_id === item.cate_id)
 
@@ -283,6 +287,7 @@ router.get('/product-with-cate', categoriesValidation.listSubCategory, async (re
 					const prodInfoJson = {
 						prodId: prodInfo.prod_id,
 						prodName: prodInfo.prod_name,
+						prodCategory: prodInfo.prod_category_id,
 						prodAmount: prodInfo.prod_amount,
 						prodPrice: prodInfo.prod_price,
 						prodDescription: prodInfo.prod_description,
