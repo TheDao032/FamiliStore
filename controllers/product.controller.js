@@ -371,8 +371,34 @@ router.get('/details/:id', async (req, res) => {
 })
 
 router.post('/search', validator.productSearching, async (req, res) => {
-	const { prodName, limit, page } = req.body
+	//I don't want to change it to const and take time to do coding for some bull shit thing, so var is the best choice
+	var { prodName, limit, page, sortBy, filter} = req.body
 	var offset = limit * (page - 1)
+	
+	if (filter == undefined){
+		filter = 'prod_created_date'
+		
+	}
+	
+	if (sortBy == undefined){
+		sortBy = 'asc'
+		
+	}
+	
+	if(filter != 'prod_name' && filter != 'prod_amount' && filter != 'prod_created_date' && filter != 'prod_updated_date' && filter != 'prod_price'){
+		return res.status(400).json({
+			errorMessage: "filter is invalid!",
+			statusCode: errorCode
+		})
+	}
+
+	
+	if(sortBy && sortBy != 'asc' && sortBy != 'desc'){
+		return res.status(400).json({
+			errorMessage: "sort by is invalid!",
+			statusCode: errorCode
+		})
+	}
 	
 	if (page < 1 || limit < 1) {
 		return res.status(400).json({
@@ -398,7 +424,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 		SELECT *
 		FROM tbl_product
 		WHERE ts @@ to_tsquery('english', '${prodName}')
-		order by prod_created_date desc
+		order by ${filter} ${sortBy}
 		limit ${limit}
 		offset ${offset}
 	)
