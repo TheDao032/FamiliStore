@@ -7,7 +7,7 @@ const login = (req, res, next) => {
 		type: 'object',
 		properties: {
 			email: { type: 'string', pattern: '' },
-			passWord: { type: 'string', pattern: '', }
+			passWord: { type: 'string', pattern: '' }
 		},
 		required: ['email', 'passWord'],
 		additionalProperties: false
