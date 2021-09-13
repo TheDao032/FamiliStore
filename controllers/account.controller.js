@@ -105,10 +105,10 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
 
-	const { oldPassword, newPassword, confirmPassword } = req.body
+	const { accOldPassword, accNewPassword, accConfirmPassword } = req.body
 
-	if ((oldPassword && oldPassword !== '') || (newPassword && newPassword !== '') || (confirmPassword && confirmPassword !== '')) {
-		if (!oldPassword || oldPassword === '' || !newPassword || newPassword === '' || !confirmPassword || confirmPassword === '') {
+	if ((accOldPassword && accOldPassword !== '') || (accNewPassword && accNewPassword !== '') || (accConfirmPassword && accConfirmPassword !== '')) {
+		if (!accOldPassword || accOldPassword === '' || !accNewPassword || accNewPassword === '' || !accConfirmPassword || accConfirmPassword === '') {
 			return res.status(400).json({
 				errorMessage: `Can't Update Password, Missing Information`
 			})
@@ -132,7 +132,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 			})
 		}
 	
-		if (newPassword !== confirmPassword) {
+		if (accNewPassword !== accConfirmPassword) {
 			return res.status(400).json({
 				errorMessage: 'password is different from confirm password',
 				statusCode: errorCode
@@ -140,7 +140,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 		}
 		
 		let date_ob = new Date()
-		const hashPassword = bcrypt.hashSync(newPassword, 3)
+		const hashPassword = bcrypt.hashSync(accNewPassword, 3)
 
 		if (accEmail && accEmail !== '') {
 			const emailInfo = await knex('tbl_account')
