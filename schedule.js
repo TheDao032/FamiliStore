@@ -15,3 +15,4 @@ const job = new CronJob('* * * * *', async function() {
 module.exports = {
     job
 }
+
