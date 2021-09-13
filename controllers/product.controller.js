@@ -424,7 +424,6 @@ router.post('/search', validator.productSearching, async (req, res) => {
 		SELECT *
 		FROM tbl_product
 		WHERE ts @@ to_tsquery('english', '${prodName}')
-		order by ${filter} ${sortBy}
 		limit ${limit}
 		offset ${offset}
 	)
@@ -460,6 +459,11 @@ router.post('/search', validator.productSearching, async (req, res) => {
 		index += 1
 	}
 	
+	if(sortBy == 'asc')
+		prodList.sort(function(a,b){return a[filter] - b[filter]})
+	else if (sortBy == 'desc')
+		prodList.sort(function(a,b){return b[filter] - a[filter]})
+
 	var numberOfProduct = await knex.raw(`SELECT count(prod_id) FROM tbl_product WHERE ts @@ to_tsquery('english', '${prodName}')`)
 
 	if (result) {
