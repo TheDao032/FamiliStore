@@ -1,6 +1,8 @@
+/*
 const CronJob = require('cron').CronJob;
 const knex = require('../FamilyStore/utils/dbConnection')
 const moment = require('moment')
+
 const job = new CronJob('* * * * *', async function() {
   //run every minute
     var currentTimeStamp = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -15,4 +17,4 @@ const job = new CronJob('* * * * *', async function() {
 module.exports = {
     job
 }
-
+*/
