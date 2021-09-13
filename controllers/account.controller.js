@@ -101,14 +101,74 @@ router.get('/details/:id', accountValidation.paramsInfo, async (req, res) => {
 })
 
 router.post('/update', accountValidation.updateAccount, async (req, res) => {
-	const avatar = req.files
 	let checkAvatar = false
-	
-	if (avatar) {
-		checkAvatar = avatar.image ? true : false
-	}
 
 	const { accId, accEmail, accPhoneNumber, accFullName } = req.body
+
+	const { oldPassword, newPassword, confirmPassword } = req.body
+
+	if ((oldPassword && oldPassword !== '') || (newPassword && newPassword !== '') || (confirmPassword && confirmPassword !== '')) {
+		if (!oldPassword || oldPassword === '' || !newPassword || newPassword === '' || !confirmPassword || confirmPassword === '') {
+			return res.status(400).json({
+				errorMessage: `Can't Update Password, Missing Information`
+			})
+		}
+
+		const { accRole } = req.account
+
+		if (roleModel.checkAdminRole(accRole)) {
+			return res.status(400).json({
+				errorMessage: `Permission Denied`,
+				statusCode: errorCode
+			})
+		}
+
+		const result = await accountModel.findById(req.account.accId)
+
+		if (!bcrypt.compareSync(accOldPassword, result[0].acc_password)) {
+			return res.status(400).json({
+				errorMessage: 'Password Incorrect!',
+				statusCode: errorCode
+			})
+		}
+	
+		if (newPassword !== confirmPassword) {
+			return res.status(400).json({
+				errorMessage: 'password is different from confirm password',
+				statusCode: errorCode
+			})
+		}
+		
+		let date_ob = new Date()
+		const hashPassword = bcrypt.hashSync(newPassword, 3)
+
+		if (accEmail && accEmail !== '') {
+			const emailInfo = await knex('tbl_account')
+				.where('acc_email', accEmail ? accEmail : '')
+				.whereNot('acc_id', req.account.accId)
+
+			if (emailInfo.length != 0) {
+				return res.status(400).json({
+					errorMessage: 'Email exist',
+					statusCode: errorCode
+				})
+			}
+		}
+
+		const account = {
+			acc_email: accEmail ? accEmail : result[0].acc_email,
+			acc_phone_number: accPhoneNumber ? accPhoneNumber : result[0].acc_phone_number,
+			acc_full_name: accFullName ? accFullName : result[0].acc_full_name,
+			acc_password: hashPassword,
+			acc_updated_date: date_ob
+		}
+
+		await knex('tbl_account').where('acc_id', accIdFlag).update(account)
+
+		return res.status(200).json({
+			statusCode: successCode
+		})
+	}
 
 	const { accRole } = req.account
 	let accIdFlag = req.account.accId
@@ -118,15 +178,6 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 		}
 	}
 
-	if (checkAvatar) {
-		var validImage = imageValidator.validateValidAvatar(avatar)
-		if (validImage !== '') {
-			return res.status(400).json({
-				errorMessage: validImage,
-				statusCode: errorCode
-			})
-		}
-	}
 	let date_ob = new Date()
 
 	if (accEmail && accEmail !== '') {
@@ -149,20 +200,6 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 			errorMessage: 'Account Does Not Exist',
 			statusCode: errorCode
 		})
-	}
-
-	if (checkAvatar) {
-		if (result[0].acc_avatar === null) {
-			await imageService.avatarUploader(avatar.image, accIdFlag, 'insert')
-		} else {
-			let promiseToUploadImage = new Promise(async function (resolve) {
-				await imageService.avatarUploader(avatar.image, accIdFlag, 'update', result[0].acc_avatar)
-				resolve();
-			})
-			promiseToUploadImage.then(function () {
-				imageService.deleteImage(result[0].acc_avatar)
-			})
-		}
 	}
 
 	const account = {
