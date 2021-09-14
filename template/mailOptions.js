@@ -93,7 +93,7 @@ const verifyBillOptions = (account, listProduct, address, receiverName, receiver
     }
 }
 
-const notifyCancelOrder = (listProduct) => {
+const notifyCancelOrder = (listProduct, check) => {
     
     var htmlOption = ` <h1>Chào quý khách thân mến! </h1><br>
     <h3>Đơn hàng của quý khách đã bị hủy, quý khách vui lòng kiểm trả lại đơn hàng, hoặc liên hệ 012345678 để biết chi tiết.</h3>
@@ -115,27 +115,38 @@ const notifyCancelOrder = (listProduct) => {
                 </tr>
             </thead>
             <tbody id="tbodyCateParent">`
-    listProduct.forEach((prod) => {
-        const price = prod.prod_price * prod.bdetail_quantity
+    if(check === true){
+        listProduct.forEach((prod) => {
+            const price = prod.prod_price * prod.bdetail_quantity
+            htmlOption += `\n<div id="">
+                                <tr>
+                                    <div style="size:100px;margin:1%;background-color:aliceblue">
+                                        <td class="text-center">
+                                            <label>${prod.prod_name}</label>
+                                        </td>
+                                        <td class="text-center">
+                                            <label>${prod.prod_description}</label>
+                                        </td>
+                                        <td class="text-center">
+                                            <label>${prod.bdetail_quantity}</label>
+                                        </td>
+                                        <td class="text-center">
+                                            <label>${price}</label>
+                                        </td>
+                                    </div>
+                                </tr>
+                            </div>`
+        })
+
+    }
+    else{
         htmlOption += `\n<div id="">
                             <tr>
-                                <div style="size:100px;margin:1%;background-color:aliceblue">
-                                    <td class="text-center">
-                                        <label>${prod.prod_name}</label>
-                                    </td>
-                                    <td class="text-center">
-                                        <label>${prod.prod_description}</label>
-                                    </td>
-                                    <td class="text-center">
-                                        <label>${prod.bdetail_quantity}</label>
-                                    </td>
-                                    <td class="text-center">
-                                        <label>${price}</label>
-                                    </td>
-                                </div>
                             </tr>
                         </div>`
-    })
+
+    }
+    
 
     htmlOption += `\n</tbody>
                 </table>

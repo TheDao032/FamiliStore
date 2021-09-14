@@ -190,18 +190,34 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 
 		for (let i = index; i < resultProductBdetail.length; i++) {
 			if (i === 0) {
-				let prodObj = {
-					productID: resultProductBdetail[index].prod_id,
-					prodName: resultProductBdetail[index].prod_name,
-					prodCategory: resultProductBdetail[index].cate_name,
-					prodQuantity: resultProductBdetail[index].prod_amount,
-					prodDescription: resultProductBdetail[index].prod_description,
-					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-					prodPrice: resultProductBdetail[index].prod_price
+				let prodObj = {}
+				if(resultProductBdetail[index].prod_id !== null){
+					prodObj = {
+						productID: resultProductBdetail[index].prod_id,
+						prodName: resultProductBdetail[index].prod_name,
+						prodCategory: resultProductBdetail[index].cate_name,
+						prodQuantity: resultProductBdetail[index].prod_amount,
+						prodDescription: resultProductBdetail[index].prod_description,
+						prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+						prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+						prodPrice: resultProductBdetail[index].prod_price
+					}
+					let imageLink = resultProductBdetail[i].prod_img_data
+					prodObj['images'] = imageLink
 				}
-				let imageLink = resultProductBdetail[i].prod_img_data
-				prodObj['images'] = imageLink
+				else{
+					prodObj = {
+						productID: resultProductBdetail[index].bdetail_product_id,
+						prodName: null,
+						prodCategory: null,
+						prodQuantity: null,
+						prodDescription: 'Sản phẩm đã bị xóa',
+						prodCreatedDate: null,
+						prodUpdatedDate: null,
+						prodPrice: resultProductBdetail[index].bdetail_product_price
+					}
+					prodObj['images'] = null
+				}
 				prodList.push(prodObj)
 			}
 
@@ -220,19 +236,35 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 				}
 			}
 
-			let prodObj = {
-				productID: resultProductBdetail[index].prod_id,
-				prodName: resultProductBdetail[index].prod_name,
-				prodCategory: resultProductBdetail[index].cate_name,
-				prodQuantity: resultProductBdetail[index].prod_amount,
-				prodDescription: resultProductBdetail[index].prod_description,
-				prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-				prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-				prodPrice: resultProductBdetail[index].prod_price
+			let prodObj = {}
+			if (resultProductBdetail[index].prod_id !== null) {
+				prodObj = {
+					productID: resultProductBdetail[index].prod_id,
+					prodName: resultProductBdetail[index].prod_name,
+					prodCategory: resultProductBdetail[index].cate_name,
+					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodDescription: resultProductBdetail[index].prod_description,
+					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+					prodPrice: resultProductBdetail[index].prod_price
+				}
+				let imageLink = resultProductBdetail[index].prod_img_data
+				prodObj['images'] = imageLink
 			}
-			let imageLink = resultProductBdetail[index].prod_img_data
-			prodObj['images'] = imageLink
-			
+			else {
+				prodObj = {
+					productID: resultProductBdetail[index].bdetail_product_id,
+					prodName: null,
+					prodCategory: null,
+					prodQuantity: null,
+					prodDescription: 'Sản phẩm đã bị xóa',
+					prodCreatedDate: null,
+					prodUpdatedDate: null,
+					prodPrice: resultProductBdetail[index].bdetail_product_price
+				}
+				prodObj['images'] = null
+			}
+
 			if (index < resultProductBdetail.length && (resultProductBdetail[index].prod_id != resultProductBdetail[index - 1].prod_id)) {
 				prodList.push(prodObj)
 			}
@@ -381,7 +413,12 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 		})
 	}
 
-	await knex.raw(`update tbl_product
+	const productCheck = await knex.raw(`select * from (tbl_bill b join tbl_bill_detail bd on bd.bdetail_bill_id = b.bill_id)
+										join tbl_product pr on pr.prod_id = bd.bdetail_product_id
+										where b.bill_id = ${billId}`)
+
+	if(productCheck.length !== 0){
+		await knex.raw(`update tbl_product
 							set prod_amount = tbl_product.prod_amount + pro.bdetail_quantity,
 								prod_updated_date = current_date
 							from (
@@ -391,6 +428,8 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 							) pro
 							where tbl_product.prod_id = pro.prod_id`)
 
+	}
+
 	var upStatus = 3
 
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -398,13 +437,24 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
 	//await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
 
-	const resultProductBdetail = await knex('tbl_bill')
+	var checkList = true
+	var resultProductBdetail = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
 		.join('tbl_account', 'acc_id', 'bill_account_id')
 		.where({bill_id: billId}).orderBy('bill_created_date', 'desc')
 
-	await mailService.sendMail(mailOptions.notifyCancelOrder(resultProductBdetail), req, res)
+	if(resultProductBdetail.length === 0){
+
+		checkList = false
+
+		resultProductBdetail = await knex('tbl_bill')
+		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
+		.join('tbl_account', 'acc_id', 'bill_account_id')
+		.where({bill_id: billId}).orderBy('bill_created_date', 'desc')
+	}
+
+	await mailService.sendMail(mailOptions.notifyCancelOrder(resultProductBdetail, checkList), req, res)
 
 	return res.status(200).json({
 		statusCode: successCode
@@ -431,13 +481,33 @@ router.post('/confirm-bill', billValidation.cancelBill, async (req, res) => {
 		})
 	}
 
+	var checkProduct = await knex.raw(`select bd.bdetail_product_id from tbl_bill_detail bd where bdetail_bill_id = ${billId}
+	 and bd.bdetail_product_id not in (select prod_id from tbl_product)`)
+
+	checkProduct = checkProduct.rows
+
+	if(checkProduct.length !== 0){
+		var mess = 'Products: '
+		checkProduct.forEach((prod) =>{
+			mess += prod.bdetail_product_id + ', '
+		})
+
+		mess += 'does not exist, cannot confirm order'
+
+		return res.status(400).json({
+			errorMessage: mess,
+			statusCode: errorCode
+		})
+	}
+
+
 	var upStatus = 1
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
 	await knex('tbl_bill').where("bill_id", billId).update({bill_status: upStatus, bill_updated_date: present})
 	//await knex('tbl_bill_detail').where("bdetail_bill_id", billId).update({bdetail_status: upStatus, bdetail_updated_date: present})
 
-	const resultProductBdetail = await knex('tbl_bill')
+	var resultProductBdetail = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
 		.join('tbl_product', 'prod_id', 'bdetail_product_id')
 		.join('tbl_account', 'acc_id', 'bill_account_id')
@@ -527,8 +597,9 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 		let prodList = []
 		var count = 1
 		for (let i = index; i < resultProductBdetail.length; i++) {
-			if (i === 0) {
-				let prodObj = {
+			let prodObj = {}
+			if (resultProductBdetail[index].prod_id !== null) {
+				prodObj = {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
@@ -538,6 +609,21 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
 					prodPrice: resultProductBdetail[index].prod_price
 				}
+			}
+			else {
+				prodObj = {
+					productID: resultProductBdetail[index].bdetail_product_id,
+					prodName: null,
+					prodCategory: null,
+					prodQuantity: null,
+					prodDescription: 'Sản phẩm đã bị xóa',
+					prodCreatedDate: null,
+					prodUpdatedDate: null,
+					prodPrice: resultProductBdetail[index].bdetail_product_price
+				}				
+			}
+			if (i === 0) {
+
 				let imageLink = resultProductBdetail[i].prod_img_data
 				prodObj['images'] = imageLink
 				prodList.push(prodObj)
@@ -552,16 +638,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 
 			if(i!== 0 && checkOneDetail === true){
 				if(count !== 2){
-					let prodObj = {
-						productID: resultProductBdetail[index].prod_id,
-						prodName: resultProductBdetail[index].prod_name,
-						prodCategory: resultProductBdetail[index].cate_name,
-						prodQuantity: resultProductBdetail[index].prod_amount,
-						prodDescription: resultProductBdetail[index].prod_description,
-						prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-						prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-						prodPrice: resultProductBdetail[index].prod_price
-					}
+
 					let imageLink = resultProductBdetail[index].prod_img_data
 					prodObj['images'] = imageLink
 					
@@ -598,15 +675,29 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 				}
 			}
 
-			let prodObj = {
-				productID: resultProductBdetail[index].prod_id,
-				prodName: resultProductBdetail[index].prod_name,
-				prodCategory: resultProductBdetail[index].cate_name,
-				prodQuantity: resultProductBdetail[index].prod_amount,
-				prodDescription: resultProductBdetail[index].prod_description,
-				prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-				prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-				prodPrice: resultProductBdetail[index].prod_price
+			if (resultProductBdetail[index].prod_id !== null) {
+				prodObj = {
+					productID: resultProductBdetail[index].prod_id,
+					prodName: resultProductBdetail[index].prod_name,
+					prodCategory: resultProductBdetail[index].cate_name,
+					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodDescription: resultProductBdetail[index].prod_description,
+					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+					prodPrice: resultProductBdetail[index].prod_price
+				}
+			}
+			else {
+				prodObj = {
+					productID: resultProductBdetail[index].bdetail_product_id,
+					prodName: null,
+					prodCategory: null,
+					prodQuantity: null,
+					prodDescription: 'Sản phẩm đã bị xóa',
+					prodCreatedDate: null,
+					prodUpdatedDate: null,
+					prodPrice: resultProductBdetail[index].bdetail_product_price
+				}				
 			}
 			let imageLink = resultProductBdetail[index].prod_img_data
 			prodObj['images'] = imageLink
@@ -765,8 +856,10 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		let prodList = []
 		var count = 1
 		for (let i = index; i < resultProductBdetail.length; i++) {
-			if (i === 0) {
-				let prodObj = {
+
+			let prodObj = {}
+			if (resultProductBdetail[index].prod_id !== null) {
+				prodObj = {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
@@ -776,6 +869,22 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
 					prodPrice: resultProductBdetail[index].prod_price
 				}
+			}
+			else {
+				prodObj = {
+					productID: resultProductBdetail[index].bdetail_product_id,
+					prodName: null,
+					prodCategory: null,
+					prodQuantity: null,
+					prodDescription: 'Sản phẩm đã bị xóa',
+					prodCreatedDate: null,
+					prodUpdatedDate: null,
+					prodPrice: resultProductBdetail[index].bdetail_product_price
+				}				
+			}
+
+			if (i === 0) {
+
 				let imageLink = resultProductBdetail[i].prod_img_data
 				prodObj['images'] = imageLink
 				prodList.push(prodObj)
@@ -790,16 +899,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 
 			if(i!== 0 && checkOneDetail === true){
 				if(count !== 2){
-					let prodObj = {
-						productID: resultProductBdetail[index].prod_id,
-						prodName: resultProductBdetail[index].prod_name,
-						prodCategory: resultProductBdetail[index].cate_name,
-						prodQuantity: resultProductBdetail[index].prod_amount,
-						prodDescription: resultProductBdetail[index].prod_description,
-						prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-						prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-						prodPrice: resultProductBdetail[index].prod_price
-					}
+
 					let imageLink = resultProductBdetail[index].prod_img_data
 					prodObj['images'] = imageLink
 
@@ -835,15 +935,29 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 				}
 			}
 
-			let prodObj = {
-				productID: resultProductBdetail[index].prod_id,
-				prodName: resultProductBdetail[index].prod_name,
-				prodCategory: resultProductBdetail[index].cate_name,
-				prodQuantity: resultProductBdetail[index].prod_amount,
-				prodDescription: resultProductBdetail[index].prod_description,
-				prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
-				prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
-				prodPrice: resultProductBdetail[index].prod_price
+			if (resultProductBdetail[index].prod_id !== null) {
+				prodObj = {
+					productID: resultProductBdetail[index].prod_id,
+					prodName: resultProductBdetail[index].prod_name,
+					prodCategory: resultProductBdetail[index].cate_name,
+					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodDescription: resultProductBdetail[index].prod_description,
+					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
+					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
+					prodPrice: resultProductBdetail[index].prod_price
+				}
+			}
+			else {
+				prodObj = {
+					productID: resultProductBdetail[index].bdetail_product_id,
+					prodName: null,
+					prodCategory: null,
+					prodQuantity: null,
+					prodDescription: 'Sản phẩm đã bị xóa',
+					prodCreatedDate: null,
+					prodUpdatedDate: null,
+					prodPrice: resultProductBdetail[index].bdetail_product_price
+				}				
 			}
 			let imageLink = resultProductBdetail[index].prod_img_data
 			prodObj['images'] = imageLink
