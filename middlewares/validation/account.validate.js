@@ -125,7 +125,7 @@ const avatar = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-    		accId: { type: 'integer' },
+    		accId: { type: 'string', pattern: '^\\d+$' },
   		},
 		required: [],
 		additionalProperties: true

@@ -163,7 +163,7 @@ router.post('/update', accountValidation.updateAccount, async (req, res) => {
 			acc_updated_date: date_ob
 		}
 
-		await knex('tbl_account').where('acc_id', accIdFlag).update(account)
+		await knex('tbl_account').where('acc_id', req.account.accId).update(account)
 
 		return res.status(200).json({
 			statusCode: successCode
@@ -338,7 +338,7 @@ router.post('/update-status', accountValidation.updateStatusAccount, async (req,
 		})
 	}
 
-	if (accStatus !== 0 || accStatus !== 1 && accStatus !== 2) {
+	if (accStatus !== 0 && accStatus !== 1 && accStatus !== 2) {
 		return res.status(400).json({
 			statusCode: errorCode,
 			errorMessage: `Invalid Status`
