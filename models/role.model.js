@@ -5,7 +5,7 @@ const findById = async (roleId) => {
 					.where({ rol_id: roleId })
 }
 
-const checkAdminRole = async (roleId) => {
+const checkAdminRole = (roleId) => {
 	if (roleId === 'ADM') {
 		return true
 	}
