@@ -6,7 +6,7 @@ const updateAccountPassword = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-		  accId: { type: 'string', pattern: '^\\d+$' },
+		  accId: { type: 'integer' },
 		  accOldPassword: { type: 'string', pattern: '' },
 		  accNewPassword: { type: 'string', pattern: '', minLength: 1 },
 		  accConfirmPassword: { type: 'string', pattern: '', minLength: 1 },
@@ -36,7 +36,7 @@ const updateRoleAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string', pattern: '^\\d+$' },
+			accId: { type: 'integer' },
 			accRole: { type: 'string', pattern: '' , maxLength: 5 },
   		},
 		required: ['accId', 'accRole'],
@@ -64,7 +64,7 @@ const updateStatusAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string', pattern: '^\\d+$' },
+			accId: { type: 'integer' },
 			accStatus: { type: 'integer' },
   		},
 		required: ['accId', 'accStatus'],
@@ -92,7 +92,7 @@ const updateAccount = (req, res, next) => {
 	const shema = {
   		type: 'object',
   		properties: {
-			accId: { type: 'string', pattern: '^\\d+$' },
+			accId: { type: 'integer' },
 			accFullName: {type: 'string', pattern: '' },
     		accEmail: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
     		accPhoneNumber: { type: 'string', pattern: '', maxLength: 15 },
