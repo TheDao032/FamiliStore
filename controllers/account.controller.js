@@ -338,7 +338,7 @@ router.post('/update-status', accountValidation.updateStatusAccount, async (req,
 		})
 	}
 
-	if (accStatus !== 0 || accStatus !== 1 || accStatus !== 2) {
+	if (accStatus !== 0 && accStatus !== 1 && accStatus !== 2) {
 		return res.status(400).json({
 			statusCode: errorCode,
 			errorMessage: `Invalid Status`
