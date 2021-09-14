@@ -103,28 +103,28 @@ describe("POST /list/filter", () => {
     })
 })
 
-// describe("POST /cancel-bill", () => {
-//     test("Respone With A 200 Status Code", async () => {
-//         const loginRespone = await request(server).post('/api/authentication/login').send({
-//             email: 'vosithien1234@gmail.com',
-//             passWord: '1234567'
-//         })
+describe("POST /cancel-bill", () => {
+    test("Respone With A 200 Status Code", async () => {
+        const loginRespone = await request(server).post('/api/authentication/login').send({
+            email: 'vosithien1234@gmail.com',
+            passWord: '1234567'
+        })
 
-//         expect(loginRespone.statusCode).toBe(200)
+        expect(loginRespone.statusCode).toBe(200)
 
-//         const { data } = loginRespone.body
+        const { data } = loginRespone.body
 
-// 		const allBills = await billModel.findAll()
+		const allBills = await billModel.findAll()
 
-//         const billListRespone = await request(server).post('/api/bill/cancel-bill')
-//                                             .set('Authorization', data.accessToken)
-//                                             .send({
-//                                                 billId: allBills[0].bill_id
-//                                             })
+        const billListRespone = await request(server).post('/api/bill/cancel-bill')
+                                            .set('Authorization', data.accessToken)
+                                            .send({
+                                                billId: allBills[0].bill_id
+                                            })
 
-//         expect(billListRespone.statusCode).toBe(200)
-//     })
-// })
+        expect(billListRespone.statusCode).toBe(200)
+    })
+})
 
 // describe("POST /confirm-bill", () => {
 //     test("Respone With A 200 Status Code", async () => {
