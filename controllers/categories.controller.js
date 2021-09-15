@@ -293,9 +293,8 @@ router.get('/product-with-cate', categoriesValidation.listSubCategory, async (re
 						prodDescription: prodInfo.prod_description,
 						prodImage: productImageInfo ? productImageInfo.prod_img_data : ''
 					}
-					if (productsWithCate.length < 10) {
-						productsWithCate.push(prodInfoJson)
-					}
+
+					productsWithCate.push(prodInfoJson)
 				})
 			})
 			const resultInfo = {
