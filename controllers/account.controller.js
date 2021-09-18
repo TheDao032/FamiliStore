@@ -15,11 +15,14 @@ const errorCode = 1
 
 router.get('/list', async (req, res) => {
 	const { page, limit } = req.query
+	const { accId } = req.account
 
 	const allAccount = await accountModel.findAll()
 
+	const filterAccount = allAccount.filter((item) => item.acc_id !== accId)
+
 	const result = await Promise.all([
-		allAccount.map((element) => {
+		filterAccount.map((element) => {
 			return {
 				accId: element.acc_id,
 				accEmail: element.acc_email,
