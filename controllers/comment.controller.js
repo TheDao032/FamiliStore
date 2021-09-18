@@ -70,7 +70,15 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 
 router.post('/add', validator.newComment, async (req, res) => {
-	const { productID, content, vote } = req.body
+	const { productID, content, vote, billID } = req.body
+	
+	if(content.length == 0){
+		return res.status(400).json({
+			errorMessage: "Comment content cannot be blank!",
+			statusCode: errorCode
+		})
+	}
+
 	var prod = await knex('tbl_product').where('prod_id', productID)
 
 	if (prod.length === 0) {
@@ -79,7 +87,15 @@ router.post('/add', validator.newComment, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-
+	
+	var cmt = await knex('tbl_comment').where('cmt_acc_id', req.account.accId).andWhere('cmt_product_id', productID).andWhere('cmt_bill_id', billID)
+	
+	if(cmt.length > 0){
+		return res.status(400).json({
+			errorMessage: "You've already voted for this product !",
+			statusCode: errorCode
+		})
+	}
 
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
@@ -94,6 +110,7 @@ router.post('/add', validator.newComment, async (req, res) => {
 		cmt_acc_id: req.account.accId,
 		cmt_content: content,
 		cmt_vote: vote,
+		cmt_bill_id: billID,
 		cmt_create_date: moment().format('YYYY-MM-DD HH:mm:ss'),
 		cmt_update_date: moment().format('YYYY-MM-DD HH:mm:ss')
 	}).returning('*')
