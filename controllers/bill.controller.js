@@ -847,7 +847,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			status = 'cancel'
 		}
 
-		//return bill object
+		//return bill object ===============================
 		var billItem = {
 			billId: resultProductBdetail[index].bill_id,
 			accountID: resultProductBdetail[index].bill_account_id,
