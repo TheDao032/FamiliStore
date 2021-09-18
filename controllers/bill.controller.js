@@ -546,6 +546,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
 
 	var resultOne = await knex.raw(`with bill as (select * from tbl_bill
+		order by bill_created_date desc
 		limit ${limit}
 		offset ${offset}
 	)
@@ -604,7 +605,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
-					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodQuantity: resultProductBdetail[index].bdetail_quantity,
 					prodDescription: resultProductBdetail[index].prod_description,
 					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
@@ -681,7 +682,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
-					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodQuantity: resultProductBdetail[index].bdetail_quantity,
 					prodDescription: resultProductBdetail[index].prod_description,
 					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
@@ -781,6 +782,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
 	
 		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status}
+			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
 		)
@@ -806,6 +808,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
 
 		var resultOne = await knex.raw(`with bill as (select * from tbl_bill
+			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
 		)
@@ -844,7 +847,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			status = 'cancel'
 		}
 
-		//return bill object
+		//return bill object ===============================
 		var billItem = {
 			billId: resultProductBdetail[index].bill_id,
 			accountID: resultProductBdetail[index].bill_account_id,
@@ -866,7 +869,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
-					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodQuantity: resultProductBdetail[index].bdetail_quantity,
 					prodDescription: resultProductBdetail[index].prod_description,
 					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
@@ -943,7 +946,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					productID: resultProductBdetail[index].prod_id,
 					prodName: resultProductBdetail[index].prod_name,
 					prodCategory: resultProductBdetail[index].cate_name,
-					prodQuantity: resultProductBdetail[index].prod_amount,
+					prodQuantity: resultProductBdetail[index].bdetail_quantity,
 					prodDescription: resultProductBdetail[index].prod_description,
 					prodCreatedDate: moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY'),
 					prodUpdatedDate: moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY') == 'Invalid date' ? moment(resultProductBdetail[index].prod_created_date).format('DD/MM/YYYY') : moment(resultProductBdetail[index].prod_updated_date).format('DD/MM/YYYY'),
