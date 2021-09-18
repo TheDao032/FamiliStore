@@ -9,8 +9,8 @@ cron.schedule('* * * * * *', async function() {
     
     await knex.raw(`update tbl_bill
     set bill_status = 2
-    where DATE_PART('day', '${currentTimeStamp}'::timestamp - bill_created_date::timestamp ) * 24 + 
-                  DATE_PART('hour', '${currentTimeStamp}'::timestamp - bill_created_date::timestamp) >= 48 and bill_status = 1`)
+    where DATE_PART('day', '${currentTimeStamp}'::timestamp - bill_updated_date::timestamp ) * 24 + 
+                  DATE_PART('hour', '${currentTimeStamp}'::timestamp - bill_updated_date::timestamp) >= 48 and bill_status = 1`)
 });
 
 

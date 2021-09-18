@@ -269,7 +269,7 @@ router.post('/update-image/:id', async (req, res) => {
 	prodImgNumber = prodImgNumber.rows[0].count
 
 
-	if (5 - prodImgNumber + numberOfOldImage - numberOfNewImage <= 0) {
+	if (prodImgNumber - numberOfOldImage + numberOfNewImage > 5) {
 		return res.status(400).json({
 			errorMessage: "Number of image to update and number of image to delete is not valid, note that one product can have only 5 images",
 			statusCode: errorCode
