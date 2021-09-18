@@ -271,19 +271,20 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 		})
 	}
 
-	//cat not exists
+
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
-		where tbl_product.prod_category_id = ${catID}
+		where tbl_product.prod_category_id = ${catID} and prod_status != 1 and prod_amount > 0
 		order by prod_created_date desc
 		offset ${offset}
 		limit ${limit}
 	)
-	select pr.*,img.prod_img_data from product pr left join tbl_product_images img
-	on img.prod_img_product_id = pr.prod_id`)
+	select pr.*,img.prod_img_data, cat.* from product pr 
+	left join tbl_product_images img on img.prod_img_product_id = pr.prod_id 
+	left join tbl_categories cat on cat.cate_id = pr.prod_category_id`)
 
 	result = result.rows
-	
+
 	//process return list
 	var prodList = []
 
@@ -293,6 +294,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 			prod_id: result[index].prod_id,
 			prod_name: result[index].prod_name,
 			prod_category_id: result[index].prod_category_id,
+			prod_category_name: result[index].cate_name,
 			prod_amount: result[index].prod_amount,
 			prod_description: result[index].prod_description,
 			prod_created_date: moment(result[index].prod_created_date).format('DD/MM/YYYY'),
