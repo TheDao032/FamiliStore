@@ -294,7 +294,9 @@ router.get('/product-with-cate', categoriesValidation.listSubCategory, async (re
 						prodImage: productImageInfo ? productImageInfo.prod_img_data : ''
 					}
 
-					productsWithCate.push(prodInfoJson)
+					if (prodInfoJson.prodAmount !== 0) {
+						productsWithCate.push(prodInfoJson)
+					}
 				})
 			})
 			const resultInfo = {
