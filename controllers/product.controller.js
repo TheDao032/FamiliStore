@@ -302,11 +302,12 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 			prod_price: result[index].prod_price,
 		}
 		let imageLink = result[index].prod_img_data
-
+		//push the first record to prodLIst
 		if (index === 0) {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
 		}
+		//push the next first record to prod list
 		if (result[index].prod_id !== prodList[prodList.length - 1].prod_id) {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
