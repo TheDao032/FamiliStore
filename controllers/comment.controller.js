@@ -3,6 +3,7 @@ const router = express.Router()
 const knex = require('../utils/dbConnection')
 const moment = require('moment');
 const validator = require('../middlewares/validation/comment.validate')
+const environment = require('../environments/environment')
 const successCode = 0
 const errorCode = 1
 
@@ -41,7 +42,7 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 
 	var returnedObject = {
-		numberOfUserComment : numberOfUserComment.rows[0].count,
+		numberOfUserComment: numberOfUserComment.rows[0].count,
 		numberOfComment: numberOfComment.rows[0].count,
 		numberOfPage: numberPage,
 		avgStar: avgStar.rows[0].round,
@@ -71,8 +72,8 @@ router.post('/list', validator.listComment, async (req, res) => {
 
 router.post('/add', validator.newComment, async (req, res) => {
 	const { productID, content, vote, billID } = req.body
-	
-	if(content.length == 0){
+
+	if (content.length == 0) {
 		return res.status(400).json({
 			errorMessage: "Comment content cannot be blank!",
 			statusCode: errorCode
@@ -87,16 +88,17 @@ router.post('/add', validator.newComment, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	
-	var cmt = await knex('tbl_comment').where('cmt_acc_id', req.account.accId).andWhere('cmt_product_id', productID).andWhere('cmt_bill_id', billID)
-	
-	if(cmt.length > 0){
-		return res.status(400).json({
-			errorMessage: "You've already voted for this product !",
-			statusCode: errorCode
-		})
-	}
 
+	if ((process.env.NODE_ENV != 'test')) {
+		var cmt = await knex('tbl_comment').where('cmt_acc_id', req.account.accId).andWhere('cmt_product_id', productID).andWhere('cmt_bill_id', billID)
+
+		if (cmt.length > 0) {
+			return res.status(400).json({
+				errorMessage: "You've already voted for this product !",
+				statusCode: errorCode
+			})
+		}
+	}
 	var isNotValid = vote > 5 || vote < 0
 	if (isNotValid) {
 		return res.status(400).json({
@@ -130,7 +132,7 @@ router.post('/update', validator.updateComment, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	console.log(req.account)
+
 	if (req.account.accRole !== 'ADM') {
 		var comment = await knex('tbl_comment').where('cmt_id', commentID).andWhere('cmt_acc_id', req.account.accId)
 		if (comment.length === 0) {
