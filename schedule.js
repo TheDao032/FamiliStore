@@ -1,9 +1,9 @@
 
 const cron = require('node-cron');
-const knex = require('../FamilyStore/utils/dbConnection')
+const knex = require('./utils/dbConnection')
 const moment = require('moment')
 
-cron.schedule('* * * * * * *', async function() {
+cron.schedule('* * * * * *', async function() {
   //run every minute
     var currentTimeStamp = moment().format('YYYY-MM-DD HH:mm:ss')
     
