@@ -426,7 +426,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 	var result = await knex.raw(`with product as (
 		SELECT *
 		FROM tbl_product
-		WHERE ts @@ to_tsquery('english', '${prodName}')
+		WHERE ts @@ to_tsquery('english', '${prodName}') and prod_status != 1 and prod_amount > 0
 		limit ${limit}
 		offset ${offset}
 	)

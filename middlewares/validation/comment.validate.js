@@ -35,6 +35,7 @@ const newComment = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
+			billID: { type: 'integer' },
 			productID: { type: 'integer' },
 			content: { type: 'string', pattern: '' ,  maxLength: 200},
 			vote: { type: 'integer' }
