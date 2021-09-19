@@ -524,7 +524,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 	const { limit, page } = req.body
 	const offset = limit * (page - 1)
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -543,7 +543,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 		left join tbl_categories cat on cat.cate_id = product.prod_category_id
 		order by bill.bill_id
 	)
-	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
+	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 
 	var resultOne = await knex.raw(`with bill as (select * from tbl_bill
 		order by bill_created_date desc
@@ -749,7 +749,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		})
 	}
 
-	if (page < 1 || limit < 1 || limit > 10) {
+	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
 			statusCode: errorCode
@@ -779,7 +779,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			left join tbl_product product on product.prod_id = detail.bdetail_product_id
 			left join tbl_categories cat on cat.cate_id = product.prod_category_id
 		)
-		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
+		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 	
 		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status}
 			order by bill_created_date desc
@@ -805,7 +805,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			left join tbl_product product on product.prod_id = detail.bdetail_product_id
 			left join tbl_categories cat on cat.cate_id = product.prod_category_id
 		)
-		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc`)
+		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 
 		var resultOne = await knex.raw(`with bill as (select * from tbl_bill
 			order by bill_created_date desc
@@ -847,7 +847,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			status = 'cancel'
 		}
 
-		//return bill object ===============================
+		//return bill object
 		var billItem = {
 			billId: resultProductBdetail[index].bill_id,
 			accountID: resultProductBdetail[index].bill_account_id,
@@ -862,7 +862,6 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		let prodList = []
 		var count = 1
 		for (let i = index; i < resultProductBdetail.length; i++) {
-
 			let prodObj = {}
 			if (resultProductBdetail[index].prod_id !== null) {
 				prodObj = {
@@ -888,7 +887,6 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					prodPrice: resultProductBdetail[index].bdetail_product_price
 				}				
 			}
-
 			if (i === 0) {
 
 				let imageLink = resultProductBdetail[i].prod_img_data
@@ -908,7 +906,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 
 					let imageLink = resultProductBdetail[index].prod_img_data
 					prodObj['images'] = imageLink
-
+					
 					var checkUniqueProd = false
 
 					var exists = Object.keys(prodList).some(function (key) {
@@ -919,6 +917,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 					if(checkUniqueProd === false){
 						prodList.push(prodObj)
 					}
+
 				}
 				count++
 				index = i + 1
@@ -982,7 +981,6 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			}
 		}
 		billItem['billDetailList'] = prodList
-
 		var checkUnique = false
 
 		var exists = Object.keys(billList).some(function(key) {
