@@ -37,7 +37,8 @@ const register = (req, res, next) => {
     		passWord: { type: 'string', pattern: '', minLength: 1 },
     		email: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{3,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
     		phoneNumber: { type: 'string', pattern: '', maxLength: 15 },
-    		role: { type: 'string', pattern: '', maxLength: 5}
+    		role: { type: 'string', pattern: '', maxLength: 5},
+			fullName: { type: 'string', pattern: '', maxLength: 90}
   		},
 		required: ['passWord', 'email'],
 		additionalProperties: true
