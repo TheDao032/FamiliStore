@@ -62,7 +62,7 @@ const listByCategory = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			catID: {type : 'integer', pattern : ''},
+			catID: {type : 'integer'},
 			page: { type: 'integer'},
 			limit: { type: 'integer'}
 		},

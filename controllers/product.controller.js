@@ -8,6 +8,7 @@ const commonService = require('../services/commonService')
 const validator = require('../middlewares/validation/product.validate')
 const productModel = require('../models/product.model')
 
+
 const successCode = 0
 const errorCode = 1
 
@@ -253,9 +254,18 @@ router.post('/list-suggestion', validator.listSuggestion, async (req, res) => {
 router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 	const { limit, page, catID } = req.body
 	const offset = limit * (page - 1)
+
+	var whereClause = 'and prod_status != 1 and prod_amount > 0'
+	if (req.hasHeader) {
+		if (req.account.accRole == 'ADM') {
+			whereClause = ''
+		}
+	}
+
 	var numberPage = await knex.raw(`select count(distinct tbl_product.prod_id) 
 	from tbl_product 
-	where tbl_product.prod_category_id = ${catID}`)
+	where tbl_product.prod_category_id = ${catID} ${whereClause}`)
+
 	numberPage = Number(numberPage.rows[0].count)
 	if (numberPage > limit) {
 		numberPage = Math.ceil(numberPage / limit)
@@ -274,7 +284,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 
 	var result = await knex.raw(`with product as(
 		select * from tbl_product
-		where tbl_product.prod_category_id = ${catID} and prod_status != 1 and prod_amount > 0
+		where tbl_product.prod_category_id = ${catID} ${whereClause}
 		order by prod_created_date desc
 		offset ${offset}
 		limit ${limit}
@@ -315,7 +325,7 @@ router.post('/list-by-cat', validator.listByCategory, async (req, res) => {
 		index += 1
 	}
 
-	var numberOfProduct = await knex.raw(`select count(prod_id) from tbl_categories join tbl_product on tbl_product.prod_category_id = tbl_categories.cate_id where tbl_categories.cate_id = ${catID}`)
+	var numberOfProduct = await knex.raw(`select count(prod_id) from tbl_categories join tbl_product on tbl_product.prod_category_id = tbl_categories.cate_id where tbl_categories.cate_id = ${catID} ${whereClause}`)
 
 
 	if (result) {
@@ -375,34 +385,41 @@ router.get('/details/:id', async (req, res) => {
 
 router.post('/search', validator.productSearching, async (req, res) => {
 	//I don't want to change it to const and take time to do coding for some bull shit thing, so var is the best choice
-	var { prodName, limit, page, sortBy, filter} = req.body
+	var { prodName, limit, page, sortBy, filter } = req.body
 	var offset = limit * (page - 1)
-	
-	if (filter == undefined){
+
+	if (filter == undefined) {
 		filter = 'prod_created_date'
-		
+
 	}
-	
-	if (sortBy == undefined){
+
+	if (sortBy == undefined) {
 		sortBy = 'asc'
-		
+
 	}
-	
-	if(filter != 'prod_name' && filter != 'prod_amount' && filter != 'prod_created_date' && filter != 'prod_updated_date' && filter != 'prod_price'){
+
+	var whereClause = 'and prod_status != 1 and prod_amount > 0'
+	if (req.hasHeader) {
+		if (req.account.accRole == 'ADM') {
+			whereClause = ''
+		}
+	}
+
+	if (filter != 'prod_name' && filter != 'prod_amount' && filter != 'prod_created_date' && filter != 'prod_updated_date' && filter != 'prod_price') {
 		return res.status(400).json({
 			errorMessage: "filter is invalid!",
 			statusCode: errorCode
 		})
 	}
 
-	
-	if(sortBy && sortBy != 'asc' && sortBy != 'desc'){
+
+	if (sortBy && sortBy != 'asc' && sortBy != 'desc') {
 		return res.status(400).json({
 			errorMessage: "sort by is invalid!",
 			statusCode: errorCode
 		})
 	}
-	
+
 	if (page < 1 || limit < 1) {
 		return res.status(400).json({
 			errorMessage: "limit and page parameter is not valid",
@@ -412,7 +429,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 
 	var numberPage = await knex.raw(`SELECT count(prod_id)
 	FROM tbl_product
-	WHERE ts @@ to_tsquery('english', '${prodName}')`)
+	WHERE ts @@ to_tsquery('english', '${prodName}') ${whereClause}`)
 
 	numberPage = Number(numberPage.rows[0].count)
 	if (numberPage > limit) {
@@ -426,7 +443,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 	var result = await knex.raw(`with product as (
 		SELECT *
 		FROM tbl_product
-		WHERE ts @@ to_tsquery('english', '${prodName}') and prod_status != 1 and prod_amount > 0
+		WHERE ts @@ to_tsquery('english', '${prodName}') ${whereClause}
 		limit ${limit}
 		offset ${offset}
 	)
@@ -449,7 +466,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 			prod_price: result[index].prod_price,
 		}
 		let imageLink = result[index].prod_img_data
-		
+
 		if (index === 0) {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
@@ -458,16 +475,16 @@ router.post('/search', validator.productSearching, async (req, res) => {
 			prodObj['images'] = imageLink
 			prodList.push(prodObj)
 		}
-		
+
 		index += 1
 	}
-	
-	if(sortBy == 'asc')
-		prodList.sort(function(a,b){return a[filter] - b[filter]})
-	else if (sortBy == 'desc')
-		prodList.sort(function(a,b){return b[filter] - a[filter]})
 
-	var numberOfProduct = await knex.raw(`SELECT count(prod_id) FROM tbl_product WHERE ts @@ to_tsquery('english', '${prodName}')`)
+	if (sortBy == 'asc')
+		prodList.sort(function (a, b) { return a[filter] - b[filter] })
+	else if (sortBy == 'desc')
+		prodList.sort(function (a, b) { return b[filter] - a[filter] })
+
+	var numberOfProduct = await knex.raw(`SELECT count(prod_id) FROM tbl_product WHERE ts @@ to_tsquery('english', '${prodName}') ${whereClause}`)
 
 	if (result) {
 		return res.status(200).json({
