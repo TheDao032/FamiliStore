@@ -388,6 +388,7 @@ router.post('/search', validator.productSearching, async (req, res) => {
 	var { prodName, limit, page, sortBy, filter } = req.body
 	var offset = limit * (page - 1)
 
+	// handle string
 	prodName = prodName.trim()
 	prodName = prodName.replace(/\s+/g, ' ')
 	prodName = prodName.split(' ');
