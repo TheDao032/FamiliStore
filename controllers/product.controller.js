@@ -448,7 +448,8 @@ router.post('/search', validator.productSearching, async (req, res) => {
 		offset ${offset}
 	)
 	select pr.*,img.prod_img_data from product pr left join tbl_product_images img
-	on img.prod_img_product_id = pr.prod_id`)
+	on img.prod_img_product_id = pr.prod_id
+	order by ${filter} ${sortBy}`)
 	result = result.rows
 
 
@@ -478,12 +479,12 @@ router.post('/search', validator.productSearching, async (req, res) => {
 
 		index += 1
 	}
-
+	/*
 	if (sortBy == 'asc')
 		prodList.sort(function (a, b) { return a[filter] - b[filter] })
 	else if (sortBy == 'desc')
 		prodList.sort(function (a, b) { return b[filter] - a[filter] })
-
+	*/
 	var numberOfProduct = await knex.raw(`SELECT count(prod_id) FROM tbl_product WHERE ts @@ to_tsquery('english', '${prodName}') ${whereClause}`)
 
 	if (result) {
