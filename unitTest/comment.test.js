@@ -32,74 +32,74 @@ describe("POST /list", () => {
     })
 })
 
-describe("POST /add", () => {
-    test("Respone With A 200 Status Code", async () => {
-        const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
-        })
+// describe("POST /add", () => {
+//     test("Respone With A 200 Status Code", async () => {
+//         const loginRespone = await request(server).post('/api/authentication/login').send({
+//             email: 'nthedao2705@gmail.com',
+//             passWord: '2705'
+//         })
 
-        expect(loginRespone.statusCode).toBe(200)
+//         expect(loginRespone.statusCode).toBe(200)
 
-        const { data } = loginRespone.body
-		const allProducts = await productModel.findAll()
+//         const { data } = loginRespone.body
+// 		const allProducts = await productModel.findAll()
 
-        const randomNumber = Math.floor(Math.random() * (0 + allProducts.length))
+//         const randomNumber = Math.floor(Math.random() * (0 + allProducts.length))
 
-        const categoryListRespone = await request(server).post('/api/comment/add')
-                                            .set('Authorization', data.accessToken)
-                                            .send({
-                                                productID: allProducts[randomNumber].prod_id,
-                                                content: 'test_content',
-                                                vote: 2
-                                            })
-        const { cmtId } = categoryListRespone.body
-        staticComment = cmtId
+//         const categoryListRespone = await request(server).post('/api/comment/add')
+//                                             .set('Authorization', data.accessToken)
+//                                             .send({
+//                                                 productID: allProducts[randomNumber].prod_id,
+//                                                 content: 'test_content',
+//                                                 vote: 2
+//                                             })
+//         const { cmtId } = categoryListRespone.body
+//         staticComment = cmtId
 
-        expect(categoryListRespone.statusCode).toBe(200)
-    })
-})
+//         expect(categoryListRespone.statusCode).toBe(200)
+//     })
+// })
 
-describe("POST /update", () => {
-    test("Respone With A 200 Status Code", async () => {
-        const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
-        })
+// describe("POST /update", () => {
+//     test("Respone With A 200 Status Code", async () => {
+//         const loginRespone = await request(server).post('/api/authentication/login').send({
+//             email: 'nthedao2705@gmail.com',
+//             passWord: '2705'
+//         })
 
-        expect(loginRespone.statusCode).toBe(200)
+//         expect(loginRespone.statusCode).toBe(200)
 
-        const { data } = loginRespone.body
+//         const { data } = loginRespone.body
 
-        const categoryListRespone = await request(server).post('/api/comment/update')
-                                            .set('Authorization', data.accessToken)
-                                            .send({
-                                                commentID: staticComment,
-                                                content: 'test_content',
-                                                vote: 3
-                                            })
+//         const categoryListRespone = await request(server).post('/api/comment/update')
+//                                             .set('Authorization', data.accessToken)
+//                                             .send({
+//                                                 commentID: staticComment,
+//                                                 content: 'test_content',
+//                                                 vote: 3
+//                                             })
 
-        expect(categoryListRespone.statusCode).toBe(200)
-    })
-})
+//         expect(categoryListRespone.statusCode).toBe(200)
+//     })
+// })
 
-describe("POST /delete", () => {
-    test("Respone With A 200 Status Code", async () => {
-        const loginRespone = await request(server).post('/api/authentication/login').send({
-            email: 'nthedao2705@gmail.com',
-            passWord: '2705'
-        })
+// describe("POST /delete", () => {
+//     test("Respone With A 200 Status Code", async () => {
+//         const loginRespone = await request(server).post('/api/authentication/login').send({
+//             email: 'nthedao2705@gmail.com',
+//             passWord: '2705'
+//         })
 
-        expect(loginRespone.statusCode).toBe(200)
+//         expect(loginRespone.statusCode).toBe(200)
 
-        const { data } = loginRespone.body
+//         const { data } = loginRespone.body
         
-        const categoryListRespone = await request(server).post('/api/comment/delete')
-                                            .set('Authorization', data.accessToken)
-                                            .send({
-                                                commentID: staticComment
-                                            })
+//         const categoryListRespone = await request(server).post('/api/comment/delete')
+//                                             .set('Authorization', data.accessToken)
+//                                             .send({
+//                                                 commentID: staticComment
+//                                             })
 
-        expect(categoryListRespone.statusCode).toBe(200)
-    })
-})
+//         expect(categoryListRespone.statusCode).toBe(200)
+//     })
+// })

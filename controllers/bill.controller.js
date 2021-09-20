@@ -531,8 +531,10 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 		})
 	}
 
+	var accId = req.account['accId']
+
 	var resultProductBdetail = await knex.raw(`with billList as (	
-		with bill as (select * from tbl_bill
+		with bill as (select * from tbl_bill where bill_account_id = ${accId}
 			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
@@ -545,7 +547,7 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 	)
 	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 
-	var resultOne = await knex.raw(`with bill as (select * from tbl_bill
+	var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
 		order by bill_created_date desc
 		limit ${limit}
 		offset ${offset}
@@ -755,6 +757,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			statusCode: errorCode
 		})
 	}
+	var accId = req.account['accId']
 	if(filter !== 'all'){		
 		var status = 0
 		if(filter === 'shipping'){
@@ -769,7 +772,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			status = 3
 		}
 		var resultProductBdetail = await knex.raw(`with billList as (	
-			with bill as (select * from tbl_bill where bill_status = ${status}
+			with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
 				order by bill_created_date desc
 				limit ${limit}
 				offset ${offset}
@@ -781,7 +784,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		)
 		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 	
-		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status}
+		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
 			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
@@ -795,7 +798,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 	else{
 
 		var resultProductBdetail = await knex.raw(`with billList as (	
-			with bill as (select * from tbl_bill
+			with bill as (select * from tbl_bill where bill_account_id = ${accId}
 				order by bill_created_date desc
 				limit ${limit}
 				offset ${offset}
@@ -807,7 +810,7 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		)
 		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
 
-		var resultOne = await knex.raw(`with bill as (select * from tbl_bill
+		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
 			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
