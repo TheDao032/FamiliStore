@@ -388,6 +388,21 @@ router.post('/search', validator.productSearching, async (req, res) => {
 	var { prodName, limit, page, sortBy, filter } = req.body
 	var offset = limit * (page - 1)
 
+	prodName = prodName.trim()
+	prodName = prodName.replace(/\s+/g, ' ')
+	prodName = prodName.split(' ');
+	var SumName = ''
+	for(i = 0; i < prodName.length ; i++){
+		if(i < prodName.length-1){
+			SumName += prodName[i] + '&'
+		}
+		else{
+			SumName += prodName[i]
+		}
+		
+	}
+	prodName = SumName
+
 	if (filter == undefined) {
 		filter = 'prod_created_date'
 
