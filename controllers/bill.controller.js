@@ -152,25 +152,30 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 		})
 	}
 	while (index < resultProductBdetail.length) {
-
-		var expectedDate = new Date(resultProductBdetail[index].bill_created_date)
+		var expectedDate = new Date(resultProductBdetail[index].bill_updated_date)
 		expectedDate.setDate(expectedDate.getDate() + 2)
-
-		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'confirm'
+
+		var status = ''
+		if (resultProductBdetail[index].bill_status === 0) {
+			status = 'confirm'
+			expectedDate = '------------------------'
+		}
 
 		if (resultProductBdetail[index].bill_status === 1) {
 			status = 'shipping'
+			
 		}
 
 		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'delivered'
+			expectedDate = 'Delivered at: ' + expectedDate
 		}
 		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
+			expectedDate = '------------------------'
 		}
-
+		
 		var billItem = {
 			billId: resultProductBdetail[index].bill_id,
 			accountID: resultProductBdetail[index].bill_account_id,
@@ -182,12 +187,12 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 			fullNameReceiver: resultProductBdetail[index].bill_name_receiver,
 			phoneNumberReceiver: resultProductBdetail[index].bill_phone_receiver,
 			noteReceiver: resultProductBdetail[index].bill_note_receiver,
-			createDate: createdDate,
+			createDate: resultProductBdetail[index].bill_created_date,
 			expectedDate: expectedDate,
 		}
-
+		
 		let prodList = []
-
+		
 		for (let i = index; i < resultProductBdetail.length; i++) {
 			if (i === 0) {
 				let prodObj = {}
@@ -220,7 +225,7 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 				}
 				prodList.push(prodObj)
 			}
-
+			
 			if ((i >= resultProductBdetail.length - 1) || (resultProductBdetail[i + 1].bill_id != resultProductBdetail[i].bill_id)) {				
 				index = i + 1
 				moveToNextBill = true
@@ -235,7 +240,7 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 					index = i + 1
 				}
 			}
-
+		
 			let prodObj = {}
 			if (resultProductBdetail[index].prod_id !== null) {
 				prodObj = {
@@ -500,7 +505,7 @@ router.post('/confirm-bill', billValidation.cancelBill, async (req, res) => {
 		})
 	}
 
-
+	
 	var upStatus = 1
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
@@ -832,22 +837,32 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 
 	while (index < resultProductBdetail.length) {
 
-		var expectedDate = new Date(resultProductBdetail[index].bill_created_date)
-		expectedDate.setDate(expectedDate.getDate() + 2)
-
+		
 		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
+		//caculate expected date
+		
+		var expectedDate = new Date(resultProductBdetail[index].bill_updated_date)
+		expectedDate.setDate(expectedDate.getDate() + 2)
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'confirm'
+
+		var status = ''
+		if (resultProductBdetail[index].bill_status === 0) {
+			status = 'confirm'
+			expectedDate = '------------------------'
+		}
 
 		if (resultProductBdetail[index].bill_status === 1) {
 			status = 'shipping'
+			
 		}
 
 		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'delivered'
+			expectedDate = 'Delivered at: ' + expectedDate
 		}
 		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
+			expectedDate = '------------------------'
 		}
 
 		//return bill object
