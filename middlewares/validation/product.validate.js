@@ -92,7 +92,7 @@ const updateProduct = (req, res, next) => {
 	const shema = {
 		type: 'object',
 		properties: {
-			prodName: { type: 'string' , maxLength: 60},
+			prodName: { type: 'string'},
 			prodCategoryID: { type: 'integer' },
 			prodAmount: { type: 'integer'},
 			prodPrice: { type: 'integer' }
