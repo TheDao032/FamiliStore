@@ -187,7 +187,7 @@ router.post('/update/:id', validator.updateProduct, async (req, res) => {
 
 
 	if (prodName != undefined) {
-		if (prodName.length > 1000) {
+		if (prodName.length > 60) {
 			return res.status(400).json({
 				errorMessage: 'Product name accept only the length smaller than 60',
 				statusCode: errorCode
