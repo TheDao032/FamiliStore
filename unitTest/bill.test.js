@@ -58,7 +58,7 @@ describe("POST /details", () => {
         expect(billListRespone.statusCode).toBe(200)
     })
 })
-
+/*
 describe("POST /list", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
@@ -81,6 +81,7 @@ describe("POST /list", () => {
     })
 })
 
+*/
 describe("POST /list/filter", () => {
     test("Respone With A 200 Status Code", async () => {
         const loginRespone = await request(server).post('/api/authentication/login').send({
