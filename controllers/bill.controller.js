@@ -100,7 +100,7 @@ router.post('/add', billValidation.newBill, async (req, res) => {
 	//store procedure add bill, bill detail, update amount of product ..................
 	const result = await knex.raw('Call proc_update_product_insert_bill_detail(?,?,?,?,?,?,?,?,?,?,?,?)',
 									[listObjectToJson, req.account['accId'], accAddress, resultCheck['totalPrice'].toString(), priceShip, 
-									resultCheck['totalQuantity'],present, receiverName, receiverPhone, receiverNoteCheck, 0, ''])
+									resultCheck['totalQuantity'],present, receiverName, receiverPhone, receiverNoteCheck, 1, ''])
 
 	if(result.rows[0].resultcode === 1){
 		return res.status(400).json({
@@ -169,7 +169,9 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 
 		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'delivered'
-			expectedDate = 'Delivered at: ' + expectedDate
+			var updatedDate = new Date(resultProductBdetail[index].bill_updated_date)
+			updatedDate = moment(new Date(updatedDate)).format('DD/MM/YYYY HH:mm:ss')
+			expectedDate = 'Delivered at: ' + updatedDate
 		}
 		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
@@ -858,7 +860,9 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 
 		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'delivered'
-			expectedDate = 'Delivered at: ' + expectedDate
+			var updatedDate = new Date(resultProductBdetail[index].bill_updated_date)
+			updatedDate = moment(new Date(updatedDate)).format('DD/MM/YYYY HH:mm:ss')
+			expectedDate = 'Delivered at: ' + updatedDate
 		}
 		else if (resultProductBdetail[index].bill_status === 3) {
 			status = 'cancel'
