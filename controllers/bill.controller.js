@@ -157,21 +157,17 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
 
 		var status = ''
-		if (resultProductBdetail[index].bill_status === 0) {
-			status = 'confirm'
-			expectedDate = '------------------------'
-		}
 
-		if (resultProductBdetail[index].bill_status === 1) {
+		if (resultProductBdetail[index].bill_status === 0) {
 			status = 'shipping'
 			
 		}
 
-		else if (resultProductBdetail[index].bill_status === 2) {
+		else if (resultProductBdetail[index].bill_status === 1) {
 			status = 'delivered'
 			expectedDate = 'Delivered at: ' + expectedDate
 		}
-		else if (resultProductBdetail[index].bill_status === 3) {
+		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'cancel'
 			expectedDate = '------------------------'
 		}
@@ -290,9 +286,9 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 router.post('/update-status', billValidation.updateStatusBill, async (req, res) => {
 	const { billId, status } = req.body
 
-	if(!(status === 'shipping' || status === 'delivered' || status === 'cancel' || status === 'confirm')){
+	if(!(status === 'shipping' || status === 'delivered' || status === 'cancel')){
 		return res.status(400).json({
-			errorMessage: 'Status must be in 4 states(shipping, delivered, cancel, confirm)',
+			errorMessage: 'Status must be in 4 states(shipping, delivered, cancel)',
 			statusCode: errorCode
 		})
 	}
@@ -316,19 +312,15 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	}
 
 	//packing
-	if(status === 'confirm'){
+	if(status === 'shipping'){
 		upStatus = 0
 	}
 
-	else if(status === 'shipping'){
+	else if(status === 'delivered'){
 		upStatus = 1
 	}
 
-	else if(status === 'delivered'){
-		upStatus = 2
-	}
-
-	if( status === 'cancel' && resultBill[0].bill_status === 3){
+	if( status === 'cancel' && resultBill[0].bill_status === 2){
 		return res.status(200).json({
 			statusCode: successCode
 		})
@@ -345,7 +337,7 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 							) pro
 							where tbl_product.prod_id = pro.prod_id`)
 
-		upStatus = 3
+		upStatus = 2
 		// if(resultBill[0].bill_status !== 2){
 			
 		// }
@@ -359,7 +351,7 @@ router.post('/update-status', billValidation.updateStatusBill, async (req, res) 
 	}
 	var check = false
 
-	if(resultBill[0].bill_status === 3){
+	if(resultBill[0].bill_status === 2){
 
 		var listTotalProduct = await knex('tbl_bill')
 		.join('tbl_bill_detail', 'bdetail_bill_id', 'bill_id')
@@ -412,7 +404,7 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 		})
 	}
 
-	if( resultBill[0].bill_status === 3){
+	if( resultBill[0].bill_status === 2){
 		return res.status(200).json({
 			statusCode: successCode
 		})
@@ -435,7 +427,7 @@ router.post('/cancel-bill', billValidation.cancelBill, async (req, res) => {
 
 	}
 
-	var upStatus = 3
+	var upStatus = 2
 
 	let present = moment().format('YYYY-MM-DD HH:mm:ss')
 
@@ -535,33 +527,65 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 			statusCode: errorCode
 		})
 	}
+	var resultProductBdetail = {}
+	var resultOne = {}
 
-	var accId = req.account['accId']
-
-	var resultProductBdetail = await knex.raw(`with billList as (	
-		with bill as (select * from tbl_bill where bill_account_id = ${accId}
+	if(req.account['accRole'] === 'ADM'){
+		resultProductBdetail = await knex.raw(`with billList as (	
+			with bill as (select * from tbl_bill
+				order by bill_created_date desc
+				limit ${limit}
+				offset ${offset}
+			)
+			select * from bill 
+			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+			left join tbl_product product on product.prod_id = detail.bdetail_product_id
+			left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			order by bill.bill_id
+		)
+		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+	
+		resultOne = await knex.raw(`with bill as (select * from tbl_bill
 			order by bill_created_date desc
 			limit ${limit}
 			offset ${offset}
 		)
-		select * from bill 
+		select bill.bill_id, count(detail.bdetail_product_id) from bill 
 		left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
 		left join tbl_product product on product.prod_id = detail.bdetail_product_id
-		left join tbl_categories cat on cat.cate_id = product.prod_category_id
-		order by bill.bill_id
-	)
-	select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+		group by bill.bill_id 
+		having count(detail.bdetail_product_id) = 1 `)
+	
+	}
+	else{
 
-	var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
-		order by bill_created_date desc
-		limit ${limit}
-		offset ${offset}
-	)
-	select bill.bill_id, count(detail.bdetail_product_id) from bill 
-	left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
-	left join tbl_product product on product.prod_id = detail.bdetail_product_id
-	group by bill.bill_id 
-	having count(detail.bdetail_product_id) = 1 `)
+		var accId = req.account['accId']
+
+		resultProductBdetail = await knex.raw(`with billList as (	
+			with bill as (select * from tbl_bill where bill_account_id = ${accId}
+				order by bill_created_date desc
+				limit ${limit}
+				offset ${offset}
+			)
+			select * from bill 
+			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+			left join tbl_product product on product.prod_id = detail.bdetail_product_id
+			left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			order by bill.bill_id
+		)
+		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+
+		resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
+			order by bill_created_date desc
+			limit ${limit}
+			offset ${offset}
+		)
+		select bill.bill_id, count(detail.bdetail_product_id) from bill 
+		left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+		left join tbl_product product on product.prod_id = detail.bdetail_product_id
+		group by bill.bill_id 
+		having count(detail.bdetail_product_id) = 1 `)
+	}
 
 	resultOne = resultOne.rows
 	resultProductBdetail = resultProductBdetail.rows	
@@ -573,22 +597,28 @@ router.post('/list', billValidation.listBill, async (req, res) => {
 
 	while (index < resultProductBdetail.length) {
 
+		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
+		//caculate expected date
+		
 		var expectedDate = new Date(resultProductBdetail[index].bill_created_date)
 		expectedDate.setDate(expectedDate.getDate() + 2)
-
-		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
-		var status = 'confirm'
 
-		if (resultProductBdetail[index].bill_status === 1) {
+		var status = ''
+
+		if (resultProductBdetail[index].bill_status === 0) {
 			status = 'shipping'
+			expectedDate = 'Delivered at: ' + expectedDate
+			
 		}
 
-		else if (resultProductBdetail[index].bill_status === 2) {
+		else if (resultProductBdetail[index].bill_status === 1) {
 			status = 'delivered'
+			expectedDate = 'Delivered at: ' + expectedDate
 		}
-		else if (resultProductBdetail[index].bill_status === 3) {
+		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'cancel'
+			expectedDate = '------------------------'
 		}
 
 		//return bill object
@@ -749,9 +779,9 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 	const offset = limit * (page - 1)
 	const { filter } = req.params
 
-	if(!(filter === 'all' || filter === 'delivered' || filter === 'shipping' || filter === 'confirm' || filter === 'cancel')){
+	if(!(filter === 'all' || filter === 'delivered' || filter === 'shipping' || filter === 'cancel')){
 		return res.status(400).json({
-			errorMessage: 'filter must be in 5 states(all, delivered, shipping, confirm, cancel)',
+			errorMessage: 'filter must be in 5 states(all, delivered, shipping, cancel)',
 			statusCode: errorCode
 		})
 	}
@@ -762,69 +792,133 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 			statusCode: errorCode
 		})
 	}
-	var accId = req.account['accId']
-	if(filter !== 'all'){		
-		var status = 0
-		if(filter === 'shipping'){
-			status = 1
-		}
+	var resultProductBdetail = {}
+	var resultOne = {}
 
-		else if(filter === 'delivered'){
-			status = 2
-		}
-
-		else if(filter === 'cancel'){
-			status = 3
-		}
-		var resultProductBdetail = await knex.raw(`with billList as (	
-			with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
+	if(req.account['accRole'] === 'ADM'){
+		if(filter !== 'all'){		
+			var status = 0
+	
+			if(filter === 'delivered'){
+				status = 1
+			}
+	
+			else if(filter === 'cancel'){
+				status = 2
+			}
+			resultProductBdetail = await knex.raw(`with billList as (	
+				with bill as (select * from tbl_bill where bill_status = ${status}
+					order by bill_created_date desc
+					limit ${limit}
+					offset ${offset}
+				)
+				select * from bill 
+				left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+				left join tbl_product product on product.prod_id = detail.bdetail_product_id
+				left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			)
+			select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+		
+			resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status}
 				order by bill_created_date desc
 				limit ${limit}
 				offset ${offset}
 			)
-			select * from bill 
+			select bill.bill_id, count(detail.bdetail_product_id) from bill 
 			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
 			left join tbl_product product on product.prod_id = detail.bdetail_product_id
-			left join tbl_categories cat on cat.cate_id = product.prod_category_id
-		)
-		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+			group by bill.bill_id
+			having count(detail.bdetail_product_id) = 1`)
+		}
+		else{
 	
-		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
-			order by bill_created_date desc
-			limit ${limit}
-			offset ${offset}
-		)
-		select bill.bill_id, count(detail.bdetail_product_id) from bill 
-		left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
-		left join tbl_product product on product.prod_id = detail.bdetail_product_id
-		group by bill.bill_id
-		having count(detail.bdetail_product_id) = 1`)
+			resultProductBdetail = await knex.raw(`with billList as (	
+				with bill as (select * from tbl_bill
+					order by bill_created_date desc
+					limit ${limit}
+					offset ${offset}
+				)
+				select * from bill 
+				left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+				left join tbl_product product on product.prod_id = detail.bdetail_product_id
+				left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			)
+			select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+	
+			resultOne = await knex.raw(`with bill as (select * from tbl_bill
+				order by bill_created_date desc
+				limit ${limit}
+				offset ${offset}
+			)
+			select bill.bill_id, count(detail.bdetail_product_id) from bill 
+			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+			left join tbl_product product on product.prod_id = detail.bdetail_product_id
+			group by bill.bill_id
+			having count(detail.bdetail_product_id) = 1`)
+		}
 	}
 	else{
-
-		var resultProductBdetail = await knex.raw(`with billList as (	
-			with bill as (select * from tbl_bill where bill_account_id = ${accId}
+		var accId = req.account['accId']
+		if(filter !== 'all'){		
+			var status = 0
+	
+			if(filter === 'delivered'){
+				status = 1
+			}
+	
+			else if(filter === 'cancel'){
+				status = 2
+			}
+			resultProductBdetail = await knex.raw(`with billList as (	
+				with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
+					order by bill_created_date desc
+					limit ${limit}
+					offset ${offset}
+				)
+				select * from bill 
+				left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+				left join tbl_product product on product.prod_id = detail.bdetail_product_id
+				left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			)
+			select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+		
+			resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_status = ${status} and bill_account_id = ${accId}
 				order by bill_created_date desc
 				limit ${limit}
 				offset ${offset}
 			)
-			select * from bill 
+			select bill.bill_id, count(detail.bdetail_product_id) from bill 
 			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
 			left join tbl_product product on product.prod_id = detail.bdetail_product_id
-			left join tbl_categories cat on cat.cate_id = product.prod_category_id
-		)
-		select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+			group by bill.bill_id
+			having count(detail.bdetail_product_id) = 1`)
+		}
+		else{
 
-		var resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
-			order by bill_created_date desc
-			limit ${limit}
-			offset ${offset}
-		)
-		select bill.bill_id, count(detail.bdetail_product_id) from bill 
-		left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
-		left join tbl_product product on product.prod_id = detail.bdetail_product_id
-		group by bill.bill_id
-		having count(detail.bdetail_product_id) = 1`)
+			resultProductBdetail = await knex.raw(`with billList as (	
+				with bill as (select * from tbl_bill where bill_account_id = ${accId}
+					order by bill_created_date desc
+					limit ${limit}
+					offset ${offset}
+				)
+				select * from bill 
+				left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+				left join tbl_product product on product.prod_id = detail.bdetail_product_id
+				left join tbl_categories cat on cat.cate_id = product.prod_category_id
+			)
+			select * from billList left join tbl_product_images images on billList.bdetail_product_id = images.prod_img_product_id order by billList.bill_created_date desc, billList.bill_id desc`)
+
+			resultOne = await knex.raw(`with bill as (select * from tbl_bill where bill_account_id = ${accId}
+				order by bill_created_date desc
+				limit ${limit}
+				offset ${offset}
+			)
+			select bill.bill_id, count(detail.bdetail_product_id) from bill 
+			left join tbl_bill_detail detail on detail.bdetail_bill_id = bill.bill_id
+			left join tbl_product product on product.prod_id = detail.bdetail_product_id
+			group by bill.bill_id
+			having count(detail.bdetail_product_id) = 1`)
+		}
 	}
 
 	resultOne = resultOne.rows
@@ -841,26 +935,22 @@ router.post('/list/:filter', billValidation.listBill,async (req, res) => {
 		var createdDate = moment(resultProductBdetail[index].bill_created_date).format('DD/MM/YYYY HH:mm:ss')
 		//caculate expected date
 		
-		var expectedDate = new Date(resultProductBdetail[index].bill_updated_date)
+		var expectedDate = new Date(resultProductBdetail[index].bill_created_date)
 		expectedDate.setDate(expectedDate.getDate() + 2)
 		expectedDate = moment(new Date(expectedDate)).format('DD/MM/YYYY HH:mm:ss')
 
 		var status = ''
+
 		if (resultProductBdetail[index].bill_status === 0) {
-			status = 'confirm'
-			expectedDate = '------------------------'
-		}
-
-		if (resultProductBdetail[index].bill_status === 1) {
 			status = 'shipping'
-			
+			expectedDate = 'Delivered at: ' + expectedDate
 		}
 
-		else if (resultProductBdetail[index].bill_status === 2) {
+		else if (resultProductBdetail[index].bill_status === 1) {
 			status = 'delivered'
 			expectedDate = 'Delivered at: ' + expectedDate
 		}
-		else if (resultProductBdetail[index].bill_status === 3) {
+		else if (resultProductBdetail[index].bill_status === 2) {
 			status = 'cancel'
 			expectedDate = '------------------------'
 		}
