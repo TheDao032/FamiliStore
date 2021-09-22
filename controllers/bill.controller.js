@@ -282,6 +282,7 @@ router.post('/details',billValidation.billDetail, async (req, res) => {
 	})
 
 })
+//===============================fix 
 
 router.post('/update-status', billValidation.updateStatusBill, async (req, res) => {
 	const { billId, status } = req.body
