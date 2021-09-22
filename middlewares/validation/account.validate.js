@@ -93,7 +93,7 @@ const updateAccount = (req, res, next) => {
   		type: 'object',
   		properties: {
 			accId: { type: 'integer' },
-			accFullName: {type: 'string', pattern: '', maxLength : 100},
+			accFullName: {type: 'string', pattern: '', maxLength : 90},
     		accEmail: { type: 'string', pattern: '^[a-z][a-z0-9_\.]{3,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$', maxLength: 100 },
     		accPhoneNumber: { type: 'string', pattern: '', maxLength: 15 },
 			accOldPassword: { type: 'string', pattern: '' },
